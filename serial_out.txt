@@ -1,0 +1,43 @@
+[Kernel] 
+VersionV Serial Out
+
+[Memory] 1 page(s) allocated at 0xA0000000
+[ELF] 0xC0102380 is in function: kernel_main
+[Interrupt] Enabled
+[PCI] Num devices: 6
+[PCI] [2] Class: 01   Subclass: 01   Prog IF: 80   Revision: 00   Vendor: 8086   Device ID: 7010
+[PCI] [4] Class: 03   Subclass: 00   Prog IF: 00   Revision: 02   Vendor: 1234   Device ID: 1111
+[PCI] [5] Class: 02   Subclass: 00   Prog IF: 00   Revision: 03   Vendor: 8086   Device ID: 100E
+[Intel8254] Found
+Class: 02   Subclass: 00   Prog IF: 00   Revision: 03   Vendor: 8086   Device ID: 100E
+Bist:
+flags: 0000 0000 0000 0000 0000 0000 0000 0000 -- 0x00000000
+       31   27   23   19   15   11   7    3
+Interrupt line: 0x00
+Interrupt pin: 0x00
+Bar0: 0xFEB80000
+Bar1: 0x0000C001
+Bar2: 0x00000000
+Bar3: 0x00000000
+Bar4: 0x00000000
+Bar5: 0x00000000
+Command:
+flags: 0000 0000 0000 0000 0000 0001 0000 0011 -- 0x00000103
+       31   27   23   19   15   11   7    3
+Status:
+flags: 0000 0000 0000 0000 0000 0000 0000 0000 -- 0x00000000
+       31   27   23   19   15   11   7    3
+Capabilities:
+flags: 0000 0000 0000 0000 0000 0000 0000 0000 -- 0x00000000
+       31   27   23   19   15   11   7    3
+[Memory] 16 page(s) allocated at 0xA0001000
+[ATA]     Identify Primary, Drive One:   true
+[ATA]     Identify Primary, Drive Two:   false
+[ATA]     Primary 60 and 61:          F0080
+[ATA]     Drive size:                 503382016b
+[ATA]     Drive size:                 491584k
+[ATA]     Drive size:                 480mb
+[ATA]     byte_to_sector( 20 )        0, 20
+[ATA]     byte_to_sector( 512 )       1, 0
+[ATA]     byte_to_sector( 513 )       1, 1
+Shutdown via END_IMMEDIATELY.

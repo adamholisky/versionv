@@ -1,0 +1,5 @@
+﻿  vvscratch.cpp
+Y:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(79,11): warning C4200: nonstandard extension used: zero-sized array in struct/union
+Y:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(79,11): message : This member will be ignored by a defaulted constructor or copy/move assignment operator
+Y:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(186,27): warning C4018: '<': signed/unsigned mismatch
+  vvscratch.vcxproj -> Y:\versions\v\vs_scratch\vvscratch\Debug\vvscratch.exe
