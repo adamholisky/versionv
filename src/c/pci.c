@@ -5,6 +5,7 @@ pci_header	pci_devices[ 15 ];
 uint32_t	pci_devices_top;
 
 void pci_initalize( void ) {
+	log_entry_enter();
 	uint16_t vendor;
 	uint8_t bus;
 	uint8_t device;
@@ -47,6 +48,8 @@ void pci_initalize( void ) {
 		k_log( sys_pci, level_info, "[%d] Class: %02X   Subclass: %02X   Prog IF: %02X   Revision: %02X   Vendor: %04X   Device ID: %04X",
 			     i, d->class_code, d->subclass, d->prog_if, d->revision_id, d->vendor_id, d->device_id );
 	}
+
+	log_entry_exit();
 }
 
 uint16_t pci_config_read( uint8_t bus, uint8_t device, uint8_t function, uint8_t offset ) {

@@ -1,5 +1,5 @@
 ENTRY(_asm_kernel_start)
- 
+
 SECTIONS
 {
 	. = 0xC0100000;
@@ -20,6 +20,9 @@ SECTIONS
 	.data ALIGN (4K) : AT (ADDR (.data) - 0xC0000000)
 	{
 		*(.data)
+		module_data_start = .;
+		INCLUDE ../test_apps/build_temp/apps_insert.ld
+		module_data_end = .;
 	}
 
 	.bss ALIGN (4K) : AT (ADDR (.bss) - 0xC0000000)
@@ -28,10 +31,7 @@ SECTIONS
 		*(.bss)
 		*(.bootstrap_stack)
 	}
+
 	
 	_kernel_end = .;
-
-	my_data : AT (0x06400000) {
-		*(.versionv_magic)
-	}
 }

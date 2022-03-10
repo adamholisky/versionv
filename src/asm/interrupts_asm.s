@@ -14,6 +14,7 @@ interrupt_\interrupt_number :
 				push %fs
 				push %gs
 					push %esp
+					push %esp
 						mov $0x10, %eax
 						mov %eax, %ds
 						mov %eax, %es
@@ -26,13 +27,14 @@ interrupt_\interrupt_number :
 							pop %eax
 						pop %eax
 					pop %esp
+					pop %esp
 				pop %gs
 				pop %fs
 				pop %es
 				pop %ds
 			popal
-		pop %esp
-	add $4, %esp
+		/* pop %esp */
+	add $8, %esp
     iret
 .endm
 
@@ -86,6 +88,9 @@ interrupt_handler 0x2D
 interrupt_handler 0x2E
 interrupt_handler 0x2F
 interrupt_handler 0x30
+interrupt_handler 0x31
+interrupt_handler 0x32
+interrupt_handler 0x99
 
 exception_handler 0
 exception_handler 1

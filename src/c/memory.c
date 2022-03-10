@@ -1,5 +1,7 @@
 #include "kernel.h"
 
+//#define kdebug_memory_pages 1
+
 static const char * vv_magic_word = "VersionV";
 uint32_t * phsyical_memory_top = (uint32_t *)0x06400000;
 uint32_t * kernel_virtual_memory_top = (uint32_t *)0xA0000000;
@@ -11,7 +13,12 @@ extern void asm_refresh_cr3( void );
 
 page_directory_entry second_page_table[1024] __attribute__ ((aligned (4096)));
 
+page_directory_entry process_pd[1024] __attribute__ ((aligned (4096)));
+page_directory_entry process_pt[1024] __attribute__ ((aligned (4096)));
+
+
 void memory_initalize( void ) {
+	log_entry_enter();
 	page_allocate( 1 );
 
 	#if kdebug_memory
@@ -24,6 +31,7 @@ void memory_initalize( void ) {
 
 	page_directory_entry * kernel_page = (page_directory_entry *)(&boot_page_directory + 768);
 
+	debugf( "----\n" );
 	debugf( "pde: %X\n", sizeof( page_directory_entry ) );
 	debugf( "bpd: 0x%08X\n", (uint32_t)&boot_page_directory );
 	debugf( "bpt: 0x%08X\n", (uint32_t)&boot_page_table );
@@ -36,8 +44,62 @@ void memory_initalize( void ) {
 	debugf( "kernel_page->page_size: %d\n", kernel_page->page_size );
 	debugf( "kernel_page->ignored: %d\n", kernel_page->ignored );
 	debugf( "kernel_page->address: 0x%08X\n", kernel_page->address<<11 );
+	debugf( "----\n" );
 
 	#endif
+
+	void * process_address_space = kmalloc( 0x1000 );
+	process_address_space = (void *)((uint32_t)process_address_space + 0x1000 - 0x0040);
+
+	page_directory_entry * pde = (page_directory_entry *)&boot_page_directory;
+	page_directory_entry * pte = (page_directory_entry *)&process_pt;
+
+	klog( "process_pt paddr:  0x%08X\n", ((uint32_t)process_pt - 0xC0000000) );
+	klog( "process paddr sp:  0x%08X\n", 0x06400000 + (uint32_t)process_address_space - 0xA0000000 );
+	klog( "process paddr>>11: 0x%08X\n", (0x06400000 + (uint32_t)process_address_space - 0xA0000000)>>11 );
+
+	pte->present = 1;
+	pte->rw = 1;
+	pte->address = (0x06400000 + (uint32_t)process_address_space - 0xA0000000)>>11;
+
+	klog( "pte->address: 0x%08X\n", pte->address<<11 );
+
+	pde->present = 1;
+	pde->rw = 1;
+	pde->address = ((uint32_t)process_pt - 0xC0000000) >> 11;
+
+	//asm volatile("invlpg (%0)" ::"r" (pte) : "memory");
+	asm_refresh_cr3();
+
+	uint32_t * pmem = (uint32_t *)process_address_space;
+	*(pmem + 1) = 0x0666;
+
+	void * zero_addr_space = 0x00000000;
+	uint32_t * zerozero = (uint32_t *)zero_addr_space;
+
+	klog( "00   uint32_t: %08X\n", *(zerozero + 1) );
+	klog( "pmem uint32_t: %08X\n", *(pmem + 1) );
+
+	log_entry_exit();
+}
+
+void set_process_pde( page_directory_entry * pte ) {
+	page_directory_entry * pde = (page_directory_entry *)&boot_page_directory;
+
+	pde->present = 1;
+	pde->rw = 1;
+	pde->address = ((uint32_t)process_pt - 0xC0000000) >> 11;
+
+	memcpy( &process_pt, pte, sizeof( page_directory_entry ) * 1024 );
+
+	// debugf( "pte: 0x%08X\n", (uint32_t)pte );
+	// debugf( "pde->addr: 0x%08X\n", pde->address << 11 );
+	// debugf( "pte->addr: 0x%08X\n", pte->address << 11 );
+
+	asm_refresh_cr3();
+
+	// kdebug_peek_at( 0 );
+	// kdebug_peek_at( (pde->address << 11) + 0xC0000000 );
 }
 
 uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
@@ -65,7 +127,7 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	pt->rw = 1;
 	pt->address = (uint32_t)phys_addr >> 11;
 
-	#ifdef kdebug_memory_pages
+	#ifdef kdebug_memory_pages_more
 
 	debugf( "bpd_index:          0x%08X\n", pd_index );
 	debugf( "pt_index:           0x%08X\n", pt_index );
@@ -99,7 +161,7 @@ uint32_t * page_allocate( uint32_t num ) {
 		#endif
 	}
 
-	k_log( sys_memory, level_info, "%d page(s) allocated at 0x%08X", num, return_pointer );
+	//k_log( sys_memory, level_info, "%d page(s) allocated at 0x%08X", num, return_pointer );
 
 	return return_pointer;
 }

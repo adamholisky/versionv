@@ -1,5 +1,6 @@
 #include "kernel.h"
 #include "interrupts.h"
+#include "syscall.h"
 
 idtr            sIDTR;
 x86_interrupt   IDT[256];
@@ -10,8 +11,11 @@ bool 	        gpf_fired = false;
 bool			can_switch = true;
 uint32_t 		timer_var = 0;
 uint32_t		timer_counter = 0;
+interrupt_stack	new_post_interrupt_stack;
+bool			use_new_post_interrupt_stack = false;
 
 void interrupts_initalize( void ) {
+	log_entry_enter();
     remap_pic( 0x20, 0x28 );
 
     add_interrupt(0, interrupt_0, 0);
@@ -51,6 +55,9 @@ void interrupts_initalize( void ) {
 	add_interrupt( 0x2E, interrupt_0x2E, 0 );
 	add_interrupt( 0x2F, interrupt_0x2F, 0 );
 	add_interrupt( 0x30, interrupt_0x30, 0 );
+	add_interrupt( 0x31, interrupt_0x31, 0 );
+	add_interrupt( 0x32, interrupt_0x32, 0 );
+	add_interrupt( 0x99, interrupt_0x99, 0 );
 
 	// mask everything
 
@@ -70,12 +77,15 @@ void interrupts_initalize( void ) {
 
     asm( "sti" );
 
-	k_log( sys_interrupt, level_info, "Enabled" );
+	klog( "Enabled" );
 
 	asm( "int %0" : : "i"(0x30) );
+	log_entry_exit();
 }
 
-void interrupt_default_handler( unsigned long interrupt_num, unsigned long route_code, interrupt_stack * stack ) {
+void interrupt_default_handler( unsigned long interrupt_num, unsigned long route_code, interrupt_stack ** _stack ) {
+	process *p;
+	interrupt_stack * stack = *_stack;
 	//dbC();
 	//debugf( "interrupt_default_handler:\n    interrupt_num: 0x%X\n    route_code: 0x%0X\n", interrupt_num, route_code );
 
@@ -91,9 +101,11 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				debugf( "  ds:   0x%04X  es:   0x%04X  fs:   0x%04X  gs:   0x%04X\n", stack->ds, stack->es, stack->fs, stack->gs );
 				debugf( "  _esp: 0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", stack->_esp, stack->cs, stack->eflags, stack->err );
 				debugf( "  eip:  0x%08X\n", stack->eip );
+				debugf( "Shutdown via END_IMMEDIATELY.\n");
+				outportb( 0xF4, 0x00 );
 				uint32_t * pointer = (uint32_t *)stack;
 				for( int i = -10; i < 5; i++ ) {
-					//debugf( "0x%08X:    0x%08X\n", (pointer + i), *(pointer + i) );
+					debugf( "0x%08X:    0x%08X\n", (pointer + i), *(pointer + i) );
 				}
 				asm( "cli" );
 				asm( "hlt" );
@@ -112,6 +124,37 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 					timer_var = 0;
 				}
 				break;
+			case 0x30:
+				debugf( "+\n" );
+				break;
+			case 0x31:
+				debugf( "-\n" );
+				break;
+			case 0x32:
+				
+				p = get_current_process();
+				p->stack_eip = stack->eip;
+				p->stack_at_interrupt = (uint32_t *)*_stack;
+
+				// debugf( "Int 0x32:\n" );
+				// debugf( "    From eip:    0x%08X\n", stack->eip );
+				// debugf( "    From _stack: 0x%08X\n", *_stack );
+				
+				p = switch_next_process();
+				*_stack = (interrupt_stack *)p->stack_at_interrupt;
+				(*_stack)->eip = p->stack_eip;
+
+				if( p->id != 0 ) {
+					set_process_pde( p->page_table );
+				}
+				
+				// debugf( "    To eip:      0x%08X\n", p->stack_eip );
+				// debugf( "    To saved st: 0x%08X\n", p->stack_at_interrupt );
+				// debugf( "    To _stack:   0x%08X\n", *_stack );
+				break;
+			case 0x99:
+				syscall_handler( _stack );
+				break;
 		}
 	}
 	
@@ -121,6 +164,11 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 	}
 
 	outportb( 0x20, 0x20 );
+}
+
+void replace_stack_on_int_exit( interrupt_stack * stack ) {
+	memcpy( &new_post_interrupt_stack, stack, sizeof( interrupt_stack ) );
+	use_new_post_interrupt_stack = true;
 }
 
 uint32_t get_timer_counter( void ) {

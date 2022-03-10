@@ -7,6 +7,7 @@ uint16_t	primary_status[256];
 uint16_t	* sector_read_buffer;
 
 void ata_initalize( void ) {
+	log_entry_enter();
 	uint32_t	drive_lba_sectors;
 	uint32_t	drive_size_bytes;
 
@@ -18,19 +19,21 @@ void ata_initalize( void ) {
 	outportb( ata_secondary_control, 4 );
 	outportb( ata_secondary_control, 0 );
 
-	debugf( "[ATA]     Identify Primary, Drive One:   %s\n", ata_identify( ata_primary, ata_drive_one ) ? "true" : "false"  );
-	debugf( "[ATA]     Identify Primary, Drive Two:   %s\n", ata_identify( ata_primary, ata_drive_two ) ? "true" : "false" );
+	klog( "Identify Primary, Drive One:   %s\n", ata_identify( ata_primary, ata_drive_one ) ? "true" : "false"  );
+	klog( "Identify Primary, Drive Two:   %s\n", ata_identify( ata_primary, ata_drive_two ) ? "true" : "false" );
 	
 	drive_lba_sectors = primary_status[60] | primary_status[61] << 16;
 	drive_size_bytes = drive_lba_sectors * 512;
 	
-	debugf( "[ATA]     Primary 60 and 61:          %X\n", drive_lba_sectors );
-	debugf( "[ATA]     Drive size:                 %db\n", drive_size_bytes );
-	debugf( "[ATA]     Drive size:                 %dk\n", drive_size_bytes / 1024 );
-	debugf( "[ATA]     Drive size:                 %dmb\n", drive_size_bytes / 1024 / 1024 );
-	debugf( "[ATA]     byte_to_sector( 20 )        %d, %d\n", byte_to_sector(20), byte_to_offset(20) );
-	debugf( "[ATA]     byte_to_sector( 512 )       %d, %d\n", byte_to_sector(512), byte_to_offset(512) );
-	debugf( "[ATA]     byte_to_sector( 513 )       %d, %d\n", byte_to_sector(513), byte_to_offset(513) );
+	klog( "Primary 60 and 61:          %X\n", drive_lba_sectors );
+	klog( "Drive size:                 %db\n", drive_size_bytes );
+	klog( "Drive size:                 %dk\n", drive_size_bytes / 1024 );
+	klog( "Drive size:                 %dmb\n", drive_size_bytes / 1024 / 1024 );
+	klog( "byte_to_sector( 20 )        %d, %d\n", byte_to_sector(20), byte_to_offset(20) );
+	klog( "byte_to_sector( 512 )       %d, %d\n", byte_to_sector(512), byte_to_offset(512) );
+	klog( "byte_to_sector( 513 )       %d, %d\n", byte_to_sector(513), byte_to_offset(513) );
+	
+	log_entry_exit();
 }
 
 int ata_identify( uint8_t drive, uint8_t drive_one_or_two ) {
@@ -54,9 +57,7 @@ int ata_identify( uint8_t drive, uint8_t drive_one_or_two ) {
 			outportb( ata_secondary_port + ata_reg_hddevsel, 0xB0 );
 		}
 	}
-	
-	//debug_f( "A\n" );
-	
+		
 	switch( drive ) {
 		case ata_primary: 
 			port = ata_primary_port;
@@ -68,13 +69,7 @@ int ata_identify( uint8_t drive, uint8_t drive_one_or_two ) {
 
 	outportb( port + ata_reg_command, ata_cmd_identify );
 
-	//debug_f( "0: %X, %X\n", port + ata_reg_command, ata_cmd_identify );
-
-	//debug_f( "0.5\n" );
-
 	status = inportb( port + ata_reg_status );
-
-	//debug_f( "status: 0x%04X\n" );
 
 	if( status ) {
 		result = -2;
@@ -83,26 +78,19 @@ int ata_identify( uint8_t drive, uint8_t drive_one_or_two ) {
 
 		}
 
-		//debug_f( "1" );
 		do {
 			status = inportb( port + ata_reg_status );
 
 			if( status & ata_sr_err ) {
-				//debug_f( "should ret 0\n" );
 				return 0;
 			}
 		} while( !(status & ata_sr_busy) && !( status & ata_sr_drq ));
 
-		//debug_f( "\nData: \n" );
 
 		for( int i = 0; i < 256; i++ ) {
 			data = inportw( port + ata_reg_data );
 			primary_status[ i ] = data;
-			//debugf( "%d: %04X\n", i, data );
 		}
-
-		//debug_f( "\n" );
-
 
 		result = 1;
 	}

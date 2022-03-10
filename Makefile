@@ -17,15 +17,6 @@ QEMU_COMMON = 	-drive format=raw,if=ide,file=$(ROOT_DIR)/vv_hd.img \
 				-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
 				-nic user,ipv6=off,model=e1000,mac=52:54:98:76:54:32 \
 				-m 4G
-
-# 				-drive id=disk,file=$(ROOT_DIR)/vv_hd.img,format=raw,if=none \
-#				-device ahci,id=ahci \
-#				-device ide-hd,drive=disk,bus=ahci.0 \
-
-# QEMU_COMMON =	-drive format=raw,if=ide,file=$(ROOT_DIR)/vv_hd.img \
-#				-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
-#				-nic user,ipv6=off,model=e1000,mac=52:54:98:76:54:32 \
-#				-m 4G
 QEMU_DISPLAY_NONE =	-serial stdio \
 					-serial file:$(ROOT_DIR)/serial_out.txt \
 					-display none
@@ -35,10 +26,12 @@ QEMU_DEBUG_COMMON = -S -gdb tcp::5894
 export
 
 all: install
+	rm build/versionv.bin
 
 build/versionv.bin:
 	$(MAKE) -C src
 	objdump -x -d build/versionv.bin > objdump.txt
+	readelf -a build/versionv.bin > elfdump.txt
 
 install: build/versionv.bin
 	mount hd_mount_dir

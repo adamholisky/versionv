@@ -7,8 +7,12 @@
 #include "vv_list.h"
 #include "ata.h"
 #include <cpuid.h>
+#include "syscall.h"
 
 #define END_IMMEDIATELY
+#undef kdebug_process_loader
+
+typedef void (*make_call)(bool);
 
 void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info ) 
 {
@@ -18,7 +22,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 	term_initalize();
 	initalize_serial();
  
-	printf( "VersionV" );
+	printf( "VersionV\n" );
 	k_log( sys_kernel, level_info, "\nVersionV Serial Out\n" );
 
 	memory_initalize();
@@ -30,15 +34,15 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 
 	ata_initalize();
 
-	//poop poopy
+	process_initalize();
 
 	#ifdef kdebug_paging
 
 	char * page_fault_addr = NULL;
 	page_fault_addr = (char *)0xA0000000;	
-	debugf( "String at 0x%08X: \"%s\"\n", page_fault_addr, page_fault_addr );
+	klog( "String at 0x%08X: \"%s\"\n", page_fault_addr, page_fault_addr );
 	page_fault_addr = (char *)page_allocate( 1 );
-	debugf( "String at 0x%08X: \"%s\"\n", page_fault_addr, page_fault_addr );
+	klog( "String at 0x%08X: \"%s\"\n", page_fault_addr, page_fault_addr );
 
 	#endif
 
@@ -47,7 +51,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 	uint32_t cpuid_return = 0;
 	uint32_t eax, unused;
 	__get_cpuid( 1, &eax, &unused, &unused, &cpuid_return );
-	debugf( "CPUID edx feature output:\n" );
+	klog( "CPUID edx feature output:\n" );
 	debugf_bit_array( cpuid_return );
 
 	#endif
@@ -58,14 +62,20 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 
 	#endif
 
+	modules_initalize();
+
+	while( true ) {
+		sched_yield();
+	}
+
 	#ifdef END_IMMEDIATELY
 
-	debugf( "Shutdown via END_IMMEDIATELY.\n");
+	klog( "Shutdown via END_IMMEDIATELY at end of kernel.c.\n");
 	outportb( 0xF4, 0x00 );
 
 	#endif
 
-	printf( "\n\nEnd of line." );
+	klog( "\n\nEnd of line." );
 
 	while( true ) { x = x - x + 1; }
 }

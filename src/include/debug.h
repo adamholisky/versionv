@@ -56,6 +56,8 @@ typedef struct {
 } profile_information;
 
 void kdebug_add_symbol( char * name, uint32_t addr, uint32_t size );
+kdebug_symbol * kdebug_get_symbol( char * name );
+uint32_t kdebug_get_symbol_addr( char * name );
 char * kdebug_get_function_at( uint32_t addr );
 char * kdebug_peek_at( uint32_t addr );
 char peek_char( char c );
@@ -65,10 +67,15 @@ profile_information * get_profile_information( void );
 void profile_stop( void );
 void profile_start( void );
 void k_log( uint32_t system_id, uint32_t level, char * message, ... );
+char * strcat( char * dest, char * src );
+char * strstr(register char *string, char *substring);
 
 #define debug_out_on() set_debug_output( true )
 #define debug_out_off() set_debug_output( false )
+#define klog( ... ) debug_out_on(); printf( "[%s:%d] ", __FUNCTION__, __LINE__ ); printf( __VA_ARGS__ ); debug_out_off()
 #define debugf( ... ) debug_out_on(); printf( __VA_ARGS__ ); debug_out_off()
+#define log_entry_enter() klog( "Enter\n" )
+#define log_entry_exit() klog( "Exit\n" );
 
 #define dbA() debugf( "A" )
 #define dbB() debugf( "B" )

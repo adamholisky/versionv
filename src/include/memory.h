@@ -19,6 +19,7 @@ typedef struct {
 void memory_initalize( void );
 uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr );
 uint32_t * page_allocate( uint32_t num );
+void set_process_pde( page_directory_entry * pte );
 
 /** This function is supposed to lock the memory data structures. It
  * could be as simple as disabling interrupts or acquiring a spinlock.

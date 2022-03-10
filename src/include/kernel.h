@@ -9,6 +9,10 @@
 #include "printf.h"
 #include "serial.h"
 #include "memory.h"
+#include "process.h"
+#include "modules.h"
 #include "debug.h"
+
+void kernel_main( );
 
 #endif

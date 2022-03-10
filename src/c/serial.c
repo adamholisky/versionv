@@ -7,6 +7,7 @@ uint32_t default_port;
 
 void initalize_serial(void)
 {
+	// DO NOT PUT KLOG FUNCTIONS HERE
 	serial_setup_port(COM1);
 	serial_setup_port(COM2);
 

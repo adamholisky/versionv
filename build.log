@@ -1,13 +1,23 @@
 make[2]: Entering directory '/mnt/hgfs/versions/v/src/libvv'
 /usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c vv_list.c -o ../../build/vv_list.o
 make[2]: Leaving directory '/mnt/hgfs/versions/v/src/libvv'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/test_apps'
+./generateasm.sh
+Processing alpha
+Processing beta
+Processing gamma
+./buildapp.sh
+Processing alpha
+Processing beta
+Processing gamma
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/test_apps'
 make[2]: Entering directory '/mnt/hgfs/versions/v/src/asm'
+/usr/local/osdev/bin/i686-elf-as  asm_tests.s -g -o ../../build/asm_tests.o
 /usr/local/osdev/bin/i686-elf-as  boot.s -g -o ../../build/boot.o
 /usr/local/osdev/bin/i686-elf-as  interrupts_asm.s -g -o ../../build/interrupts_asm.o
 make[2]: Leaving directory '/mnt/hgfs/versions/v/src/asm'
 make[2]: Entering directory '/mnt/hgfs/versions/v/src/bootstrap'
 /usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c bootstrap.c -o ../../build/bootstrap.o
-/usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c printf.c -o ../../build/printf.o
 make[2]: Leaving directory '/mnt/hgfs/versions/v/src/bootstrap'
 make[2]: Entering directory '/mnt/hgfs/versions/v/src/c'
 /usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c ata.c -o ../../build/ata.o
@@ -17,12 +27,78 @@ make[2]: Entering directory '/mnt/hgfs/versions/v/src/c'
 /usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c interrupts.c -o ../../build/interrupts.o
 /usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c kernel.c -o ../../build/kernel.o
 /usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c memory.c -o ../../build/memory.o
+/usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c modules.c -o ../../build/modules.o
 /usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c multiboot.c -o ../../build/multiboot.o
 /usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c pci.c -o ../../build/pci.o
+/usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c process.c -o ../../build/process.o
 /usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c serial.c -o ../../build/serial.o
+/usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c syscall.c -o ../../build/syscall.o
 /usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c terminal.c -o ../../build/terminal.o
 /usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c vga.c -o ../../build/vga.o
 make[2]: Leaving directory '/mnt/hgfs/versions/v/src/c'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/c/syscall'
+/usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c read.c -o ../../../build/read.o
+/usr/local/osdev/bin/i686-elf-gcc -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   -c sched_yield.c -o ../../../build/sched_yield.o
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/c/syscall'
 make[2]: Entering directory '/mnt/hgfs/versions/v/src/build_support'
-/usr/local/osdev/bin/i686-elf-gcc -T linker.ld -o ../../build/versionv.bin -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   ../../build/ata.o ../../build/boot.o ../../build/bootstrap.o ../../build/debug.o ../../build/elf.o ../../build/intel8254.o ../../build/interrupts_asm.o ../../build/interrupts.o ../../build/kernel.o ../../build/memory.o ../../build/multiboot.o ../../build/pci.o ../../build/printf.o ../../build/serial.o ../../build/terminal.o ../../build/vga.o ../../build/vv_list.o
+/usr/local/osdev/bin/i686-elf-gcc -T linker.ld -o ../../build/versionv.bin -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   ../../../vvlibc/vvlibc.o ../../build/asm_tests.o ../../build/ata.o ../../build/boot.o ../../build/bootstrap.o ../../build/debug.o ../../build/elf.o ../../build/intel8254.o ../../build/interrupts_asm.o ../../build/interrupts.o ../../build/kernel.o ../../build/memory.o ../../build/modules.o ../../build/multiboot.o ../../build/pci.o ../../build/process.o ../../build/read.o ../../build/sched_yield.o ../../build/serial.o ../../build/syscall.o ../../build/terminal.o ../../build/vga.o ../../build/vv_list.o ../test_apps/build_objout/alpha.bin ../test_apps/build_objout/beta.bin ../test_apps/build_objout/gamma.bin
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/build_support'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/libvv'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/libvv'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/test_apps'
+./generateasm.sh
+Processing alpha
+Processing beta
+Processing gamma
+/usr/local/osdev/bin/i686-elf-gcc -fPIC -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -c alpha.c -o build_objout/alpha.o
+/usr/local/osdev/bin/i686-elf-ld -nostdlib -fPIC -shared -o ./build_objout/alpha.vvs ./build_objout/alpha.o
+/usr/local/osdev/bin/i686-elf-gcc -fPIC -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -c ./build_temp/alpha.s -o ./build_objout/alpha.bin
+./buildapp.sh
+Processing alpha
+Processing beta
+Processing gamma
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/test_apps'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/asm'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/asm'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/bootstrap'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/bootstrap'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/c'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/c'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/c/syscall'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/c/syscall'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/build_support'
+/usr/local/osdev/bin/i686-elf-gcc -T linker.ld -o ../../build/versionv.bin -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   ../../../vvlibc/vvlibc.o ../../build/asm_tests.o ../../build/ata.o ../../build/boot.o ../../build/bootstrap.o ../../build/debug.o ../../build/elf.o ../../build/intel8254.o ../../build/interrupts_asm.o ../../build/interrupts.o ../../build/kernel.o ../../build/memory.o ../../build/modules.o ../../build/multiboot.o ../../build/pci.o ../../build/process.o ../../build/read.o ../../build/sched_yield.o ../../build/serial.o ../../build/syscall.o ../../build/terminal.o ../../build/vga.o ../../build/vv_list.o ../test_apps/build_objout/alpha.bin ../test_apps/build_objout/beta.bin ../test_apps/build_objout/gamma.bin
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/build_support'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/libvv'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/libvv'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/test_apps'
+./generateasm.sh
+Processing alpha
+Processing beta
+Processing gamma
+./buildapp.sh
+Processing alpha
+Processing beta
+Processing gamma
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/test_apps'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/asm'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/asm'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/bootstrap'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/bootstrap'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/c'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/c'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/c/syscall'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/mnt/hgfs/versions/v/src/c/syscall'
+make[2]: Entering directory '/mnt/hgfs/versions/v/src/build_support'
+/usr/local/osdev/bin/i686-elf-gcc -T linker.ld -o ../../build/versionv.bin -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/src/include -I/mnt/hgfs/versions/v/src/libvv/include   ../../../vvlibc/vvlibc.o ../../build/asm_tests.o ../../build/ata.o ../../build/boot.o ../../build/bootstrap.o ../../build/debug.o ../../build/elf.o ../../build/intel8254.o ../../build/interrupts_asm.o ../../build/interrupts.o ../../build/kernel.o ../../build/memory.o ../../build/modules.o ../../build/multiboot.o ../../build/pci.o ../../build/process.o ../../build/read.o ../../build/sched_yield.o ../../build/serial.o ../../build/syscall.o ../../build/terminal.o ../../build/vga.o ../../build/vv_list.o ../test_apps/build_objout/alpha.bin ../test_apps/build_objout/beta.bin ../test_apps/build_objout/gamma.bin
 make[2]: Leaving directory '/mnt/hgfs/versions/v/src/build_support'

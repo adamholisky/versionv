@@ -6,6 +6,7 @@ multiboot_info_t multiboot_header;
 unsigned long mb_magic;
 
 void multiboot_initalize( unsigned long _mb_magic, multiboot_info_t *mbh ) {
+    // DO NOT PUT KLOG FUNCTIONS HERE
 	mb_magic = _mb_magic;
 	memcpy( &multiboot_header, mbh, sizeof( multiboot_info_t ) );
 

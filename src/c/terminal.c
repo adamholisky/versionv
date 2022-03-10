@@ -18,6 +18,7 @@ unsigned int y_start;
 bool is_debug_output = false;
 
 void term_initalize( void ) {
+	// DO NOT PUT KLOG FUNCTIONS HERE
 	unsigned int x = 0;
 	unsigned int y = 0;
 

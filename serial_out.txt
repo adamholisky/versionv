@@ -1,43 +1,58 @@
 [Kernel] 
 VersionV Serial Out
 
-[Memory] 1 page(s) allocated at 0xA0000000
-[ELF] 0xC0102380 is in function: kernel_main
-[Interrupt] Enabled
+[memory_initalize:21] Enter
+[memory_initalize:57] process_pt paddr:  0x00113000
+[memory_initalize:58] process paddr sp:  0x06402000
+[memory_initalize:59] process paddr>>11: 0x0000C804
+[memory_initalize:65] pte->address: 0x06402000
+[memory_initalize:80] 00   uint32_t: 00000666
+[memory_initalize:81] pmem uint32_t: 00000666
+[memory_initalize:83] Exit
+[elf_initalize:11] Enter
+[elf_initalize:50] 0xC0104590 is in function: kernel_main
+[elf_initalize:52] Exit
+[interrupts_initalize:18] Enter
+[interrupts_initalize:80] Enabled+
+[interrupts_initalize:83] Exit
+[pci_initalize:8] Enter
 [PCI] Num devices: 6
 [PCI] [2] Class: 01   Subclass: 01   Prog IF: 80   Revision: 00   Vendor: 8086   Device ID: 7010
 [PCI] [4] Class: 03   Subclass: 00   Prog IF: 00   Revision: 02   Vendor: 1234   Device ID: 1111
 [PCI] [5] Class: 02   Subclass: 00   Prog IF: 00   Revision: 03   Vendor: 8086   Device ID: 100E
-[Intel8254] Found
-Class: 02   Subclass: 00   Prog IF: 00   Revision: 03   Vendor: 8086   Device ID: 100E
-Bist:
-flags: 0000 0000 0000 0000 0000 0000 0000 0000 -- 0x00000000
-       31   27   23   19   15   11   7    3
-Interrupt line: 0x00
-Interrupt pin: 0x00
-Bar0: 0xFEB80000
-Bar1: 0x0000C001
-Bar2: 0x00000000
-Bar3: 0x00000000
-Bar4: 0x00000000
-Bar5: 0x00000000
-Command:
-flags: 0000 0000 0000 0000 0000 0001 0000 0011 -- 0x00000103
-       31   27   23   19   15   11   7    3
-Status:
-flags: 0000 0000 0000 0000 0000 0000 0000 0000 -- 0x00000000
-       31   27   23   19   15   11   7    3
-Capabilities:
-flags: 0000 0000 0000 0000 0000 0000 0000 0000 -- 0x00000000
-       31   27   23   19   15   11   7    3
-[Memory] 16 page(s) allocated at 0xA0001000
-[ATA]     Identify Primary, Drive One:   true
-[ATA]     Identify Primary, Drive Two:   false
-[ATA]     Primary 60 and 61:          F0080
-[ATA]     Drive size:                 503382016b
-[ATA]     Drive size:                 491584k
-[ATA]     Drive size:                 480mb
-[ATA]     byte_to_sector( 20 )        0, 20
-[ATA]     byte_to_sector( 512 )       1, 0
-[ATA]     byte_to_sector( 513 )       1, 1
-Shutdown via END_IMMEDIATELY.
+[pci_initalize:52] Exit
+[intel8254_initalize:6] Enter
+[intel8254_initalize:14] Found[intel8254_initalize:19] Class: 02   Subclass: 00   Prog IF: 00   Revision: 03   Vendor: 8086   Device ID: 100E
+[intel8254_initalize:22] Bist:
+[intel8254_initalize:25] Interrupt line: 0x00
+[intel8254_initalize:26] Interrupt pin: 0x00
+[intel8254_initalize:27] Bar0: 0xFEB80000
+[intel8254_initalize:28] Bar1: 0x0000C001
+[intel8254_initalize:29] Bar2: 0x00000000
+[intel8254_initalize:30] Bar3: 0x00000000
+[intel8254_initalize:31] Bar4: 0x00000000
+[intel8254_initalize:32] Bar5: 0x00000000
+[intel8254_initalize:40] Exit
+[ata_initalize:10] Enter
+[ata_initalize:22] Identify Primary, Drive One:   true
+[ata_initalize:23] Identify Primary, Drive Two:   false
+[ata_initalize:28] Primary 60 and 61:          F0080
+[ata_initalize:29] Drive size:                 503382016b
+[ata_initalize:30] Drive size:                 491584k
+[ata_initalize:31] Drive size:                 480mb
+[ata_initalize:32] byte_to_sector( 20 )        0, 20
+[ata_initalize:33] byte_to_sector( 512 )       1, 0
+[ata_initalize:34] byte_to_sector( 513 )       1, 1
+[ata_initalize:36] Exit
+[process_initalize:15] Enter
+[process_initalize:20] Initalizing processes...
+[process_initalize:31] Process begin tests...
+[process_initalize:82] Exit
+[modules_initalize:60] Module found: alpha @ 0xC010808C for 0xB74 bytes
+[modules_initalize:60] Module found: beta @ 0xC0108C00 for 0xB64 bytes
+[modules_initalize:60] Module found: gamma @ 0xC0109764 for 0xB68 bytes
+Hello, world from alpha!
+    And more?
+Hello, world from beta!
+Hello, world from gamma!
+[switch_next_process:207] END. Processes switched over 100,000 times.

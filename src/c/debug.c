@@ -1,5 +1,6 @@
 #include "debug.h"
 #include "interrupts.h"
+#include "bootstrap.h"
 
 uint32_t kernel_symbol_top = 0;
 kdebug_symbol kernel_symbols[ KDEBUG_MAX_SYMBOLS ];
@@ -28,6 +29,10 @@ void kdebug_add_symbol( char * name, uint32_t addr, uint32_t size ) {
 	debugf( "    size: %d (0x%x)\n", kernel_symbols[ kernel_symbol_top - 1].size, kernel_symbols[ kernel_symbol_top - 1 ].size); */
 }
 
+kdebug_symbol * kdebug_get_symbol_array( void ){
+	return kernel_symbols;
+}
+
 char * kdebug_get_function_at( uint32_t addr ) {
 	char * ret_val = kdebug_symbol_cannot_find;
 
@@ -42,6 +47,32 @@ char * kdebug_get_function_at( uint32_t addr ) {
 	}
 
 	return ret_val;
+}
+
+kdebug_symbol * kdebug_get_symbol( char * name ) {
+	kdebug_symbol * ret = NULL;
+
+	for( int i = 0; i < KDEBUG_MAX_SYMBOLS; i++ ) {
+		if( kernel_symbols[i].name[0] == 0 ) continue;
+
+		if( strcmp( kernel_symbols[i].name, name ) == 0 ) {
+			ret = kernel_symbols + i;
+		}
+	}
+
+	return ret;
+}
+
+uint32_t kdebug_get_symbol_addr( char * name ) {
+	uint32_t ret = 0;
+
+	kdebug_symbol * sym = kdebug_get_symbol( name );
+
+	if( sym != NULL ) {
+		ret = sym->addr;
+	}
+
+	return ret;
 }
 
 char * kdebug_peek_at( uint32_t addr ) {
@@ -130,4 +161,46 @@ void profile_test_run( uint32_t num_of_nops ) {
 	debugf( "profile.start = 0x%08X\n", test_info->start );
 	debugf( "profile.stop = 0x%08X\n", test_info->stop );
 	debugf( "profile.length = 0x%08X / %d ticks / %d milliseconds\n", test_info->length, test_info->length, (test_info->length * 10) );
+}
+
+char * strcat( char * dest, char * src ) {
+	char *rdest = dest;
+
+    while (*dest)
+      dest++;
+    while (*dest++ = *src++)
+      ;
+    return rdest;
+}
+
+// lifted from apple
+char * strstr(register char *string, char *substring)
+{
+    register char *a, *b;
+
+    /* First scan quickly through the two strings looking for a
+     * single-character match.  When it's found, then compare the
+     * rest of the substring.
+     */
+
+    b = substring;
+    if (*b == 0) {
+	return string;
+    }
+    for ( ; *string != 0; string += 1) {
+	if (*string != *b) {
+	    continue;
+	}
+	a = string;
+	while (1) {
+	    if (*b == 0) {
+		return string;
+	    }
+	    if (*a++ != *b++) {
+		break;
+	    }
+	}
+	b = substring;
+    }
+    return NULL;
 }

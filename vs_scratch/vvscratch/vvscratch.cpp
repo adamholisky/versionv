@@ -1,18 +1,66 @@
-// vvscratch.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
 #define _CRT_SECURE_NO_DEPRECATE
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+
+uint32_t swap_uint32(uint32_t val);
+void set_debug_output(bool output);
+void swap_task(void);
+typedef void (*make_call)(bool);
+
+uint32_t swap_uint32(uint32_t val)
+{
+    val = ((val << 8) & 0xFF00FF00) | ((val >> 8) & 0xFF00FF);
+    return (val << 16) | (val >> 16);
+}
+
+#undef do_ext2_tests
+#define do_elf_tests
 
 #define MAXBUFLEN 1000000
 
 #define Elf32_Half uint16_t
 #define Elf32_Word uint32_t
+#define Elf32_Sword int32_t
 #define Elf32_Addr uint32_t
 #define Elf32_Off uint32_t
 
 #define EI_NIDENT 16
+
+#define ET_NONE 0 // No file type
+#define ET_REL 1 // Relocatable file
+#define ET_EXEC 2 // Executable file
+#define ET_DYN 3 // Shared object file
+#define ET_CORE 4 //Core file
+#define ET_LOPROC 0xFF00 // Processor-specific
+#define ET_HIPROC 0xFFFF // Processor-specific
+
+#define SHT_NULL 0
+#define SHT_PROGBITS 1
+#define SHT_SYMTAB 2
+#define SHT_STRTAB 3
+#define SHT_RELA 4
+#define SHT_HASH 5
+#define SHT_DYNAMIC 6
+#define SHT_NOTE 7
+#define SHT_NOBITS 8
+#define SHT_REL 9
+#define SHT_SHLIB 10
+#define SHT_DYNSYM 11
+
+#define SHF_WRITE 0x1
+#define SHF_ALLOC 0x2
+#define SHF_EXECINSTR 0x4
+#define SHF_MASKPROC 0xF0000000
+
+#define PT_NULL 0
+#define PT_LOAD 1
+#define PT_DYNAMIC 2
+
+#define ELF32_R_SYM(i) ((i)>>8)
+#define ELF32_R_TYPE(i) ((unsigned char)(i))
+#define ELF32_R_INFO(s,t) (((s)<<8)+(unsigned char)(t))
 
 typedef struct {
     unsigned char e_ident[EI_NIDENT];
@@ -43,6 +91,37 @@ typedef struct {
     Elf32_Word sh_addralign;
     Elf32_Word sh_entsize;
 } Elf32_Shdr;
+
+typedef struct {
+    Elf32_Word st_name;
+    Elf32_Addr st_value;
+    Elf32_Word st_size;
+    unsigned char st_info;
+    unsigned char st_other;
+    Elf32_Half st_shndx;
+} Elf32_Sym;
+
+typedef struct {
+    Elf32_Addr r_offset;
+    Elf32_Word r_info;
+} Elf32_Rel;
+
+typedef struct {
+    Elf32_Addr r_offset;
+    Elf32_Word r_info;
+    Elf32_Sword r_addend;
+} Elf32_Rela;
+
+typedef struct {
+    Elf32_Word p_type;
+    Elf32_Off p_offset;
+    Elf32_Addr p_vaddr;
+    Elf32_Addr p_paddr;
+    Elf32_Word p_filesz;
+    Elf32_Word p_memsz;
+    Elf32_Word p_flags;
+    Elf32_Word p_align;
+} Elf32_Phdr;
 
 typedef struct {
     uint32_t	s_inodes_count;		/* Inodes count */
@@ -115,9 +194,15 @@ typedef struct {
 
 
 void elf_run(void);
+Elf32_Shdr* elf_find_rel_plt(uint32_t* mem, Elf32_Ehdr* elf_header);
+Elf32_Shdr* elf_find_got_plt(uint32_t* mem, Elf32_Ehdr* elf_header);
+char* elf_get_section_name(uint32_t* mem, Elf32_Ehdr* elf_header, uint32_t sec_num);
+void elf_load_program_headers(Elf32_Ehdr* elf_header, uint8_t* process_space, uint8_t* data);
 
 int main()
 {
+
+#ifdef do_ext2_tests
     uint8_t * source = nullptr;
     long numbytes;
 
@@ -231,16 +316,23 @@ int main()
             }
         }
     }
+#endif
+
+#ifdef do_elf_tests
+    elf_run();
+#endif
 }
 
 void elf_run(void) {
     char* source = nullptr;
+    uint32_t* process_space = (uint32_t*)malloc(0x50000);
     long numbytes;
 
     Elf32_Ehdr* elf_header = nullptr;
     Elf32_Shdr* elf_sheader = nullptr;
+    Elf32_Phdr* elf_pheader = nullptr;
 
-    FILE* fp = fopen("vv_hd.img", "r");
+    FILE* fp = fopen("Y:\\versions\\v\\vs_scratch\\vvscratch\\Debug\\alpha.vvs", "rb");
 
     if (fp != NULL) {
         fseek(fp, 0L, SEEK_END);
@@ -248,10 +340,16 @@ void elf_run(void) {
 
         fseek(fp, 0L, SEEK_SET);
 
-        source = (char*)calloc(numbytes, sizeof(char));
+        source = (char*)calloc(numbytes * 2, sizeof(char));
 
         if (source == NULL) {
             printf("souce is null\n");
+            exit(1);
+        }
+
+        if (source == 0) {
+            printf("source is 0\n");
+            exit(1);
         }
 
         fread(source, sizeof(char), numbytes, fp);
@@ -263,40 +361,235 @@ void elf_run(void) {
         fclose(fp);
     }
     else {
-        printf("fp is null\n");
+        printf("fp is null, errno %d\n", errno);
     }
 
-    if (source != NULL) {
-        elf_header = (Elf32_Ehdr*)source;
+    if (source == NULL) {
+        printf("source is null -- number 2\n");
+        exit(1);
+    }
 
-        printf("source: 0x%08X\n", (uint32_t)source);
-        printf("numbytes: 0x%08X\n", numbytes);
+    elf_header = (Elf32_Ehdr*)source;
 
-        printf("ehdr: 0x%x\n", sizeof(Elf32_Ehdr));
-        printf("shdr: 0x%x\n", sizeof(Elf32_Shdr));
+    printf("source: 0x%08X\n", (uint32_t)source);
+    printf("numbytes: 0x%08X\n", numbytes);
 
-        printf("%s\n", elf_header->e_ident);
+    printf("ELF Header\n");
+    printf("Ident: %s\n", elf_header->e_ident);
+    printf("Type: 0x%X\n", elf_header->e_type);
+    printf("Machine: 0x%X\n", elf_header->e_machine);
+    printf("Version: 0x%X\n", elf_header->e_version);
+    printf("Entry: 0x%X\n", elf_header->e_entry);
+    printf("Program header offset: 0x%X\n", elf_header->e_phoff);
+    printf("Section header offset: 0x%X\n", elf_header->e_shoff);
+    printf("Flags: 0x%X\n", elf_header->e_flags);
+    printf("Program Header Entries: 0x%X\n", elf_header->e_phnum);
+    printf("Number of section headers: 0x%X\n", elf_header->e_shnum);
+    printf("Section header size: 0x%X (sizeof: 0x%X)\n", elf_header->e_shentsize, sizeof(Elf32_Shdr));
+    printf("Section name string tbl index: 0x%X\n", elf_header->e_shstrndx);
+    printf("Section header in mem: 0x%08X\n", (uint32_t)elf_header + elf_header->e_shoff);
 
-        printf("0x%X\n", elf_header->e_shoff);
-        printf("0x%08X\n", (uint32_t)elf_header + elf_header->e_shoff);
+    elf_sheader = (Elf32_Shdr*)((uint32_t)elf_header + elf_header->e_shoff);
+    Elf32_Shdr * elf_str_shdr = (Elf32_Shdr*)(((uint32_t)elf_header + elf_header->e_shoff) + (sizeof(Elf32_Shdr) * elf_header->e_shstrndx));
+    uint32_t elf_str_offset = elf_str_shdr->sh_offset;
+    printf("str offset: 0x%X\n", elf_str_offset);
+    printf("Section Headers\n");
+    printf("num d/h  mem offst   typ  addr          file offset\n");
+    for (int i = 0; i < elf_header->e_shnum; i++) {
+        Elf32_Shdr* section = (Elf32_Shdr*)(((uint32_t)elf_header + elf_header->e_shoff) + (sizeof(Elf32_Shdr) * i));
+        printf("[%d / %x @ 0x%08X] %d    0x%08X    0x%08X  -->  %s\n", i, i, (uint32_t)section, section->sh_type, section->sh_addr, section->sh_offset, (char*)(source + elf_str_offset + section->sh_name));
+    }
 
-        elf_sheader = (Elf32_Shdr*)((uint32_t)elf_header + elf_header->e_shoff);
+    printf("\nProgram Headers\n");
 
-        for (int i = 0; i < elf_header->e_shnum; i++) {
-            printf("[%d / %x @ 0x%08X] %d    0x%08X    0x%08X\n", i, i, (uint32_t)&elf_sheader[i], elf_sheader[i].sh_type, elf_sheader[i].sh_addr, elf_sheader[i].sh_offset);
+    for (int i = 0; i < elf_header->e_phnum; i++) {
+        elf_pheader = (Elf32_Phdr*)((uint32_t)elf_header + elf_header->e_phoff + (elf_header->e_phentsize * i));
+
+        printf("\n");
+
+        printf("Program header type: %X\n", elf_pheader->p_type);
+        printf("PH Offset: 0x%08X\n", elf_pheader->p_offset);
+        printf("PH vaddr: 0x%08X\n", elf_pheader->p_vaddr);
+        printf("PH paddr: 0x%08X\n", elf_pheader->p_paddr);
+        printf("PH filesz: 0x%08X\n", elf_pheader->p_filesz);
+        printf("PH memsz: 0x%08X\n", elf_pheader->p_memsz);
+        printf("PH flags: 0x%08X\n", elf_pheader->p_flags);
+        printf("PH align: 0x%08X\n", elf_pheader->p_align);
+
+        if (elf_pheader->p_type == 1) {
+            uint8_t* data = (uint8_t *)(source + elf_pheader->p_offset);
+            printf("I would load 0x%X bytes starting at file location 0x%X into physical memory address 0x%08X in 0x%X bytes of allocated space.\n", elf_pheader->p_filesz, elf_pheader->p_offset, elf_pheader->p_paddr, elf_pheader->p_memsz );
+            printf("The first 10 bytes of loaded data looks like: ");
+
+            for (int j = 0; j < 9; j++) {
+                printf("%02X ", (uint8_t)*(data + j));
+            }
+
+            printf("\n");
         }
     }
+
+    printf("\n----------\nBeginning OS simulation\n");
+
+    Elf32_Shdr* rel_plt = elf_find_rel_plt((uint32_t*)source, elf_header);
+    if (rel_plt != NULL) {
+        uint32_t* data = (uint32_t*)(source + rel_plt->sh_offset);
+        printf(".rel.plt out:\n");
+        for (int j = 0; j < rel_plt->sh_size; j++) {
+            printf("%08X\t", (uint32_t) * (data + j));
+        }
+        printf("\n\n");
+    }
+    else {
+        printf("Could not find .rel.plt section\n");
+    }
+
+    Elf32_Shdr* got_plt = elf_find_got_plt((uint32_t*)source, elf_header);
+    if (got_plt != NULL) {
+        uint32_t* data = (uint32_t*)(source + got_plt->sh_offset);
+        printf(".got.plt out:\n");
+        for (int j = 0; j < got_plt->sh_size; j++) {
+            printf("%08X\t", (uint32_t) * (data + j));
+        }
+        printf("\n\n");
+    }
+    else {
+        printf("Could not find .got.plt section\n");
+    }
+
+    elf_load_program_headers(elf_header, (uint8_t *)process_space, (uint8_t *)source);
+
+    for (int k = 0; k < 0x200; k = k+4) {
+        //printf("0x%03X: %02X %02X %02X %02X\n", k, (uint8_t)*((uint8_t*)process_space +k), (uint8_t) * ((uint8_t*)process_space + k + 1), (uint8_t) * ((uint8_t*)process_space + k + 2), (uint8_t) * ((uint8_t*)process_space + k + 3));
+    }
+
+    for (int k = 0x1288; k < 0x12a0; k = k + 4) {
+        printf("0x%03X: %02X %02X %02X %02X\n", k, (uint8_t) * ((uint8_t*)process_space + k), (uint8_t) * ((uint8_t*)process_space + k + 1), (uint8_t) * ((uint8_t*)process_space + k + 2), (uint8_t) * ((uint8_t*)process_space + k + 3));
+    }
+
+    uint32_t* func_printf = (uint32_t*)_printf_p;
+    uint32_t* func_set_debug_output = (uint32_t*)set_debug_output;
+    uint32_t* func_sched_yield = (uint32_t*)swap_task;
+
+    if (rel_plt == NULL) {
+        exit(1);
+    }
+
+    if (got_plt == NULL) {
+        exit(1);
+    }
+
+
+    uint32_t* data1 = (uint32_t*)((uint32_t)process_space + got_plt->sh_addr);
+    printf(".got.plt out:\n");
+    for (int j = 0; j < got_plt->sh_size; j++) {
+        printf("%08X\t", (uint32_t) * (data1 + j));
+    }
+    printf("\n\n");
+
+    Elf32_Rel* elf_rel1 = (Elf32_Rel*)(source + rel_plt->sh_offset);
+    Elf32_Rel* elf_rel2 = (Elf32_Rel*)(source + rel_plt->sh_offset + sizeof(Elf32_Rel));
+    Elf32_Rel* elf_rel3 = (Elf32_Rel*)(source + rel_plt->sh_offset + 2 * sizeof(Elf32_Rel));
+
+    uint32_t* got_entry = (uint32_t*)((uint8_t*)process_space + elf_rel1->r_offset);
+    *got_entry = (uint32_t)func_set_debug_output;
+
+    uint32_t* got_entry2 = (uint32_t*)((uint8_t*)process_space + elf_rel2->r_offset);
+    *got_entry2 = (uint32_t)func_printf;
+
+    uint32_t* got_entry3 = (uint32_t*)((uint8_t*)process_space + elf_rel3->r_offset);
+    *got_entry3 = (uint32_t)func_sched_yield;
+    
+    //uint32_t* got_entry = (uint32_t*)((uint8_t*)process_space + elf_rel1->r_offset);
+    
+    uint32_t* data2 = (uint32_t*)((uint32_t)process_space + got_plt->sh_addr);
+    printf(".got.plt out:\n");
+    for (int x = 0; x < got_plt->sh_size; x++) {
+        printf("%08X\t", (uint32_t) * (data2 + x));
+    }
+    printf("\n\n");
+
+    make_call the_call = (make_call)*got_entry;
+    printf("Calling 0x%08X\n", (uint32_t)the_call);
+    the_call(true);
+
+   /* the_call = (make_call)*got_entry2;
+    printf("Calling 0x%08X\n", (uint32_t)the_call);
+    the_call(true);*/
+
+    the_call = (make_call)*got_entry3;
+    printf("Calling 0x%08X\n", (uint32_t)the_call);
+    the_call(true);
 
     printf("end\n");
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
+void set_debug_output(bool output) {
+    printf("set_debug_output called with %d\n", output);
+}
 
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
+void swap_task(void) {
+    printf("sched wait called\n");
+}
+
+void elf_load_program_headers(Elf32_Ehdr* elf_header, uint8_t* process_space, uint8_t* data) {
+    Elf32_Phdr* elf_pheader = nullptr;
+
+    for (int i = 0; i < elf_header->e_phnum; i++) {
+        elf_pheader = (Elf32_Phdr*)((uint32_t)elf_header + elf_header->e_phoff + (elf_header->e_phentsize * i));
+
+        if (elf_pheader->p_type == 1) {
+            uint8_t* source = (uint8_t*)(data + elf_pheader->p_offset);
+            uint8_t* dest = (uint8_t*)(process_space + elf_pheader->p_vaddr);
+    
+            printf("Loading 0x%X bytes to physical/virtual 0x%08X / 0x%08X.\n", elf_pheader->p_filesz, elf_pheader->p_paddr, elf_pheader->p_vaddr);
+
+            memcpy(dest, source, elf_pheader->p_filesz);
+        }
+    }
+}
+
+Elf32_Shdr * elf_find_rel_plt(uint32_t* mem, Elf32_Ehdr* elf_header) {
+    Elf32_Shdr* ret = nullptr;
+
+    for (int i = 0; i < elf_header->e_shnum; i++) {
+        Elf32_Shdr* section = (Elf32_Shdr*)(((uint32_t)mem + elf_header->e_shoff) + (sizeof(Elf32_Shdr) * i));
+
+        if (section->sh_type == SHT_REL) {
+            printf("rel.plt section: [%d / %x @ 0x%08X] %d    0x%08X    0x%08X\n", i, i, (uint32_t)section, section->sh_type, section->sh_addr, section->sh_offset);
+            ret = section;
+        }
+    }
+
+    return ret;
+}
+
+Elf32_Shdr* elf_find_got_plt(uint32_t* mem, Elf32_Ehdr* elf_header) {
+    Elf32_Shdr* ret = nullptr;
+    char* sec_name = nullptr;
+
+    for (int i = 0; i < elf_header->e_shnum; i++) {
+        Elf32_Shdr* section = (Elf32_Shdr*)(((uint32_t)mem + elf_header->e_shoff) + (sizeof(Elf32_Shdr) * i));
+
+        if (section->sh_type == SHT_PROGBITS) {
+            sec_name = elf_get_section_name(mem, elf_header, i);
+            //printf("sn: %s\n", sec_name);
+            if (strcmp(sec_name, ".got.plt") == 0) {
+                printf("got.plt section: [%d / %x @ 0x%08X] %d    0x%08X    0x%08X\n", i, i, (uint32_t)section, section->sh_type, section->sh_addr, section->sh_offset);
+                ret = section;
+            }
+        }
+    }
+
+    return ret;
+}
+
+char* elf_get_section_name(uint32_t* mem, Elf32_Ehdr* elf_header, uint32_t sec_num) {
+    Elf32_Shdr* elf_str_shdr = (Elf32_Shdr*)(((uint32_t)elf_header + elf_header->e_shoff) + (sizeof(Elf32_Shdr) * elf_header->e_shstrndx));
+    uint32_t elf_str_offset = elf_str_shdr->sh_offset;
+    Elf32_Shdr* section = (Elf32_Shdr*)(((uint32_t)mem + elf_header->e_shoff) + (sizeof(Elf32_Shdr) * sec_num));
+
+    char* ret = (char*)((char*)mem + elf_str_offset + section->sh_name);
+
+    return ret;
+}

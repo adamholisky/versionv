@@ -14,6 +14,8 @@ define qq
   quit
 end
 
-break _asm_kernel_start
-break stage5
-break debug_jump
+#break _asm_kernel_start
+#break stage5
+#break interrupts.c:107 if interrupt_num == 0x30
+#break interrupts.c:107 if interrupt_num == 0x31 
+break sched_yield.c:34
