@@ -6,6 +6,7 @@
 #include "terminal.h"
 
 #define KDEBUG_MAX_SYMBOLS 1024
+#define STACKFRAME_MAX 25
 
 enum level {
     level_info,
@@ -55,6 +56,11 @@ typedef struct {
     uint32_t    length;
 } profile_information;
 
+typedef struct {
+    struct stackframe *ebp;
+    uint32_t eip;
+} stackframe;
+
 void kdebug_add_symbol( char * name, uint32_t addr, uint32_t size );
 kdebug_symbol * kdebug_get_symbol( char * name );
 uint32_t kdebug_get_symbol_addr( char * name );
@@ -69,10 +75,15 @@ void profile_start( void );
 void k_log( uint32_t system_id, uint32_t level, char * message, ... );
 char * strcat( char * dest, char * src );
 char * strstr(register char *string, char *substring);
+void debugf_stack_trace( void );
+void stack_trace_test_func_a( void );
+void stack_trace_test_func_b( void );
+void stack_trace_test_func_c( void );
+void stack_trace_test_func_d( void );
 
 #define debug_out_on() set_debug_output( true )
 #define debug_out_off() set_debug_output( false )
-#define klog( ... ) debug_out_on(); printf( "[%s:%d] ", __FUNCTION__, __LINE__ ); printf( __VA_ARGS__ ); debug_out_off()
+#define klog( ... ) debug_out_on(); printf( "[\x1b[0;34;49m%s:%d\x1b[0;00;00m] ", __FUNCTION__, __LINE__ ); printf( __VA_ARGS__ ); debug_out_off()
 #define debugf( ... ) debug_out_on(); printf( __VA_ARGS__ ); debug_out_off()
 #define log_entry_enter() klog( "Enter\n" )
 #define log_entry_exit() klog( "Exit\n" );

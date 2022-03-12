@@ -11,6 +11,10 @@ unsigned int term_current_column;
 unsigned char term_current_color;
 unsigned short * term_buffer;
 
+char ansi_capture[25];
+bool term_capture_ansi_escape_code = false;
+uint32_t capture_i = 0;
+
 unsigned int VGA_WIDTH = 80;
 unsigned int VGA_HEIGHT = 25;
 unsigned int y_start;
@@ -25,7 +29,7 @@ void term_initalize( void ) {
 	term_current_row = 0;
 	term_current_column = 0;
 	y_start = 0;
-	term_current_color = vga_entry_color( VGA_COLOR_WHITE, VGA_COLOR_BLUE );
+	term_current_color = vga_entry_color( VGA_COLOR_WHITE, VGA_COLOR_BLACK );
 	term_buffer = ( unsigned short * )( 0xC00B8000 );
 
 	for( y = 0; y < VGA_HEIGHT; y++ ) {
@@ -33,6 +37,10 @@ void term_initalize( void ) {
 			term_buffer[( y * VGA_WIDTH ) + x] = vga_entry( ' ', term_current_color );
 		}
 	}
+}
+
+void term_set_color( uint32_t foreground, uint32_t background ) {
+	term_current_color = vga_entry_color( VGA_COLOR_RED, VGA_COLOR_BLUE );
 }
 
 void term_put_char_at( char c, unsigned char color, unsigned int x, unsigned int y ) {
@@ -47,45 +55,125 @@ void term_put_char( char c ) {
 	unsigned int x;
 	unsigned int y;
 	unsigned int max_row;
+	unsigned short fg, bg;
+	bool send_to_com1 = false;
+	bool send_to_com2 = false;
+	bool send_to_screen = false;
 
 	if( is_debug_output == true ) {
-		serial_write( c );
-
-		return;
+		send_to_com1 = true;
+		send_to_com2 = true;
 	}
 
-	if( c != '\n' ) {
-		term_put_char_at( c, term_current_color, term_current_column, term_current_row );
-	} else {
-		term_current_column = VGA_WIDTH - 1;
-	}
+	if( c == '\x1b' ) {
+		term_capture_ansi_escape_code = true;
+		capture_i = 0;
+		send_to_com1 = false;
+	} else if( term_capture_ansi_escape_code ) {
+		if( c == 'm' ) {
+			ansi_capture[capture_i] = 0;
+			term_capture_ansi_escape_code = false;
+			capture_i = 0;
 
-	term_current_column++;
+			// Process escape seq
+			// char 3 & 4 = fg
+			// char 6 & 7 = bg
+			fg = ((ansi_capture[3] - '0') * 10) + (ansi_capture[4] - '0');
+			bg = ((ansi_capture[6] - '0') * 10) + (ansi_capture[7] - '0');
 
-	if( term_current_column == VGA_WIDTH ) {
-		term_current_column = 0;
-
-		term_current_row++;
-
-		max_row = VGA_HEIGHT;
-
-		if( term_current_row == max_row ) {
-			term_current_row = max_row - 1;
-
-			for( y = y_start; y < max_row - 1; y++ ) {
-				for( x = 0; x < VGA_WIDTH; x++ ) {
-					term_buffer[( y * VGA_WIDTH ) + x] = term_buffer[( ( y + 1 ) * VGA_WIDTH ) + x];
-				}
+			switch( fg ) {
+				case 30:
+					fg = VGA_COLOR_BLACK;
+					break;
+				case 31:
+					fg = VGA_COLOR_RED;
+					break;
+				case 32:
+					fg = VGA_COLOR_GREEN;
+					break;
+				case 34:
+					fg = VGA_COLOR_BLUE;
+					break;
+				case 37:
+				case 39:
+				case 0:
+				default:
+					fg = VGA_COLOR_WHITE;
 			}
 
-			for( x = 0; x < VGA_WIDTH; x++ ) {
-				const size_t index = ( VGA_HEIGHT - 1 ) * VGA_WIDTH + x;
-				term_buffer[index] = vga_entry( ' ', term_current_color );
+			switch( bg ) {
+				case 40:
+					bg = VGA_COLOR_BLACK;
+					break;
+				case 41:
+					bg = VGA_COLOR_RED;
+					break;
+				case 42:
+					bg = VGA_COLOR_GREEN;
+					break;
+				case 44:
+					bg = VGA_COLOR_BLUE;
+					break;
+				case 47:
+				case 49:
+				case 0:
+				default:
+					bg = VGA_COLOR_BLACK;
+			}
+
+			term_current_color = vga_entry_color( fg, bg );
+			send_to_com1 = false;
+		} else {
+			ansi_capture[capture_i] = c;
+			capture_i++;
+			send_to_com1 = false;
+		}
+	} else {
+		send_to_screen = true;
+
+		//update_cursor( term_current_row, term_current_column );
+	}
+
+	if( send_to_com1 ) {
+		serial_write_port( c, COM1 );
+	}
+
+	if( send_to_com2 ) {
+		serial_write_port( c, COM2 );
+	}
+
+	if( send_to_screen ) {
+		if( c != '\n' ) {
+			term_put_char_at( c, term_current_color, term_current_column, term_current_row );
+		} else {
+			term_current_column = VGA_WIDTH - 1;
+		}
+
+		term_current_column++;
+
+		if( term_current_column == VGA_WIDTH ) {
+			term_current_column = 0;
+
+			term_current_row++;
+
+			max_row = VGA_HEIGHT;
+
+			if( term_current_row == max_row ) {
+				term_current_row = max_row - 1;
+
+				for( y = y_start; y < max_row - 1; y++ ) {
+					for( x = 0; x < VGA_WIDTH; x++ ) {
+						term_buffer[( y * VGA_WIDTH ) + x] = term_buffer[( ( y + 1 ) * VGA_WIDTH ) + x];
+					}
+				}
+
+				for( x = 0; x < VGA_WIDTH; x++ ) {
+					const size_t index = ( VGA_HEIGHT - 1 ) * VGA_WIDTH + x;
+					term_buffer[index] = vga_entry( ' ', term_current_color );
+				}
 			}
 		}
 	}
-
-	//update_cursor( term_current_row, term_current_column );
 }
 
 void term_clear_last_char( void ) {

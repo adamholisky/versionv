@@ -3,6 +3,11 @@
 #Support variables
 ROOT_DIR = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BUILD_LOG = $(ROOT_DIR)/build.log
+SHELL :=/bin/bash -O globstar
+SOURCES_C = $(shell ls src/**/*.c)
+SOURCES_ASM = $(shell ls src/**/*.s)
+#SOURCES = $(wildcard src/test_apps/*.c) $(wildcard src/c/*.c)
+#SOURCES += $(wildcard src/test_apps/*.c)
 
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
@@ -17,18 +22,18 @@ QEMU_COMMON = 	-drive format=raw,if=ide,file=$(ROOT_DIR)/vv_hd.img \
 				-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
 				-nic user,ipv6=off,model=e1000,mac=52:54:98:76:54:32 \
 				-m 4G
-QEMU_DISPLAY_NONE =	-serial stdio \
-					-serial file:$(ROOT_DIR)/serial_out.txt \
+QEMU_DISPLAY_NONE =	-serial file:$(ROOT_DIR)/serial_out.txt \
+					-serial stdio \
 					-display none
-QEMU_DISPLAY_NORMAL = -serial file:$(ROOT_DIR)/serial_out.txt
+QEMU_DISPLAY_NORMAL = -serial file:$(ROOT_DIR)/serial_out.txt \
+					  -serial stdio
 QEMU_DEBUG_COMMON = -S -gdb tcp::5894
 
 export
 
 all: install
-	rm build/versionv.bin
 
-build/versionv.bin:
+build/versionv.bin: $(SOURCES_C) $(SOURCES_ASM)
 	$(MAKE) -C src
 	objdump -x -d build/versionv.bin > objdump.txt
 	readelf -a build/versionv.bin > elfdump.txt

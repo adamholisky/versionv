@@ -8,11 +8,10 @@
 #include "ata.h"
 #include <cpuid.h>
 #include "syscall.h"
+#include "debug.h"
 
 #define END_IMMEDIATELY
 #undef kdebug_process_loader
-
-typedef void (*make_call)(bool);
 
 void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info ) 
 {
@@ -22,8 +21,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 	term_initalize();
 	initalize_serial();
  
-	printf( "VersionV\n" );
-	k_log( sys_kernel, level_info, "\nVersionV Serial Out\n" );
+	printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m\n" );
+	debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m Serial Out\n" );
 
 	memory_initalize();
 	elf_initalize( (uint32_t)kernel_main );
@@ -64,6 +63,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 
 	modules_initalize();
 
+	stack_trace_test_func_a();
+
 	while( true ) {
 		sched_yield();
 	}
@@ -87,3 +88,4 @@ int register_io_device( char * name, void (*read_func)(), void (*write_func)() )
 uint32_t write( int file, void * buff, uint32_t count ) {
 
 }
+

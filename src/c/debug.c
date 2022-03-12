@@ -204,3 +204,37 @@ char * strstr(register char *string, char *substring)
     }
     return NULL;
 }
+
+void debugf_stack_trace( void ) {
+	stackframe *frame;
+
+	asm ("movl %%ebp,%0" : "=r"(frame));
+
+	debugf( "Stack Trace\n----------------------\n" );
+	
+	for( int i = 0; (frame != NULL) && (i < STACKFRAME_MAX); i++ ) {
+		debugf( "% 2d:    0x%08X %s\n", i+1, frame->eip, kdebug_get_function_at(frame->eip) );
+		frame = frame->ebp;
+	}
+}
+
+#pragma GCC push_options
+#pragma GCC optimize ("O0")
+
+void stack_trace_test_func_a( void ) {
+	stack_trace_test_func_b();
+}
+
+void stack_trace_test_func_b( void ) {
+	stack_trace_test_func_c();
+}
+
+void stack_trace_test_func_c( void ) {
+	stack_trace_test_func_d();
+}
+
+void stack_trace_test_func_d( void ) {
+	debugf_stack_trace();
+}
+
+#pragma GCC pop_options

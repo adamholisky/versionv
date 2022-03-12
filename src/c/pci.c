@@ -4,6 +4,8 @@
 pci_header	pci_devices[ 15 ];
 uint32_t	pci_devices_top;
 
+#undef kdebug_pci
+
 void pci_initalize( void ) {
 	log_entry_enter();
 	uint16_t vendor;
@@ -39,14 +41,19 @@ void pci_initalize( void ) {
 		}
 	}
 
+	#ifdef kdebug_pci
 	k_log( sys_pci, level_info, "Num devices: %d", pci_devices_top );
+	#endif
+
 	for( i = 0; i < pci_devices_top; i++ ) {
 		d = &pci_devices[i];
 
 		if( d->class_code == 0x06 ) continue;
 
+		#ifdef kdebug_pci
 		k_log( sys_pci, level_info, "[%d] Class: %02X   Subclass: %02X   Prog IF: %02X   Revision: %02X   Vendor: %04X   Device ID: %04X",
 			     i, d->class_code, d->subclass, d->prog_if, d->revision_id, d->vendor_id, d->device_id );
+		#endif
 	}
 
 	log_entry_exit();

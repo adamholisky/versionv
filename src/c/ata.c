@@ -1,6 +1,8 @@
 #include "kernel.h"
 #include "ata.h"
 
+#undef kdebug_ata
+
 bool 		primary_ready;
 
 uint16_t	primary_status[256];
@@ -25,6 +27,7 @@ void ata_initalize( void ) {
 	drive_lba_sectors = primary_status[60] | primary_status[61] << 16;
 	drive_size_bytes = drive_lba_sectors * 512;
 	
+	#ifdef kdebug_ata
 	klog( "Primary 60 and 61:          %X\n", drive_lba_sectors );
 	klog( "Drive size:                 %db\n", drive_size_bytes );
 	klog( "Drive size:                 %dk\n", drive_size_bytes / 1024 );
@@ -32,7 +35,8 @@ void ata_initalize( void ) {
 	klog( "byte_to_sector( 20 )        %d, %d\n", byte_to_sector(20), byte_to_offset(20) );
 	klog( "byte_to_sector( 512 )       %d, %d\n", byte_to_sector(512), byte_to_offset(512) );
 	klog( "byte_to_sector( 513 )       %d, %d\n", byte_to_sector(513), byte_to_offset(513) );
-	
+	#endif
+
 	log_entry_exit();
 }
 

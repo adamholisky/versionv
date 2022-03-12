@@ -54,15 +54,19 @@ void memory_initalize( void ) {
 	page_directory_entry * pde = (page_directory_entry *)&boot_page_directory;
 	page_directory_entry * pte = (page_directory_entry *)&process_pt;
 
+	#ifdef kdebug_memory_pages
 	klog( "process_pt paddr:  0x%08X\n", ((uint32_t)process_pt - 0xC0000000) );
 	klog( "process paddr sp:  0x%08X\n", 0x06400000 + (uint32_t)process_address_space - 0xA0000000 );
 	klog( "process paddr>>11: 0x%08X\n", (0x06400000 + (uint32_t)process_address_space - 0xA0000000)>>11 );
+	#endif
 
 	pte->present = 1;
 	pte->rw = 1;
 	pte->address = (0x06400000 + (uint32_t)process_address_space - 0xA0000000)>>11;
 
+	#ifdef kdebug_memory_pages
 	klog( "pte->address: 0x%08X\n", pte->address<<11 );
+	#endif
 
 	pde->present = 1;
 	pde->rw = 1;
@@ -77,9 +81,11 @@ void memory_initalize( void ) {
 	void * zero_addr_space = 0x00000000;
 	uint32_t * zerozero = (uint32_t *)zero_addr_space;
 
+	#ifdef kdebug_memory_pages
 	klog( "00   uint32_t: %08X\n", *(zerozero + 1) );
 	klog( "pmem uint32_t: %08X\n", *(pmem + 1) );
-
+	#endif
+	
 	log_entry_exit();
 }
 

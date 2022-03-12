@@ -1,6 +1,6 @@
-make[1]: Entering directory '/mnt/versions/v/libvv_primary/src'
-gcc -fno-omit-frame-pointer -O2 -static-libgcc -lgcc -g -I/mnt/versions/v/libvv_primary/include -I/mnt/versions/v/libvv_primary/build_support   -c vv_list.c -o ../build/vv_list.o
-make[1]: Leaving directory '/mnt/versions/v/libvv_primary/src'
-make[1]: Entering directory '/mnt/versions/v/libvv_primary/build_support'
-gcc -o ../vv_lib_test -fno-omit-frame-pointer -O2 -static-libgcc -lgcc -g -I/mnt/versions/v/libvv_primary/include -I/mnt/versions/v/libvv_primary/build_support   ../build/vv_list.o
-make[1]: Leaving directory '/mnt/versions/v/libvv_primary/build_support'
+make[1]: Entering directory '/mnt/hgfs/versions/v/libvv_primary/src'
+gcc -fno-omit-frame-pointer -O2 -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/libvv_primary/include -I/mnt/hgfs/versions/v/libvv_primary/build_support   -c vv_list.c -o ../build/vv_list.o
+make[1]: Leaving directory '/mnt/hgfs/versions/v/libvv_primary/src'
+make[1]: Entering directory '/mnt/hgfs/versions/v/libvv_primary/build_support'
+gcc -o ../vv_lib_test -fno-omit-frame-pointer -O2 -static-libgcc -lgcc -g -I/mnt/hgfs/versions/v/libvv_primary/include -I/mnt/hgfs/versions/v/libvv_primary/build_support   ../build/vv_list.o
+make[1]: Leaving directory '/mnt/hgfs/versions/v/libvv_primary/build_support'
