@@ -2,3 +2,7 @@
 *.bin
 *.img
 *.exe
+objdump.txt
+elfdump.txt
+serial_out.txt
+build.log
