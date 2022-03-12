@@ -16,6 +16,8 @@
 void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info ) 
 {
 	int x = 0;
+
+	outportb( 0xF4, 0x00 );
 	
 	multiboot_initalize( mb_magic, mb_info );
 	term_initalize();

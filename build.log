@@ -6,15 +6,6 @@ make[2]: Entering directory '/mnt/hgfs/versions/v/src/test_apps'
 Processing alpha
 Processing beta
 Processing gamma
-/usr/local/osdev/bin/i686-elf-gcc -fPIC -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -c alpha.c -o build_objout/alpha.o
-/usr/local/osdev/bin/i686-elf-ld -nostdlib -fPIC -shared -o ./build_objout/alpha.vvs ./build_objout/alpha.o
-/usr/local/osdev/bin/i686-elf-gcc -fPIC -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -c ./build_temp/alpha.s -o ./build_objout/alpha.bin
-/usr/local/osdev/bin/i686-elf-gcc -fPIC -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -c beta.c -o build_objout/beta.o
-/usr/local/osdev/bin/i686-elf-ld -nostdlib -fPIC -shared -o ./build_objout/beta.vvs ./build_objout/beta.o
-/usr/local/osdev/bin/i686-elf-gcc -fPIC -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -c ./build_temp/beta.s -o ./build_objout/beta.bin
-/usr/local/osdev/bin/i686-elf-gcc -fPIC -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -c gamma.c -o build_objout/gamma.o
-/usr/local/osdev/bin/i686-elf-ld -nostdlib -fPIC -shared -o ./build_objout/gamma.vvs ./build_objout/gamma.o
-/usr/local/osdev/bin/i686-elf-gcc -fPIC -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -c ./build_temp/gamma.s -o ./build_objout/gamma.bin
 ./buildapp.sh
 Processing alpha
 Processing beta
