@@ -4,16 +4,16 @@
 char * strcat( char * dest, char * src ) {
 	char *rdest = dest;
 
-    while (*dest)
+    while( *dest )
       dest++;
-    while (*dest++ = *src++)
+    while ( *dest++ = *src++ )
       ;
-    return rdest;
+    
+	return rdest;
 }
 
 // lifted from apple
-char * strstr(register char *string, char *substring)
-{
+char * strstr( register char * string, char * substring ) {
     register char *a, *b;
 
     /* First scan quickly through the two strings looking for a

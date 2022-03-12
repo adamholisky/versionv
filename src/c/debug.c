@@ -23,14 +23,9 @@ void kdebug_add_symbol( char * name, uint32_t addr, uint32_t size ) {
 	kernel_symbols[ kernel_symbol_top ].addr = addr;
 	kernel_symbols[ kernel_symbol_top ].size = size;
 	kernel_symbol_top++;
-
-	/* debugf( "kdebug_symbol readout:\n" );
-	debugf( "    name: %s\n", kernel_symbols[ kernel_symbol_top - 1].name);
-	debugf( "    addr: %d (0x%x)\n", kernel_symbols[ kernel_symbol_top - 1].addr, kernel_symbols[ kernel_symbol_top - 1 ].addr);
-	debugf( "    size: %d (0x%x)\n", kernel_symbols[ kernel_symbol_top - 1].size, kernel_symbols[ kernel_symbol_top - 1 ].size); */
 }
 
-kdebug_symbol * kdebug_get_symbol_array( void ){
+kdebug_symbol * kdebug_get_symbol_array( void ) {
 	return kernel_symbols;
 }
 
