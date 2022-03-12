@@ -51,7 +51,6 @@ void modules_initalize( void ) {
 				klog( "Module found: %s @ 0x%08X for 0x%X bytes\n", modules[num_modules].name, modules[num_modules].elf_object_start_addr, modules[num_modules].elf_object_size );
 				num_modules++;
 			}
-
 		}
 	}
 	
@@ -155,42 +154,21 @@ void load_module_elf_image( uint32_t *raw_data_start ) {
 		#endif
 	}
 
-	/*
-	uint32_t* func_printf = (uint32_t*)kdebug_get_symbol_addr( "printf_" );
-		uint32_t* func_set_debug_output = (uint32_t*)kdebug_get_symbol_addr( "set_debug_output" );
-		uint32_t* func_sched_yield = (uint32_t*)kdebug_get_symbol_addr( "sched_yield" );
+	#ifdef kdebug_process_loader
+	uint32_t* data2 = (uint32_t*)((uint32_t)process_space + got_plt->sh_addr);
+	debugf(".got.plt out:\n");
+	for (int x = 0; x < (got_plt->sh_size/4); x++) {
+		debugf("%08X\t", (uint32_t) * (data2 + x));
+	}
+	debugf("\n\n");
+	
 
-		Elf32_Rel* elf_rel1 = (Elf32_Rel*)((uint8_t*)raw_data_start + rel_plt->sh_offset);
-		Elf32_Rel* elf_rel2 = (Elf32_Rel*)((uint8_t*)raw_data_start + rel_plt->sh_offset + sizeof(Elf32_Rel));
-		Elf32_Rel* elf_rel3 = (Elf32_Rel*)((uint8_t*)raw_data_start + rel_plt->sh_offset + 2 * sizeof(Elf32_Rel));
+	debugf( "    module_proc entry:      0x%08X\n", module_proc->entry);
+	debugf( "    module_proc code virt:  0x%08X\n", module_proc->code_start_virt );
+	debugf( "    module_proc stack virt: 0x%08X\n", module_proc->stack );
+	#endif
 
-		uint32_t* got_entry = (uint32_t*)(process_space + elf_rel1->r_offset);
-		*got_entry = (uint32_t)func_set_debug_output;
-		debugf( "got_entry: 0x%08x 0x%08X\n", got_entry, *got_entry);
+	module_proc->stack_eip = (uint32_t)module_proc->entry;
 
-		uint32_t* got_entry2 = (uint32_t*)(process_space + elf_rel2->r_offset);
-		*got_entry2 = (uint32_t)func_printf;
-		debugf( "got_entry2: 0x%08x 0x%08X\n", got_entry2, *got_entry2);
-
-		uint32_t* got_entry3 = (uint32_t*)(process_space  + elf_rel3->r_offset);
-		*got_entry3 = (uint32_t)func_sched_yield;
-		debugf( "got_entry3: 0x%08x 0x%08X\n", got_entry3, *got_entry3);
-	*/
-		#ifdef kdebug_process_loader
-		uint32_t* data2 = (uint32_t*)((uint32_t)process_space + got_plt->sh_addr);
-		debugf(".got.plt out:\n");
-		for (int x = 0; x < (got_plt->sh_size/4); x++) {
-			debugf("%08X\t", (uint32_t) * (data2 + x));
-		}
-		debugf("\n\n");
-		
-
-		debugf( "    module_proc entry:      0x%08X\n", module_proc->entry);
-		debugf( "    module_proc code virt:  0x%08X\n", module_proc->code_start_virt );
-		debugf( "    module_proc stack virt: 0x%08X\n", module_proc->stack );
-		#endif
-
-		module_proc->stack_eip = (uint32_t)module_proc->entry;
-
-		add_process( *module_proc );
+	add_process( *module_proc );
 }

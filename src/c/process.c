@@ -29,55 +29,6 @@ void process_initalize( void ) {
 	proc_last = 0;
 
 	klog( "Process begin tests...\n" );
-	
-	/*
-	proc_a.code_start_virt = page_allocate( 4 );
-	proc_a.code_start_phys = proc_a.code_start_virt - 0xA0000000;
-	proc_a.stack = page_allocate( 4 );
-	uint32_t * proc_a_code = (uint32_t *)proc_a.code_start_virt;
-
-
-	kdebug_symbol * test_proc = kdebug_get_symbol( "process_test_a" );
-	debugf( "process_test_a() @ 0x%08X for 0x%X\n", test_proc->addr, test_proc->size );
-	memcpy( proc_a.code_start_virt, test_proc->addr, test_proc->size + 2 );
-
-	// CD30 CD32 EBFA
-	//proc_a_code[0] = 0x32CD30CD;
-	//proc_a_code[1] = 0x0000FAEB;
-
-	debugf( "    proc_a code virt:  0x%08X\n", proc_a.code_start_virt );
-	kdebug_peek_at( (uint32_t)test_proc->addr );
-	kdebug_peek_at( (uint32_t)proc_a.code_start_virt );
-	//debugf( "    proc_a code out:   0x%08X 0x%08X\n", *proc_a_code, *(proc_a_code + 1) );
-	debugf( "    proc_a stack virt: 0x%08X\n", proc_a.stack );
-
-	proc_b.code_start_virt = page_allocate( 4 );
-	proc_b.code_start_phys = proc_b.code_start_virt - 0xA0000000;
-	proc_b.stack = page_allocate( 4 );
-	uint32_t * proc_b_code = (uint32_t *)proc_b.code_start_virt;
-
-	// CD31 CD32 EBFA
-	proc_b_code[0] = 0x32CD31CD;
-	proc_b_code[1] = 0x0000FAEB;
-
-	debugf( "    proc_b code virt:  0x%08X\n", proc_b.code_start_virt );
-	debugf( "    proc_b code out:   0x%08X 0x%08X\n", *proc_b_code, *(proc_b_code + 1) );
-	debugf( "    proc_b stack virt: 0x%08X\n", proc_b.stack );
-	
-	add_process( proc_a );
-	add_process( proc_b );
-
-	proc_current = 0;
-	proc_last = 2;
-
-	//asm( "int %0" : : "i"(0x32) );
-	*/
-	/*
-	void (*start)() = proc_a.code_start_virt;
-
-	debugf( "starting at: 0x%08X\n", start );
-	start();
-	*/
 
 	log_entry_exit();
 }
