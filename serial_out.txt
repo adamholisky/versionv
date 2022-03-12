@@ -1,9 +1,9 @@
 VersionV Serial Out
 [memory_initalize:21] Enter
 [memory_initalize:89] Exit
-[elf_initalize:11] Enter
-[elf_initalize:50] 0xC01042D0 is in function: kernel_main
-[elf_initalize:52] Exit
+[elf_initalize:12] Enter
+[elf_initalize:51] 0xC0104210 is in function: kernel_main
+[elf_initalize:53] Exit
 [interrupts_initalize:18] Enter
 [interrupts_initalize:80] Enabled+
 [interrupts_initalize:83] Exit
@@ -21,15 +21,16 @@ VersionV Serial Out
 [process_initalize:20] Initalizing processes...
 [process_initalize:31] Process begin tests...
 [process_initalize:82] Exit
-[modules_initalize:60] Module found: alpha @ 0xC010808C for 0xA34 bytes
-[modules_initalize:60] Module found: beta @ 0xC0108AC0 for 0xA34 bytes
-[modules_initalize:60] Module found: gamma @ 0xC01094F4 for 0xA34 bytes
+[modules_initalize:51] Module found: alpha @ 0xC010808C for 0xB68 bytes
+[modules_initalize:51] Module found: beta @ 0xC0108BF4 for 0xA34 bytes
+[modules_initalize:51] Module found: gamma @ 0xC0109628 for 0xA34 bytes
 Stack Trace
 ----------------------
  1:    0xC0101E6B stack_trace_test_func_d
  2:    0xC0101E5B stack_trace_test_func_c
  3:    0xC0101E4B stack_trace_test_func_b
  4:    0xC0101E3B stack_trace_test_func_a
- 5:    0xC010433F kernel_main
+ 5:    0xC010427F kernel_main
  6:    0xC0101B95 _asm_kernel_start
+Hello, world from alpha!
 [switch_next_process:207] END. Processes switched over 100,000 times.

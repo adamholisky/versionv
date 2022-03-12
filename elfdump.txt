@@ -10,7 +10,7 @@ ELF Header:
   Version:                           0x1
   Entry point address:               0xc0101b00
   Start of program headers:          52 (bytes into file)
-  Start of section headers:          182372 (bytes into file)
+  Start of section headers:          182916 (bytes into file)
   Flags:                             0x0
   Size of this header:               52 (bytes)
   Size of program headers:           32 (bytes)
@@ -22,28 +22,28 @@ ELF Header:
 Section Headers:
   [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
   [ 0]                   NULL            00000000 000000 000000 00      0   0  0
-  [ 1] .text             PROGBITS        c0100000 001000 006af6 00  AX  0   0 16
+  [ 1] .text             PROGBITS        c0100000 001000 006b06 00  AX  0   0 16
   [ 2] .rodata           PROGBITS        c0107000 008000 0004a6 00   A  0   0 32
   [ 3] .rodata.str1.1    PROGBITS        c01074a6 0084a6 000294 01 AMS  0   0  1
   [ 4] .rodata.cst8      PROGBITS        c0107740 008740 000048 08  AM  0   0  8
   [ 5] .rodata.cst4      PROGBITS        c0107788 008788 000028 04  AM  0   0  4
   [ 6] .rodata.str1.4    PROGBITS        c01077b0 0087b0 0004a3 01 AMS  0   0  4
-  [ 7] .data             PROGBITS        c0108000 009000 001f28 00  WA  0   0 32
-  [ 8] .versionv_magic   PROGBITS        c0109f28 00af28 00000d 00  WA  0   0  1
-  [ 9] .bss              NOBITS          c010a000 00af35 012510 00  WA  0   0 4096
-  [10] .comment          PROGBITS        00000000 00af35 000012 01  MS  0   0  1
-  [11] .debug_aranges    PROGBITS        00000000 00af48 0002d8 00      0   0  8
-  [12] .debug_info       PROGBITS        00000000 00b220 00b9da 00      0   0  1
-  [13] .debug_abbrev     PROGBITS        00000000 016bfa 002e1c 00      0   0  1
-  [14] .debug_line       PROGBITS        00000000 019a16 0068d4 00      0   0  1
-  [15] .debug_frame      PROGBITS        00000000 0202ec 001508 00      0   0  4
-  [16] .debug_str        PROGBITS        00000000 0217f4 001d69 01  MS  0   0  1
-  [17] .debug_line_str   PROGBITS        00000000 02355d 0002a6 01  MS  0   0  1
-  [18] .debug_loclists   PROGBITS        00000000 023803 0063f4 00      0   0  1
-  [19] .debug_rnglists   PROGBITS        00000000 029bf7 0009a8 00      0   0  1
-  [20] .symtab           SYMTAB          00000000 02a5a0 001270 10     21  72  4
-  [21] .strtab           STRTAB          00000000 02b810 000f50 00      0   0  1
-  [22] .shstrtab         STRTAB          00000000 02c760 000102 00      0   0  1
+  [ 7] .data             PROGBITS        c0108000 009000 00205c 00  WA  0   0 32
+  [ 8] .versionv_magic   PROGBITS        c010a05c 00b05c 00000d 00  WA  0   0  1
+  [ 9] .bss              NOBITS          c010b000 00b069 012510 00  WA  0   0 4096
+  [10] .comment          PROGBITS        00000000 00b069 000012 01  MS  0   0  1
+  [11] .debug_aranges    PROGBITS        00000000 00b080 0002f8 00      0   0  8
+  [12] .debug_info       PROGBITS        00000000 00b378 00b9ec 00      0   0  1
+  [13] .debug_abbrev     PROGBITS        00000000 016d64 002e9b 00      0   0  1
+  [14] .debug_line       PROGBITS        00000000 019bff 00692f 00      0   0  1
+  [15] .debug_frame      PROGBITS        00000000 020530 00151c 00      0   0  4
+  [16] .debug_str        PROGBITS        00000000 021a4c 001d69 01  MS  0   0  1
+  [17] .debug_line_str   PROGBITS        00000000 0237b5 0002b8 01  MS  0   0  1
+  [18] .debug_loclists   PROGBITS        00000000 023a6d 0063d6 00      0   0  1
+  [19] .debug_rnglists   PROGBITS        00000000 029e43 000963 00      0   0  1
+  [20] .symtab           SYMTAB          00000000 02a7a8 001280 10     21  73  4
+  [21] .strtab           STRTAB          00000000 02ba28 000f59 00      0   0  1
+  [22] .shstrtab         STRTAB          00000000 02c981 000102 00      0   0  1
 Key to Flags:
   W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
   L (link order), O (extra OS processing required), G (group), T (TLS),
@@ -55,7 +55,7 @@ There are no section groups in this file.
 Program Headers:
   Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
   LOAD           0x001000 0xc0100000 0x00100000 0x07c53 0x07c53 R E 0x1000
-  LOAD           0x009000 0xc0108000 0x00108000 0x01f35 0x14510 RW  0x1000
+  LOAD           0x009000 0xc0108000 0x00108000 0x02069 0x15510 RW  0x1000
 
  Section to Segment mapping:
   Segment Sections...
@@ -68,13 +68,13 @@ There are no relocations in this file.
 
 The decoding of unwind sections for machine type Intel 80386 is not currently supported.
 
-Symbol table '.symtab' contains 295 entries:
+Symbol table '.symtab' contains 296 entries:
    Num:    Value  Size Type    Bind   Vis      Ndx Name
      0: 00000000     0 NOTYPE  LOCAL  DEFAULT  UND 
      1: 00000000     0 FILE    LOCAL  DEFAULT  ABS boot.o
      2: 1badb002     0 NOTYPE  LOCAL  DEFAULT  ABS MAGIC
-     3: c0118510     0 NOTYPE  LOCAL  DEFAULT    9 stack_bottom
-     4: c011c510     0 NOTYPE  LOCAL  DEFAULT    9 stack_top
+     3: c0119510     0 NOTYPE  LOCAL  DEFAULT    9 stack_bottom
+     4: c011d510     0 NOTYPE  LOCAL  DEFAULT    9 stack_top
      5: c0108036     0 NOTYPE  LOCAL  DEFAULT    7 GDT_END
      6: c0108006     0 NOTYPE  LOCAL  DEFAULT    7 NULL_SELECTOR
      7: c010800e     0 NOTYPE  LOCAL  DEFAULT    7 CODE_SELECTOR
@@ -115,14 +115,14 @@ Symbol table '.symtab' contains 295 entries:
     42: c0107404    21 OBJECT  LOCAL  DEFAULT    2 __FUNCTION__.0
     43: 00000000     0 FILE    LOCAL  DEFAULT  ABS kernel.c
     44: 00000000     0 FILE    LOCAL  DEFAULT  ABS memory.c
-    45: c0104500   166 FUNC    LOCAL  DEFAULT    1 allocate_new_page
-    46: c0115020     8 OBJECT  LOCAL  DEFAULT    9 l_allocated
-    47: c0115010     8 OBJECT  LOCAL  DEFAULT    9 l_warningCount
-    48: c011502c     4 OBJECT  LOCAL  DEFAULT    9 l_memRoot
-    49: c0115018     8 OBJECT  LOCAL  DEFAULT    9 l_inuse
-    50: c0115008     8 OBJECT  LOCAL  DEFAULT    9 l_errorCount
-    51: c0115000     8 OBJECT  LOCAL  DEFAULT    9 l_possibleOverruns
-    52: c0115028     4 OBJECT  LOCAL  DEFAULT    9 l_bestBet
+    45: c0104440   166 FUNC    LOCAL  DEFAULT    1 allocate_new_page
+    46: c0116020     8 OBJECT  LOCAL  DEFAULT    9 l_allocated
+    47: c0116010     8 OBJECT  LOCAL  DEFAULT    9 l_warningCount
+    48: c011602c     4 OBJECT  LOCAL  DEFAULT    9 l_memRoot
+    49: c0116018     8 OBJECT  LOCAL  DEFAULT    9 l_inuse
+    50: c0116008     8 OBJECT  LOCAL  DEFAULT    9 l_errorCount
+    51: c0116000     8 OBJECT  LOCAL  DEFAULT    9 l_possibleOverruns
+    52: c0116028     4 OBJECT  LOCAL  DEFAULT    9 l_bestBet
     53: c010741c    17 OBJECT  LOCAL  DEFAULT    2 __FUNCTION__.0
     54: 00000000     0 FILE    LOCAL  DEFAULT  ABS modules.c
     55: c0107430    22 OBJECT  LOCAL  DEFAULT    2 __FUNCTION__.0
@@ -136,234 +136,235 @@ Symbol table '.symtab' contains 295 entries:
     63: 00000000     0 FILE    LOCAL  DEFAULT  ABS read.c
     64: 00000000     0 FILE    LOCAL  DEFAULT  ABS sched_yield.c
     65: 00000000     0 FILE    LOCAL  DEFAULT  ABS serial.c
-    66: 00000000     0 FILE    LOCAL  DEFAULT  ABS syscall.c
-    67: 00000000     0 FILE    LOCAL  DEFAULT  ABS terminal.c
-    68: c010749c    10 OBJECT  LOCAL  DEFAULT    2 CSWTCH.43
-    69: c0107494     8 OBJECT  LOCAL  DEFAULT    2 CSWTCH.44
-    70: 00000000     0 FILE    LOCAL  DEFAULT  ABS vga.c
-    71: 00000000     0 FILE    LOCAL  DEFAULT  ABS vv_list.c
-    72: c0109f28     0 NOTYPE  GLOBAL DEFAULT    7 .vvs_app_gamma_end
-    73: c0101e70    55 FUNC    GLOBAL DEFAULT    1 kdebug_add_symbol
-    74: c0102350     6 FUNC    GLOBAL DEFAULT    1 get_profile_info[...]
-    75: c0101cd0    37 FUNC    GLOBAL DEFAULT    1 strcpy
-    76: c0102e7b     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x23
-    77: c0101890    16 FUNC    GLOBAL DEFAULT    1 _putchar
-    78: c0104ec0   426 FUNC    GLOBAL DEFAULT    1 krealloc
-    79: c0106ac0    54 FUNC    GLOBAL DEFAULT    1 vv_list_iterate
-    80: c01154c0 12288 OBJECT  GLOBAL DEFAULT    9 proc
-    81: c0106060    13 FUNC    GLOBAL DEFAULT    1 serial_set_defau[...]
-    82: c01033a2     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_7
-    83: c0118504     4 OBJECT  GLOBAL DEFAULT    9 term_current_column
-    84: c01094f4     0 NOTYPE  GLOBAL DEFAULT    7 .vvs_app_beta_end
-    85: c0105e10    46 FUNC    GLOBAL DEFAULT    1 process_test_a
-    86: c0101e40    14 FUNC    GLOBAL DEFAULT    1 stack_trace_test[...]
-    87: c01030b5     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x2D
-    88: c0102a90   162 FUNC    GLOBAL DEFAULT    1 elf_find_dynstr_tab
-    89: c0101820    32 FUNC    GLOBAL DEFAULT    1 vprintf_
-    90: c0106600    61 FUNC    GLOBAL DEFAULT    1 term_put_string
-    91: c0106160   103 FUNC    GLOBAL DEFAULT    1 syscall
-    92: c0106270     8 FUNC    GLOBAL DEFAULT    1 term_set_color
-    93: c0105680     1 FUNC    GLOBAL DEFAULT    1 multiboot_echo_t[...]
-    94: c0105120    26 FUNC    GLOBAL DEFAULT    1 liballoc_unlock
-    95: c0105f60   154 FUNC    GLOBAL DEFAULT    1 initalize_serial
-    96: c01184fc     4 OBJECT  GLOBAL DEFAULT    9 term_buffer
-    97: c0101ec0    80 FUNC    GLOBAL DEFAULT    1 kdebug_get_funct[...]
-    98: c0102930   162 FUNC    GLOBAL DEFAULT    1 elf_find_sym_strtab
-    99: c0105cd0   310 FUNC    GLOBAL DEFAULT    1 switch_next_process
-   100: c0102640   471 FUNC    GLOBAL DEFAULT    1 elf_initalize
-   101: c01035c8     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_19
-   102: c0102f26     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x26
-   103: c0103127     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x2F
-   104: c0105600   111 FUNC    GLOBAL DEFAULT    1 multiboot_initalize
-   105: c0104110     6 FUNC    GLOBAL DEFAULT    1 get_timer_counter
-   106: c0104200    78 FUNC    GLOBAL DEFAULT    1 interrupt_mask_irq
-   107: c01019b0   336 FUNC    GLOBAL DEFAULT    1 ata_initalize
-   108: c01108c0     6 OBJECT  GLOBAL DEFAULT    9 sIDTR
-   109: c0103532     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_16
-   110: c0106640    61 FUNC    GLOBAL DEFAULT    1 term_write_string
-   111: c0110060    76 OBJECT  GLOBAL DEFAULT    9 new_post_interru[...]
-   112: c01184d8     4 OBJECT  GLOBAL DEFAULT    9 capture_i
-   113: c0101ca0    43 FUNC    GLOBAL DEFAULT    1 memcpy
-   114: c01045b0   233 FUNC    GLOBAL DEFAULT    1 liballoc_dump
-   115: c0104d00   396 FUNC    GLOBAL DEFAULT    1 kfree
-   116: c0102e09     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x21
-   117: c010a020   512 OBJECT  GLOBAL DEFAULT    9 primary_status
-   118: c0104250   110 FUNC    GLOBAL DEFAULT    1 interrupt_unmask_irq
-   119: c0105e40    46 FUNC    GLOBAL DEFAULT    1 process_test_b
-   120: c010307c     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x2C
-   121: c0103199     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x31
-   122: c0102570   198 FUNC    GLOBAL DEFAULT    1 debugf_stack_trace
-   123: c010349c     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_12
-   124: c0115040     4 OBJECT  GLOBAL DEFAULT    9 mb_magic
-   125: c0106680    13 FUNC    GLOBAL DEFAULT    1 set_debug_output
-   126: c01033d4     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_8
-   127: c01032a8     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_2
-   128: c01017d0    33 FUNC    GLOBAL DEFAULT    1 sprintf_
-   129: c01041b0    78 FUNC    GLOBAL DEFAULT    1 add_interrupt
-   130: c01100ac     4 OBJECT  GLOBAL DEFAULT    9 timer_counter
-   131: c010c000     0 NOTYPE  GLOBAL DEFAULT    9 boot_page_table
-   132: c0105690   460 FUNC    GLOBAL DEFAULT    1 pci_initalize
-   133: c0106000    81 FUNC    GLOBAL DEFAULT    1 serial_setup_port
-   134: c0101bc0   216 FUNC    GLOBAL DEFAULT    1 __udivmoddi4
-   135: c010807a     1 OBJECT  GLOBAL DEFAULT    7 can_switch
-   136: c010808c     0 NOTYPE  GLOBAL DEFAULT    7 .vvs_app_alpha_start
-   137: c0108ac0     0 NOTYPE  GLOBAL DEFAULT    7 .vvs_app_alpha_end
-   138: c0103276     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_1
-   139: c0108084     4 OBJECT  GLOBAL DEFAULT    7 VGA_HEIGHT
-   140: c0101eb0     6 FUNC    GLOBAL DEFAULT    1 kdebug_get_symbo[...]
-   141: c01040e0    33 FUNC    GLOBAL DEFAULT    1 replace_stack_on[...]
-   142: c0101f60    83 FUNC    GLOBAL DEFAULT    1 kdebug_get_symbo[...]
-   143: c0106820   662 FUNC    GLOBAL DEFAULT    1 main_vv_list
-   144: c01184c8     4 OBJECT  GLOBAL DEFAULT    9 proc_current
-   145: c0102eb4     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x24
-   146: c01029e0   162 FUNC    GLOBAL DEFAULT    1 elf_find_dynsym_tab
-   147: c0106700    35 FUNC    GLOBAL DEFAULT    1 vv_list_initalize
-   148: c0101dc0   104 FUNC    GLOBAL DEFAULT    1 hex2int
-   149: c01184d4     4 OBJECT  GLOBAL DEFAULT    9 y_start
-   150: c0104440   192 FUNC    GLOBAL DEFAULT    1 page_allocate
-   151: c0115034     4 OBJECT  GLOBAL DEFAULT    9 num_modules
-   152: c01028e0    70 FUNC    GLOBAL DEFAULT    1 elf_find_symtab
-   153: c0101840    32 FUNC    GLOBAL DEFAULT    1 vsnprintf_
-   154: c0105100    24 FUNC    GLOBAL DEFAULT    1 liballoc_lock
-   155: c011c510     0 NOTYPE  GLOBAL DEFAULT    9 _kernel_end
-   156: c01100c0  2048 OBJECT  GLOBAL DEFAULT    9 IDT
-   157: c0108088     4 OBJECT  GLOBAL DEFAULT    7 VGA_WIDTH
-   158: c0108ac0     0 NOTYPE  GLOBAL DEFAULT    7 .vvs_app_beta_start
-   159: c0104120    30 FUNC    GLOBAL DEFAULT    1 load_idtr
-   160: c0115030     4 OBJECT  GLOBAL DEFAULT    9 modules
-   161: c0102290    78 FUNC    GLOBAL DEFAULT    1 k_log
-   162: c01058b0    93 FUNC    GLOBAL DEFAULT    1 pci_read_header
-   163: c0105910   110 FUNC    GLOBAL DEFAULT    1 pci_get_header_b[...]
-   164: c01042c0   151 FUNC    GLOBAL DEFAULT    1 kernel_main
-   165: c0101e30    14 FUNC    GLOBAL DEFAULT    1 stack_trace_test[...]
-   166: c0104370     1 FUNC    GLOBAL DEFAULT    1 write
-   167: c01018a7     0 NOTYPE  GLOBAL DEFAULT    1 process_test_alp[...]
-   168: c0101860    45 FUNC    GLOBAL DEFAULT    1 fctprintf
-   169: c01065b0    65 FUNC    GLOBAL DEFAULT    1 term_clear_last_char
-   170: c0110040     1 OBJECT  GLOBAL DEFAULT    9 use_new_post_int[...]
-   171: c0103500     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_14
-   172: c01024b0    68 FUNC    GLOBAL DEFAULT    1 strcat
-   173: c01030ee     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x2E
-   174: c01184cc     4 OBJECT  GLOBAL DEFAULT    9 default_port
-   175: c0102300    38 FUNC    GLOBAL DEFAULT    1 profile_start
-   176: c0108060    26 OBJECT  GLOBAL DEFAULT    7 kdebug_symbol_ca[...]
-   177: c01066c0    51 FUNC    GLOBAL DEFAULT    1 my_list_iterator
-   178: c0103600  2008 FUNC    GLOBAL DEFAULT    1 interrupts_initalize
-   179: c01184e0    25 OBJECT  GLOBAL DEFAULT    9 ansi_capture
-   180: c0105670     6 FUNC    GLOBAL DEFAULT    1 get_multiboot_header
-   181: c0103370     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_6
-   182: c0109f28     0 NOTYPE  GLOBAL DEFAULT    7 module_data_end
-   183: c0103406     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_9
-   184: c0102fd1     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x29
-   185: c0102500   102 FUNC    GLOBAL DEFAULT    1 strstr
-   186: c010346a     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_11
-   187: c0105450   428 FUNC    GLOBAL DEFAULT    1 modules_initalize
-   188: c0115060   120 OBJECT  GLOBAL DEFAULT    9 multiboot_header
-   189: c0105e70    81 FUNC    GLOBAL DEFAULT    1 read
-   190: c01100b4     1 OBJECT  GLOBAL DEFAULT    9 gpf_fired
-   191: c0102dd0     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x20
-   192: c01100b5     1 OBJECT  GLOBAL DEFAULT    9 debug_interrupts
-   193: c0105140     5 FUNC    GLOBAL DEFAULT    1 liballoc_alloc
-   194: c0102c20    68 FUNC    GLOBAL DEFAULT    1 elf_get_sym_name[...]
-   195: c01062c0   749 FUNC    GLOBAL DEFAULT    1 term_put_char
-   196: c010a220     1 OBJECT  GLOBAL DEFAULT    9 primary_ready
-   197: c0102480    42 FUNC    GLOBAL DEFAULT    1 profile_test
-   198: c0103596     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_18
-   199: c0102f5f     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x27
-   200: c0103043     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x2B
-   201: c01043d0   108 FUNC    GLOBAL DEFAULT    1 page_map
-   202: c0104a70   337 FUNC    GLOBAL DEFAULT    1 memory_initalize
-   203: c01061d0   157 FUNC    GLOBAL DEFAULT    1 term_initalize
-   204: c0103de0   762 FUNC    GLOBAL DEFAULT    1 interrupt_defaul[...]
-   205: c0103244     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0
-   206: c0108080     4 OBJECT  GLOBAL DEFAULT    7 phsyical_memory_top
-   207: c010808c     0 NOTYPE  GLOBAL DEFAULT    7 module_data_start
-   208: c0105b30   378 FUNC    GLOBAL DEFAULT    1 add_process
-   209: c0103160     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x30
-   210: c01031d2     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x32
-   211: c0102820   108 FUNC    GLOBAL DEFAULT    1 elf_load_program[...]
-   212: c01060a0    42 FUNC    GLOBAL DEFAULT    1 serial_read_port
-   213: c0102c70   350 FUNC    GLOBAL DEFAULT    1 intel8254_initalize
-   214: c0114000  4096 OBJECT  GLOBAL DEFAULT    9 second_page_table
-   215: c01067b0   111 FUNC    GLOBAL DEFAULT    1 vv_list_remove
-   216: c0105860    68 FUNC    GLOBAL DEFAULT    1 pci_config_read
-   217: c0105070   131 FUNC    WEAK   DEFAULT    1 memset
-   218: c010300a     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x2A
-   219: c01022e0    22 FUNC    GLOBAL DEFAULT    1 peek_char
-   220: c0108000     0 NOTYPE  GLOBAL DEFAULT    7 GDTR
-   221: c0102e42     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x22
-   222: c0105160   717 FUNC    GLOBAL DEFAULT    1 load_module_elf_image
-   223: c01018a8     0 FUNC    GLOBAL DEFAULT    1 process_test_beta
-   224: c01150e0     4 OBJECT  GLOBAL DEFAULT    9 pci_devices_top
-   225: c0106730   119 FUNC    GLOBAL DEFAULT    1 vv_list_append
-   226: c0101e50    14 FUNC    GLOBAL DEFAULT    1 stack_trace_test[...]
-   227: c010d000    12 OBJECT  GLOBAL DEFAULT    9 profile_from_lat[...]
-   228: c0104360     1 FUNC    GLOBAL DEFAULT    1 register_io_device
-   229: c0101b95     0 NOTYPE  GLOBAL DEFAULT    1 asm_refresh_cr3
-   230: c0105f00    87 FUNC    GLOBAL DEFAULT    1 syscall_sched_yield
-   231: c0105ed0     3 FUNC    GLOBAL DEFAULT    1 syscall_read
-   232: c0101b00   156 FUNC    GLOBAL DEFAULT    1 _asm_kernel_start
-   233: c0104bd0   291 FUNC    GLOBAL DEFAULT    1 memory_test
-   234: c01018b0   241 FUNC    GLOBAL DEFAULT    1 ata_identify
-   235: c0101d00    76 FUNC    GLOBAL DEFAULT    1 strcmp
-   236: c0106690    43 FUNC    GLOBAL DEFAULT    1 write_to_serial_port
-   237: c0118508     4 OBJECT  GLOBAL DEFAULT    9 term_current_row
-   238: c01032da     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_3
-   239: c0101800    31 FUNC    GLOBAL DEFAULT    1 snprintf_
-   240: c0108040    32 OBJECT  GLOBAL DEFAULT    7 sys_text_arr
-   241: c0105150     3 FUNC    GLOBAL DEFAULT    1 liballoc_free
-   242: c0104140   103 FUNC    GLOBAL DEFAULT    1 remap_pic
-   243: c010b000     0 NOTYPE  GLOBAL DEFAULT    9 boot_page_directory
-   244: c01184c4     4 OBJECT  GLOBAL DEFAULT    9 proc_last
-   245: c0106070    47 FUNC    GLOBAL DEFAULT    1 serial_write_port
-   246: c0115100   960 OBJECT  GLOBAL DEFAULT    9 pci_devices
-   247: c0105cb0    17 FUNC    GLOBAL DEFAULT    1 get_current_process
-   248: c01184dc     1 OBJECT  GLOBAL DEFAULT    9 term_capture_ans[...]
-   249: c0110020     4 OBJECT  GLOBAL DEFAULT    9 kernel_symbol_top
-   250: c010320b     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x99
-   251: c0102330    29 FUNC    GLOBAL DEFAULT    1 profile_stop
-   252: c010807c     4 OBJECT  GLOBAL DEFAULT    7 kernel_virtual_m[...]
-   253: c0103564     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_17
-   254: c010333e     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_5
-   255: c01018af     0 NOTYPE  GLOBAL DEFAULT    1 process_test_beta_end
-   256: c01017a0    33 FUNC    GLOBAL DEFAULT    1 printf_
-   257: c0101e60    14 FUNC    GLOBAL DEFAULT    1 stack_trace_test[...]
-   258: c0102b40   162 FUNC    GLOBAL DEFAULT    1 elf_find_got_plt
-   259: c01034ce     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_13
-   260: c0102f98     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x28
-   261: c0101fc0   706 FUNC    GLOBAL DEFAULT    1 kdebug_peek_at
-   262: c0118500     1 OBJECT  GLOBAL DEFAULT    9 term_current_color
-   263: c01046a0   962 FUNC    GLOBAL DEFAULT    1 kmalloc
-   264: c01184c0     4 OBJECT  GLOBAL DEFAULT    9 process_switch_c[...]
-   265: c01060d0   139 FUNC    GLOBAL DEFAULT    1 syscall_handler
-   266: c0105ae0    68 FUNC    GLOBAL DEFAULT    1 setup_kernel_process
-   267: c0103438     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_10
-   268: c0101d50    97 FUNC    GLOBAL DEFAULT    1 atoi
-   269: c0102890    70 FUNC    GLOBAL DEFAULT    1 elf_find_rel_plt
-   270: c010a000     4 OBJECT  GLOBAL DEFAULT    9 sector_read_buffer
-   271: c010d020 12288 OBJECT  GLOBAL DEFAULT    9 kernel_symbols
-   272: c01100b0     4 OBJECT  GLOBAL DEFAULT    9 timer_var
-   273: c010330c     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_4
-   274: c01018a0     0 FUNC    GLOBAL DEFAULT    1 process_test_alpha
-   275: c0108006     0 NOTYPE  GLOBAL DEFAULT    7 GDT
-   276: c0105430    17 FUNC    GLOBAL DEFAULT    1 load_module
-   277: c01100b7     1 OBJECT  GLOBAL DEFAULT    9 pic1_irq_mask
-   278: c0106280    50 FUNC    GLOBAL DEFAULT    1 term_put_char_at
-   279: c0102bf0    44 FUNC    GLOBAL DEFAULT    1 elf_get_section_name
-   280: c0101ba0    27 FUNC    GLOBAL DEFAULT    1 strlen
-   281: c0100000     0 NOTYPE  GLOBAL DEFAULT    1 _kernel_start
-   282: c0112000  4096 OBJECT  GLOBAL DEFAULT    9 process_pt
-   283: c01184d0     1 OBJECT  GLOBAL DEFAULT    9 is_debug_output
-   284: c0101f10    76 FUNC    GLOBAL DEFAULT    1 kdebug_get_symbol
-   285: c01100b6     1 OBJECT  GLOBAL DEFAULT    9 pic2_irq_mask
-   286: c0111000     1 OBJECT  GLOBAL DEFAULT    9 liballoc_is_locked
-   287: c0104e90    47 FUNC    GLOBAL DEFAULT    1 kcalloc
-   288: c0105ee0    21 FUNC    GLOBAL DEFAULT    1 sched_yield
-   289: c0104380    65 FUNC    GLOBAL DEFAULT    1 set_process_pde
-   290: c0102360   286 FUNC    GLOBAL DEFAULT    1 profile_test_run
-   291: c0105980   343 FUNC    GLOBAL DEFAULT    1 process_initalize
-   292: c01094f4     0 NOTYPE  GLOBAL DEFAULT    7 .vvs_app_gamma_start
-   293: c0102eed     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x25
-   294: c0113000  4096 OBJECT  GLOBAL DEFAULT    9 process_pd
+    66: 00000000     0 FILE    LOCAL  DEFAULT  ABS string.c
+    67: 00000000     0 FILE    LOCAL  DEFAULT  ABS syscall.c
+    68: 00000000     0 FILE    LOCAL  DEFAULT  ABS terminal.c
+    69: c010749c    10 OBJECT  LOCAL  DEFAULT    2 CSWTCH.43
+    70: c0107494     8 OBJECT  LOCAL  DEFAULT    2 CSWTCH.44
+    71: 00000000     0 FILE    LOCAL  DEFAULT  ABS vga.c
+    72: 00000000     0 FILE    LOCAL  DEFAULT  ABS vv_list.c
+    73: c010a05c     0 NOTYPE  GLOBAL DEFAULT    7 .vvs_app_gamma_end
+    74: c0101e70    55 FUNC    GLOBAL DEFAULT    1 kdebug_add_symbol
+    75: c0102350     6 FUNC    GLOBAL DEFAULT    1 get_profile_info[...]
+    76: c0101cd0    37 FUNC    GLOBAL DEFAULT    1 strcpy
+    77: c0102dbb     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x23
+    78: c0101890    16 FUNC    GLOBAL DEFAULT    1 _putchar
+    79: c0104e00   426 FUNC    GLOBAL DEFAULT    1 krealloc
+    80: c0106ad0    54 FUNC    GLOBAL DEFAULT    1 vv_list_iterate
+    81: c01164c0 12288 OBJECT  GLOBAL DEFAULT    9 proc
+    82: c0105fb0    13 FUNC    GLOBAL DEFAULT    1 serial_set_defau[...]
+    83: c01032e2     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_7
+    84: c0119504     4 OBJECT  GLOBAL DEFAULT    9 term_current_column
+    85: c0109628     0 NOTYPE  GLOBAL DEFAULT    7 .vvs_app_beta_end
+    86: c0105d60    46 FUNC    GLOBAL DEFAULT    1 process_test_a
+    87: c0101e40    14 FUNC    GLOBAL DEFAULT    1 stack_trace_test[...]
+    88: c0102ff5     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x2D
+    89: c01029d0   162 FUNC    GLOBAL DEFAULT    1 elf_find_dynstr_tab
+    90: c0101820    32 FUNC    GLOBAL DEFAULT    1 vprintf_
+    91: c0106610    61 FUNC    GLOBAL DEFAULT    1 term_put_string
+    92: c0106170   103 FUNC    GLOBAL DEFAULT    1 syscall
+    93: c0106280     8 FUNC    GLOBAL DEFAULT    1 term_set_color
+    94: c01055d0     1 FUNC    GLOBAL DEFAULT    1 multiboot_echo_t[...]
+    95: c0105060    26 FUNC    GLOBAL DEFAULT    1 liballoc_unlock
+    96: c0105eb0   154 FUNC    GLOBAL DEFAULT    1 initalize_serial
+    97: c01194fc     4 OBJECT  GLOBAL DEFAULT    9 term_buffer
+    98: c0101ec0    80 FUNC    GLOBAL DEFAULT    1 kdebug_get_funct[...]
+    99: c0102870   162 FUNC    GLOBAL DEFAULT    1 elf_find_sym_strtab
+   100: c0105c20   310 FUNC    GLOBAL DEFAULT    1 switch_next_process
+   101: c0102580   471 FUNC    GLOBAL DEFAULT    1 elf_initalize
+   102: c0103508     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_19
+   103: c0102e66     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x26
+   104: c0103067     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x2F
+   105: c0105550   111 FUNC    GLOBAL DEFAULT    1 multiboot_initalize
+   106: c0104050     6 FUNC    GLOBAL DEFAULT    1 get_timer_counter
+   107: c0104140    78 FUNC    GLOBAL DEFAULT    1 interrupt_mask_irq
+   108: c01019b0   336 FUNC    GLOBAL DEFAULT    1 ata_initalize
+   109: c01118c0     6 OBJECT  GLOBAL DEFAULT    9 sIDTR
+   110: c0103472     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_16
+   111: c0106650    61 FUNC    GLOBAL DEFAULT    1 term_write_string
+   112: c0111060    76 OBJECT  GLOBAL DEFAULT    9 new_post_interru[...]
+   113: c01194d8     4 OBJECT  GLOBAL DEFAULT    9 capture_i
+   114: c0101ca0    43 FUNC    GLOBAL DEFAULT    1 memcpy
+   115: c01044f0   233 FUNC    GLOBAL DEFAULT    1 liballoc_dump
+   116: c0104c40   396 FUNC    GLOBAL DEFAULT    1 kfree
+   117: c0102d49     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x21
+   118: c010b020   512 OBJECT  GLOBAL DEFAULT    9 primary_status
+   119: c0104190   110 FUNC    GLOBAL DEFAULT    1 interrupt_unmask_irq
+   120: c0105d90    46 FUNC    GLOBAL DEFAULT    1 process_test_b
+   121: c0102fbc     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x2C
+   122: c01030d9     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x31
+   123: c01024b0   198 FUNC    GLOBAL DEFAULT    1 debugf_stack_trace
+   124: c01033dc     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_12
+   125: c0116040     4 OBJECT  GLOBAL DEFAULT    9 mb_magic
+   126: c0106690    13 FUNC    GLOBAL DEFAULT    1 set_debug_output
+   127: c0103314     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_8
+   128: c01031e8     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_2
+   129: c01017d0    33 FUNC    GLOBAL DEFAULT    1 sprintf_
+   130: c01040f0    78 FUNC    GLOBAL DEFAULT    1 add_interrupt
+   131: c01110ac     4 OBJECT  GLOBAL DEFAULT    9 timer_counter
+   132: c010d000     0 NOTYPE  GLOBAL DEFAULT    9 boot_page_table
+   133: c01055e0   460 FUNC    GLOBAL DEFAULT    1 pci_initalize
+   134: c0105f50    81 FUNC    GLOBAL DEFAULT    1 serial_setup_port
+   135: c0101bc0   216 FUNC    GLOBAL DEFAULT    1 __udivmoddi4
+   136: c010807a     1 OBJECT  GLOBAL DEFAULT    7 can_switch
+   137: c010808c     0 NOTYPE  GLOBAL DEFAULT    7 .vvs_app_alpha_start
+   138: c0108bf4     0 NOTYPE  GLOBAL DEFAULT    7 .vvs_app_alpha_end
+   139: c01031b6     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_1
+   140: c0108084     4 OBJECT  GLOBAL DEFAULT    7 VGA_HEIGHT
+   141: c0101eb0     6 FUNC    GLOBAL DEFAULT    1 kdebug_get_symbo[...]
+   142: c0104020    33 FUNC    GLOBAL DEFAULT    1 replace_stack_on[...]
+   143: c0101f60    83 FUNC    GLOBAL DEFAULT    1 kdebug_get_symbo[...]
+   144: c0106830   662 FUNC    GLOBAL DEFAULT    1 main_vv_list
+   145: c01194c8     4 OBJECT  GLOBAL DEFAULT    9 proc_current
+   146: c0102df4     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x24
+   147: c0102920   162 FUNC    GLOBAL DEFAULT    1 elf_find_dynsym_tab
+   148: c0106710    35 FUNC    GLOBAL DEFAULT    1 vv_list_initalize
+   149: c0101dc0   104 FUNC    GLOBAL DEFAULT    1 hex2int
+   150: c01194d4     4 OBJECT  GLOBAL DEFAULT    9 y_start
+   151: c0104380   192 FUNC    GLOBAL DEFAULT    1 page_allocate
+   152: c0116034     4 OBJECT  GLOBAL DEFAULT    9 num_modules
+   153: c0102820    70 FUNC    GLOBAL DEFAULT    1 elf_find_symtab
+   154: c0101840    32 FUNC    GLOBAL DEFAULT    1 vsnprintf_
+   155: c0105040    24 FUNC    GLOBAL DEFAULT    1 liballoc_lock
+   156: c011d510     0 NOTYPE  GLOBAL DEFAULT    9 _kernel_end
+   157: c01110c0  2048 OBJECT  GLOBAL DEFAULT    9 IDT
+   158: c0108088     4 OBJECT  GLOBAL DEFAULT    7 VGA_WIDTH
+   159: c0108bf4     0 NOTYPE  GLOBAL DEFAULT    7 .vvs_app_beta_start
+   160: c0104060    30 FUNC    GLOBAL DEFAULT    1 load_idtr
+   161: c0116030     4 OBJECT  GLOBAL DEFAULT    9 modules
+   162: c0102290    78 FUNC    GLOBAL DEFAULT    1 k_log
+   163: c0105800    93 FUNC    GLOBAL DEFAULT    1 pci_read_header
+   164: c0105860   110 FUNC    GLOBAL DEFAULT    1 pci_get_header_b[...]
+   165: c0104200   151 FUNC    GLOBAL DEFAULT    1 kernel_main
+   166: c0101e30    14 FUNC    GLOBAL DEFAULT    1 stack_trace_test[...]
+   167: c01042b0     1 FUNC    GLOBAL DEFAULT    1 write
+   168: c01018a7     0 NOTYPE  GLOBAL DEFAULT    1 process_test_alp[...]
+   169: c0101860    45 FUNC    GLOBAL DEFAULT    1 fctprintf
+   170: c01065c0    65 FUNC    GLOBAL DEFAULT    1 term_clear_last_char
+   171: c0111040     1 OBJECT  GLOBAL DEFAULT    9 use_new_post_int[...]
+   172: c0103440     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_14
+   173: c0106020    68 FUNC    GLOBAL DEFAULT    1 strcat
+   174: c010302e     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x2E
+   175: c01194cc     4 OBJECT  GLOBAL DEFAULT    9 default_port
+   176: c0102300    38 FUNC    GLOBAL DEFAULT    1 profile_start
+   177: c0108060    26 OBJECT  GLOBAL DEFAULT    7 kdebug_symbol_ca[...]
+   178: c01066d0    51 FUNC    GLOBAL DEFAULT    1 my_list_iterator
+   179: c0103540  2008 FUNC    GLOBAL DEFAULT    1 interrupts_initalize
+   180: c01194e0    25 OBJECT  GLOBAL DEFAULT    9 ansi_capture
+   181: c01055c0     6 FUNC    GLOBAL DEFAULT    1 get_multiboot_header
+   182: c01032b0     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_6
+   183: c010a05c     0 NOTYPE  GLOBAL DEFAULT    7 module_data_end
+   184: c0103346     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_9
+   185: c0102f11     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x29
+   186: c0106070   102 FUNC    GLOBAL DEFAULT    1 strstr
+   187: c01033aa     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_11
+   188: c0105390   444 FUNC    GLOBAL DEFAULT    1 modules_initalize
+   189: c0116060   120 OBJECT  GLOBAL DEFAULT    9 multiboot_header
+   190: c0105dc0    81 FUNC    GLOBAL DEFAULT    1 read
+   191: c01110b4     1 OBJECT  GLOBAL DEFAULT    9 gpf_fired
+   192: c0102d10     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x20
+   193: c01110b5     1 OBJECT  GLOBAL DEFAULT    9 debug_interrupts
+   194: c0105080     5 FUNC    GLOBAL DEFAULT    1 liballoc_alloc
+   195: c0102b60    68 FUNC    GLOBAL DEFAULT    1 elf_get_sym_name[...]
+   196: c01062d0   749 FUNC    GLOBAL DEFAULT    1 term_put_char
+   197: c010b220     1 OBJECT  GLOBAL DEFAULT    9 primary_ready
+   198: c0102480    42 FUNC    GLOBAL DEFAULT    1 profile_test
+   199: c01034d6     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_18
+   200: c0102e9f     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x27
+   201: c0102f83     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x2B
+   202: c0104310   108 FUNC    GLOBAL DEFAULT    1 page_map
+   203: c01049b0   337 FUNC    GLOBAL DEFAULT    1 memory_initalize
+   204: c01061e0   157 FUNC    GLOBAL DEFAULT    1 term_initalize
+   205: c0103d20   762 FUNC    GLOBAL DEFAULT    1 interrupt_defaul[...]
+   206: c0103184     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0
+   207: c0108080     4 OBJECT  GLOBAL DEFAULT    7 phsyical_memory_top
+   208: c010808c     0 NOTYPE  GLOBAL DEFAULT    7 module_data_start
+   209: c0105a80   378 FUNC    GLOBAL DEFAULT    1 add_process
+   210: c01030a0     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x30
+   211: c0103112     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x32
+   212: c0102760   108 FUNC    GLOBAL DEFAULT    1 elf_load_program[...]
+   213: c0105ff0    42 FUNC    GLOBAL DEFAULT    1 serial_read_port
+   214: c0102bb0   350 FUNC    GLOBAL DEFAULT    1 intel8254_initalize
+   215: c0115000  4096 OBJECT  GLOBAL DEFAULT    9 second_page_table
+   216: c01067c0   111 FUNC    GLOBAL DEFAULT    1 vv_list_remove
+   217: c01057b0    68 FUNC    GLOBAL DEFAULT    1 pci_config_read
+   218: c0104fb0   131 FUNC    WEAK   DEFAULT    1 memset
+   219: c0102f4a     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x2A
+   220: c01022e0    22 FUNC    GLOBAL DEFAULT    1 peek_char
+   221: c0108000     0 NOTYPE  GLOBAL DEFAULT    7 GDTR
+   222: c0102d82     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x22
+   223: c01050a0   717 FUNC    GLOBAL DEFAULT    1 load_module_elf_image
+   224: c01018a8     0 FUNC    GLOBAL DEFAULT    1 process_test_beta
+   225: c01160e0     4 OBJECT  GLOBAL DEFAULT    9 pci_devices_top
+   226: c0106740   119 FUNC    GLOBAL DEFAULT    1 vv_list_append
+   227: c0101e50    14 FUNC    GLOBAL DEFAULT    1 stack_trace_test[...]
+   228: c010e000    12 OBJECT  GLOBAL DEFAULT    9 profile_from_lat[...]
+   229: c01042a0     1 FUNC    GLOBAL DEFAULT    1 register_io_device
+   230: c0101b95     0 NOTYPE  GLOBAL DEFAULT    1 asm_refresh_cr3
+   231: c0105e50    87 FUNC    GLOBAL DEFAULT    1 syscall_sched_yield
+   232: c0105e20     3 FUNC    GLOBAL DEFAULT    1 syscall_read
+   233: c0101b00   156 FUNC    GLOBAL DEFAULT    1 _asm_kernel_start
+   234: c0104b10   291 FUNC    GLOBAL DEFAULT    1 memory_test
+   235: c01018b0   241 FUNC    GLOBAL DEFAULT    1 ata_identify
+   236: c0101d00    76 FUNC    GLOBAL DEFAULT    1 strcmp
+   237: c01066a0    43 FUNC    GLOBAL DEFAULT    1 write_to_serial_port
+   238: c0119508     4 OBJECT  GLOBAL DEFAULT    9 term_current_row
+   239: c010321a     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_3
+   240: c0101800    31 FUNC    GLOBAL DEFAULT    1 snprintf_
+   241: c0108040    32 OBJECT  GLOBAL DEFAULT    7 sys_text_arr
+   242: c0105090     3 FUNC    GLOBAL DEFAULT    1 liballoc_free
+   243: c0104080   103 FUNC    GLOBAL DEFAULT    1 remap_pic
+   244: c010c000     0 NOTYPE  GLOBAL DEFAULT    9 boot_page_directory
+   245: c01194c4     4 OBJECT  GLOBAL DEFAULT    9 proc_last
+   246: c0105fc0    47 FUNC    GLOBAL DEFAULT    1 serial_write_port
+   247: c0116100   960 OBJECT  GLOBAL DEFAULT    9 pci_devices
+   248: c0105c00    17 FUNC    GLOBAL DEFAULT    1 get_current_process
+   249: c01194dc     1 OBJECT  GLOBAL DEFAULT    9 term_capture_ans[...]
+   250: c0111020     4 OBJECT  GLOBAL DEFAULT    9 kernel_symbol_top
+   251: c010314b     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x99
+   252: c0102330    29 FUNC    GLOBAL DEFAULT    1 profile_stop
+   253: c010807c     4 OBJECT  GLOBAL DEFAULT    7 kernel_virtual_m[...]
+   254: c01034a4     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_17
+   255: c010327e     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_5
+   256: c01018af     0 NOTYPE  GLOBAL DEFAULT    1 process_test_beta_end
+   257: c01017a0    33 FUNC    GLOBAL DEFAULT    1 printf_
+   258: c0101e60    14 FUNC    GLOBAL DEFAULT    1 stack_trace_test[...]
+   259: c0102a80   162 FUNC    GLOBAL DEFAULT    1 elf_find_got_plt
+   260: c010340e     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_13
+   261: c0102ed8     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x28
+   262: c0101fc0   706 FUNC    GLOBAL DEFAULT    1 kdebug_peek_at
+   263: c0119500     1 OBJECT  GLOBAL DEFAULT    9 term_current_color
+   264: c01045e0   962 FUNC    GLOBAL DEFAULT    1 kmalloc
+   265: c01194c0     4 OBJECT  GLOBAL DEFAULT    9 process_switch_c[...]
+   266: c01060e0   139 FUNC    GLOBAL DEFAULT    1 syscall_handler
+   267: c0105a30    68 FUNC    GLOBAL DEFAULT    1 setup_kernel_process
+   268: c0103378     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_10
+   269: c0101d50    97 FUNC    GLOBAL DEFAULT    1 atoi
+   270: c01027d0    70 FUNC    GLOBAL DEFAULT    1 elf_find_rel_plt
+   271: c010b000     4 OBJECT  GLOBAL DEFAULT    9 sector_read_buffer
+   272: c010e020 12288 OBJECT  GLOBAL DEFAULT    9 kernel_symbols
+   273: c01110b0     4 OBJECT  GLOBAL DEFAULT    9 timer_var
+   274: c010324c     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_4
+   275: c01018a0     0 FUNC    GLOBAL DEFAULT    1 process_test_alpha
+   276: c0108006     0 NOTYPE  GLOBAL DEFAULT    7 GDT
+   277: c0105370    17 FUNC    GLOBAL DEFAULT    1 load_module
+   278: c01110b7     1 OBJECT  GLOBAL DEFAULT    9 pic1_irq_mask
+   279: c0106290    50 FUNC    GLOBAL DEFAULT    1 term_put_char_at
+   280: c0102b30    44 FUNC    GLOBAL DEFAULT    1 elf_get_section_name
+   281: c0101ba0    27 FUNC    GLOBAL DEFAULT    1 strlen
+   282: c0100000     0 NOTYPE  GLOBAL DEFAULT    1 _kernel_start
+   283: c0113000  4096 OBJECT  GLOBAL DEFAULT    9 process_pt
+   284: c01194d0     1 OBJECT  GLOBAL DEFAULT    9 is_debug_output
+   285: c0101f10    76 FUNC    GLOBAL DEFAULT    1 kdebug_get_symbol
+   286: c01110b6     1 OBJECT  GLOBAL DEFAULT    9 pic2_irq_mask
+   287: c0112000     1 OBJECT  GLOBAL DEFAULT    9 liballoc_is_locked
+   288: c0104dd0    47 FUNC    GLOBAL DEFAULT    1 kcalloc
+   289: c0105e30    21 FUNC    GLOBAL DEFAULT    1 sched_yield
+   290: c01042c0    65 FUNC    GLOBAL DEFAULT    1 set_process_pde
+   291: c0102360   286 FUNC    GLOBAL DEFAULT    1 profile_test_run
+   292: c01058d0   343 FUNC    GLOBAL DEFAULT    1 process_initalize
+   293: c0109628     0 NOTYPE  GLOBAL DEFAULT    7 .vvs_app_gamma_start
+   294: c0102e2d     0 NOTYPE  GLOBAL DEFAULT    1 interrupt_0x25
+   295: c0114000  4096 OBJECT  GLOBAL DEFAULT    9 process_pd
 
 No version information found in this file.

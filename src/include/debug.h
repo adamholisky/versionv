@@ -63,6 +63,7 @@ typedef struct {
 
 void kdebug_add_symbol( char * name, uint32_t addr, uint32_t size );
 kdebug_symbol * kdebug_get_symbol( char * name );
+kdebug_symbol * kdebug_get_symbol_array( void );
 uint32_t kdebug_get_symbol_addr( char * name );
 char * kdebug_get_function_at( uint32_t addr );
 char * kdebug_peek_at( uint32_t addr );

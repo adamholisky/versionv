@@ -1,6 +1,7 @@
 #include "debug.h"
 #include "interrupts.h"
 #include "bootstrap.h"
+#include "string.h"
 
 uint32_t kernel_symbol_top = 0;
 kdebug_symbol kernel_symbols[ KDEBUG_MAX_SYMBOLS ];
@@ -163,48 +164,6 @@ void profile_test_run( uint32_t num_of_nops ) {
 	debugf( "profile.length = 0x%08X / %d ticks / %d milliseconds\n", test_info->length, test_info->length, (test_info->length * 10) );
 }
 
-char * strcat( char * dest, char * src ) {
-	char *rdest = dest;
-
-    while (*dest)
-      dest++;
-    while (*dest++ = *src++)
-      ;
-    return rdest;
-}
-
-// lifted from apple
-char * strstr(register char *string, char *substring)
-{
-    register char *a, *b;
-
-    /* First scan quickly through the two strings looking for a
-     * single-character match.  When it's found, then compare the
-     * rest of the substring.
-     */
-
-    b = substring;
-    if (*b == 0) {
-	return string;
-    }
-    for ( ; *string != 0; string += 1) {
-	if (*string != *b) {
-	    continue;
-	}
-	a = string;
-	while (1) {
-	    if (*b == 0) {
-		return string;
-	    }
-	    if (*a++ != *b++) {
-		break;
-	    }
-	}
-	b = substring;
-    }
-    return NULL;
-}
-
 void debugf_stack_trace( void ) {
 	stackframe *frame;
 
@@ -214,7 +173,7 @@ void debugf_stack_trace( void ) {
 	
 	for( int i = 0; (frame != NULL) && (i < STACKFRAME_MAX); i++ ) {
 		debugf( "% 2d:    0x%08X %s\n", i+1, frame->eip, kdebug_get_function_at(frame->eip) );
-		frame = frame->ebp;
+		frame = (stackframe *)frame->ebp;
 	}
 }
 

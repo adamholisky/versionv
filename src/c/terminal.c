@@ -5,6 +5,7 @@
 #include "terminal.h"
 #include "bootstrap.h"
 #include "serial.h"
+#include "string.h"
 
 unsigned int term_current_row;
 unsigned int term_current_column;

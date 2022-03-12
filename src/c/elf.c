@@ -6,6 +6,7 @@
 #include "multiboot.h"
 #include "debug.h"
 #include "terminal.h"
+#include "string.h"
 
 void elf_initalize( uint32_t kmain ) {
     log_entry_enter();
@@ -186,7 +187,7 @@ char* elf_get_sym_name_from_index(uint32_t* mem, Elf32_Ehdr* elf_header, uint32_
 	Elf32_Shdr *elf_dynstr_shdr = elf_find_dynstr_tab(mem, elf_header);
     //Elf32_Shdr *elf_str_shdr = (Elf32_Shdr*)(((uint32_t)elf_header + elf_header->e_shoff) + (sizeof(Elf32_Shdr) * elf_header->e_shstrndx));
 
-	Elf32_Sym* elf_sym = (Elf32_Shdr*)(((uint8_t*)mem + elf_sym_shdr->sh_offset) + (sizeof(Elf32_Sym) * index));
+	Elf32_Sym* elf_sym = (Elf32_Sym*)(((uint8_t*)mem + elf_sym_shdr->sh_offset) + (sizeof(Elf32_Sym) * index));
 	//debugf("st_name: %d\n", elf_sym->st_name);
 
 	//kdebug_peek_at( (uint8_t)mem + elf_dynstr_shdr->sh_offset );

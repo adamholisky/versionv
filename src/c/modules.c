@@ -1,17 +1,8 @@
 #include "kernel.h"
+#include "debug.h"
 #include "process.h"
 #include "elf.h"
-
-#define MODULES_MAX 25
-
-typedef struct {
-	uint32_t	elf_object_start_addr;
-	uint32_t	elf_object_size;
-	
-	char		name[25];
-
-	void		*entry;
-} kmodule;
+#include "modules.h"
 
 uint32_t num_modules;
 kmodule *modules;
@@ -76,7 +67,7 @@ void load_module( kmodule *mod ) {
 	#ifdef kdebug_process_loader
 	klog( "Loading %s...\n", mod->name);
 	#endif
-	load_module_elf_image( mod->elf_object_start_addr );
+	load_module_elf_image( (uint32_t *)mod->elf_object_start_addr );
 }
 
 void load_module_elf_image( uint32_t *raw_data_start ) {
@@ -143,7 +134,7 @@ void load_module_elf_image( uint32_t *raw_data_start ) {
         klog("Could not find .got.plt section\n");
     }
 
-	module_proc->entry = elf_header->e_entry;
+	module_proc->entry = (void *)elf_header->e_entry;
 	
     if (rel_plt == NULL) {
 		klog( "rel_pplt is null\n");
@@ -157,7 +148,7 @@ void load_module_elf_image( uint32_t *raw_data_start ) {
 	for(int rel_num = 0; rel_num < (rel_plt->sh_size/4)/2; rel_num++) {
 		Elf32_Rel *elf_rel = (Elf32_Rel*)((uint8_t*)raw_data_start + rel_plt->sh_offset + (rel_num * sizeof(Elf32_Rel)));
 		uint32_t *got_entry = (uint32_t*)(process_space + elf_rel->r_offset);
-		*got_entry = (uint32_t)kdebug_get_symbol_addr( elf_get_sym_name_from_index((uint8_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) );
+		*got_entry = (uint32_t)kdebug_get_symbol_addr( elf_get_sym_name_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) );
 		
 		#ifdef kdebug_process_loader
 		klog( "rel sym: 0x%08X, %X, %s\n", elf_rel->r_offset, ELF32_R_SYM(elf_rel->r_info), elf_get_sym_name_from_index((uint8_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) );
@@ -199,7 +190,7 @@ void load_module_elf_image( uint32_t *raw_data_start ) {
 		debugf( "    module_proc stack virt: 0x%08X\n", module_proc->stack );
 		#endif
 
-		module_proc->stack_eip = module_proc->entry;
+		module_proc->stack_eip = (uint32_t)module_proc->entry;
 
 		add_process( *module_proc );
 }

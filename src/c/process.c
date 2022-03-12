@@ -121,7 +121,7 @@ uint32_t add_process( process p ) {
 	stack_initial.eax = 0;
 	stack_initial._esp = (uint32_t)&stack_initial._esp;
 	// err element not present? TODO fix logic
-	stack_initial.eip = p.entry;
+	stack_initial.eip = (uint32_t)p.entry;
 	stack_initial.cs = 0x08;
 	stack_initial.eflags = 0x202;
 
@@ -140,8 +140,8 @@ uint32_t add_process( process p ) {
 	proc[i].code_start_virt = p.code_start_virt;
 	proc[i].data_start_phys = p.data_start_phys;
 	proc[i].data_start_virt = p.data_start_virt;	
-	proc[i].entry = p.entry;
-	proc[i].stack_eip = p.entry;
+	proc[i].entry = (void *)p.entry;
+	proc[i].stack_eip = (uint32_t)p.entry;
 	proc[i].stack_at_interrupt = p.stack;
 	
 	interrupt_stack * is = (interrupt_stack *)proc[i].stack;
@@ -212,11 +212,7 @@ process * switch_next_process( void ) {
 }
 
 volatile void process_test_a( void ) {
-	void (*deo)(bool) = set_debug_output;
-	void (*pf)(char *) = printf;
-	deo( false );
-	pf( "+" );
-	deo( false );
+	debugf( "+" );
 	sched_yield();
 }
 
