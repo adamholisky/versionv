@@ -20,7 +20,7 @@ VersionV Serial Out
 [process_initalize:15] Enter
 [process_initalize:20] Initalizing processes...
 [process_initalize:31] Process begin tests...
-[process_initalize:82] Exit
+[process_initalize:33] Exit
 [modules_initalize:51] Module found: alpha @ 0xC010808C for 0xB68 bytes
 [modules_initalize:51] Module found: beta @ 0xC0108BF4 for 0xA34 bytes
 [modules_initalize:51] Module found: gamma @ 0xC0109628 for 0xA34 bytes
@@ -33,4 +33,4 @@ Stack Trace
  5:    0xC010427F kernel_main
  6:    0xC0101B95 _asm_kernel_start
 Hello, world from alpha!
-[switch_next_process:207] END. Processes switched over 100,000 times.
+[switch_next_process:158] END. Processes switched over 100,000 times.

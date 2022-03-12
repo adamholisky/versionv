@@ -39,17 +39,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  12 .debug_abbrev 00002e9b  00000000  00000000  00016d64  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 13 .debug_line   0000692f  00000000  00000000  00019bff  2**0
+ 13 .debug_line   00006929  00000000  00000000  00019bff  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_frame  0000151c  00000000  00000000  00020530  2**2
+ 14 .debug_frame  0000151c  00000000  00000000  00020528  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_str    00001d69  00000000  00000000  00021a4c  2**0
+ 15 .debug_str    00001d69  00000000  00000000  00021a44  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_line_str 000002b8  00000000  00000000  000237b5  2**0
+ 16 .debug_line_str 000002b8  00000000  00000000  000237ad  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_loclists 000063d6  00000000  00000000  00023a6d  2**0
+ 17 .debug_loclists 000063d6  00000000  00000000  00023a65  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_rnglists 00000963  00000000  00000000  00029e43  2**0
+ 18 .debug_rnglists 00000963  00000000  00000000  00029e3b  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 SYMBOL TABLE:
 00000000 l    df *ABS*	00000000 boot.o
@@ -7415,7 +7415,7 @@ c01051c0:	83 ec 0c             	sub    $0xc,%esp
 c01051c3:	6a 01                	push   $0x1
 c01051c5:	e8 c6 14 00 00       	call   c0106690 <set_debug_output>
 c01051ca:	83 c4 0c             	add    $0xc,%esp
-c01051cd:	6a 6e                	push   $0x6e
+c01051cd:	6a 6d                	push   $0x6d
 c01051cf:	68 30 74 10 c0       	push   $0xc0107430
 c01051d4:	68 c3 74 10 c0       	push   $0xc01074c3
 c01051d9:	e8 c2 c5 ff ff       	call   c01017a0 <printf_>
@@ -7444,7 +7444,7 @@ c0105223:	89 47 28             	mov    %eax,0x28(%edi)
 c0105226:	6a 01                	push   $0x1
 c0105228:	e8 63 14 00 00       	call   c0106690 <set_debug_output>
 c010522d:	83 c4 0c             	add    $0xc,%esp
-c0105230:	68 8c 00 00 00       	push   $0x8c
+c0105230:	68 8b 00 00 00       	push   $0x8b
 c0105235:	68 30 74 10 c0       	push   $0xc0107430
 c010523a:	68 c3 74 10 c0       	push   $0xc01074c3
 c010523f:	e8 5c c5 ff ff       	call   c01017a0 <printf_>
@@ -7462,7 +7462,7 @@ c0105273:	89 55 e4             	mov    %edx,-0x1c(%ebp)
 c0105276:	6a 01                	push   $0x1
 c0105278:	e8 13 14 00 00       	call   c0106690 <set_debug_output>
 c010527d:	83 c4 0c             	add    $0xc,%esp
-c0105280:	68 86 00 00 00       	push   $0x86
+c0105280:	68 85 00 00 00       	push   $0x85
 c0105285:	68 30 74 10 c0       	push   $0xc0107430
 c010528a:	68 c3 74 10 c0       	push   $0xc01074c3
 c010528f:	e8 0c c5 ff ff       	call   c01017a0 <printf_>
@@ -7479,7 +7479,7 @@ c01052bb:	89 55 e4             	mov    %edx,-0x1c(%ebp)
 c01052be:	6a 01                	push   $0x1
 c01052c0:	e8 cb 13 00 00       	call   c0106690 <set_debug_output>
 c01052c5:	83 c4 0c             	add    $0xc,%esp
-c01052c8:	68 90 00 00 00       	push   $0x90
+c01052c8:	68 8f 00 00 00       	push   $0x8f
 c01052cd:	68 30 74 10 c0       	push   $0xc0107430
 c01052d2:	68 c3 74 10 c0       	push   $0xc01074c3
 c01052d7:	e8 c4 c4 ff ff       	call   c01017a0 <printf_>
@@ -7489,7 +7489,7 @@ c01052e8:	83 ec 0c             	sub    $0xc,%esp
 c01052eb:	6a 01                	push   $0x1
 c01052ed:	e8 9e 13 00 00       	call   c0106690 <set_debug_output>
 c01052f2:	83 c4 0c             	add    $0xc,%esp
-c01052f5:	68 86 00 00 00       	push   $0x86
+c01052f5:	68 85 00 00 00       	push   $0x85
 c01052fa:	68 30 74 10 c0       	push   $0xc0107430
 c01052ff:	68 c3 74 10 c0       	push   $0xc01074c3
 c0105304:	e8 97 c4 ff ff       	call   c01017a0 <printf_>
@@ -7502,7 +7502,7 @@ c0105324:	89 47 28             	mov    %eax,0x28(%edi)
 c0105327:	c7 04 24 01 00 00 00 	movl   $0x1,(%esp)
 c010532e:	e8 5d 13 00 00       	call   c0106690 <set_debug_output>
 c0105333:	83 c4 0c             	add    $0xc,%esp
-c0105336:	68 8c 00 00 00       	push   $0x8c
+c0105336:	68 8b 00 00 00       	push   $0x8b
 c010533b:	68 30 74 10 c0       	push   $0xc0107430
 c0105340:	68 c3 74 10 c0       	push   $0xc01074c3
 c0105345:	e8 56 c4 ff ff       	call   c01017a0 <printf_>
@@ -8023,7 +8023,7 @@ c01059e5:	e8 a6 0c 00 00       	call   c0106690 <set_debug_output>
 c01059ea:	c7 04 24 01 00 00 00 	movl   $0x1,(%esp)
 c01059f1:	e8 9a 0c 00 00       	call   c0106690 <set_debug_output>
 c01059f6:	83 c4 0c             	add    $0xc,%esp
-c01059f9:	6a 52                	push   $0x52
+c01059f9:	6a 21                	push   $0x21
 c01059fb:	68 80 74 10 c0       	push   $0xc0107480
 c0105a00:	68 c3 74 10 c0       	push   $0xc01074c3
 c0105a05:	e8 96 bd ff ff       	call   c01017a0 <printf_>
@@ -8218,7 +8218,7 @@ c0105caf:	83 ec 0c             	sub    $0xc,%esp
 c0105cb2:	6a 01                	push   $0x1
 c0105cb4:	e8 d7 09 00 00       	call   c0106690 <set_debug_output>
 c0105cb9:	83 c4 0c             	add    $0xc,%esp
-c0105cbc:	68 c6 00 00 00       	push   $0xc6
+c0105cbc:	68 95 00 00 00       	push   $0x95
 c0105cc1:	68 6c 74 10 c0       	push   $0xc010746c
 c0105cc6:	68 c3 74 10 c0       	push   $0xc01074c3
 c0105ccb:	e8 d0 ba ff ff       	call   c01017a0 <printf_>
@@ -8237,7 +8237,7 @@ c0105d00:	83 ec 0c             	sub    $0xc,%esp
 c0105d03:	6a 01                	push   $0x1
 c0105d05:	e8 86 09 00 00       	call   c0106690 <set_debug_output>
 c0105d0a:	83 c4 0c             	add    $0xc,%esp
-c0105d0d:	68 cf 00 00 00       	push   $0xcf
+c0105d0d:	68 9e 00 00 00       	push   $0x9e
 c0105d12:	68 6c 74 10 c0       	push   $0xc010746c
 c0105d17:	68 c3 74 10 c0       	push   $0xc01074c3
 c0105d1c:	e8 7f ba ff ff       	call   c01017a0 <printf_>
