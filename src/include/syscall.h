@@ -8,6 +8,8 @@
 #define SYSCALL_OPEN	2
 #define SYSCALL_CLOSE	3
 #define SYSCALL_SCHED_YIELD	4
+#define SYSCALL_SBRK	5
+
 
 #define SYSCALL_RT_SUCCESS 0
 #define SYSCALL_RT_ERROR 1
@@ -29,5 +31,8 @@ uint32_t syscall_read( int fd, void * buff, uint32_t size );
 
 uint32_t sched_yield( void );
 uint32_t syscall_sched_yield( interrupt_stack ** _stack );
+
+uint32_t sbrk( int inc );
+uint32_t syscall_sbrk( int inc );
 
 #endif

@@ -11,7 +11,7 @@ SOURCES_ASM = $(shell ls src/**/*.s)
 
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
-CFLAGS = -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/src/include -I$(ROOT_DIR)/src/libvv/include $(C_OPTS) 
+CFLAGS = -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/src/include -I$(ROOT_DIR)/src/libvv/include -I/usr/local/osdev/versions/vvlibc/include $(C_OPTS) 
 ASM = /usr/local/osdev/bin/i686-elf-as
 ALAGS = $(C_OPTS) -I$(ROOT_DIR)/src/include
 

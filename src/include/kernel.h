@@ -5,9 +5,9 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "bootstrap.h"
-#include "string.h"
+#include <string.h>
 #include "terminal.h"
-#include "printf.h"
+#include <printf.h>
 #include "serial.h"
 #include "memory.h"
 #include "process.h"

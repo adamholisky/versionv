@@ -38,8 +38,11 @@ uint32_t syscall_handler( interrupt_stack ** _stack ) {
 			//debugf( "[SYSCALL] sched_yield\n" );
 			syscall_sched_yield( _stack );
 			break;
+		case SYSCALL_SBRK:
+			syscall_sbrk( stack->edi );
+			break;
 		default:
-			debugf( "[SYSCALL] Undefined: 0x%04X\n", stack->eax );
+			klog( "Undefined syscall number: 0x%04X\n", stack->eax );
 	}
 
 	return SYSCALL_RT_SUCCESS;
@@ -66,7 +69,28 @@ uint32_t syscall( uint32_t call_num, uint32_t num_args, syscall_args * args ) {
 			);
 			break;
 		case 2:
+			asm	volatile ( 
+				"movl %1, %%eax \n"
+				"movl %2, %%edi \n"
+				"movl %3, %%esi \n"
+				"int %4 \n"
+				"movl %%eax, %0"
+				:"=r"(ret)
+				:"r"(call_num), "m"(args->arg_1), "m"(args->arg_2), "i"(0x99)
+				:"%eax" 
+			);
+			break;
 		case 1:
+			asm	volatile ( 
+				"movl %1, %%eax \n"
+				"movl %2, %%edi \n"
+				"int %3 \n"
+				"movl %%eax, %0"
+				:"=r"(ret)
+				:"r"(call_num), "m"(args->arg_1), "i"(0x99)
+				:"%eax" 
+			);
+			break;
 		case 0:
 			asm	volatile ( 
 				"movl %1, %%eax \n"
@@ -78,6 +102,6 @@ uint32_t syscall( uint32_t call_num, uint32_t num_args, syscall_args * args ) {
 			);
 			break;
 		default:
-			debugf( "[SYSCALL] Called with more than six args.\n" );
+			klog( "Syscall called with more than six args.\n" );
 	}
 }

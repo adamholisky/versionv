@@ -4,7 +4,9 @@
 uint32_t read( int fd, void * buff, uint32_t size ) {
 	syscall_args	args;
 
-	debugf( "calling syscall read with fd = %d, buff = 0x%08X, size = %d\n", fd, buff, size );
+	#ifdef kdebug_syscall
+	klog( "calling syscall read with fd = %d, buff = 0x%08X, size = %d\n", fd, buff, size );
+	#endif
 
 	args.arg_1 = fd;
 	args.arg_2 = (uint32_t)buff;

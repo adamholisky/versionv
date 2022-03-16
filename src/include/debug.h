@@ -74,8 +74,6 @@ profile_information * get_profile_information( void );
 void profile_stop( void );
 void profile_start( void );
 void k_log( uint32_t system_id, uint32_t level, char * message, ... );
-char * strcat( char * dest, char * src );
-char * strstr( register char * string, char * substring );
 void debugf_stack_trace( void );
 void stack_trace_test_func_a( void );
 void stack_trace_test_func_b( void );
