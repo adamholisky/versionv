@@ -63,8 +63,6 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 
 	modules_initalize();
 
-	stack_trace_test_func_a();
-
 	while( true ) {
 		sched_yield();
 	}

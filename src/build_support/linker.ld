@@ -33,5 +33,5 @@ SECTIONS
 	}
 
 	
-	_kernel_end = .;
+	_kernel_end = ALIGN(0x1000);
 }

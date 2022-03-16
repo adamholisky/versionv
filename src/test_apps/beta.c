@@ -9,7 +9,7 @@ extern void sched_yield( void );
 
 void main( void ) {
 	set_debug_output( true );
-	//printf_( "Hello, world from beta!\n" );
+	printf_( "Hello, world from beta!\n" );
 	set_debug_output( false );
 	
 	while ( true ) {

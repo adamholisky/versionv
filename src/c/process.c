@@ -37,7 +37,7 @@ uint32_t setup_kernel_process( void ) {
 	proc[ PROC_KERNEL ].present = true;
 	proc[ PROC_KERNEL ].status = 1;
 	proc[ PROC_KERNEL ].id = PROC_KERNEL;
-	proc[ PROC_KERNEL ].code_start_phys = kernel_main - 0xC0000000;
+	proc[ PROC_KERNEL ].code_start_phys = kernel_main - KERNEL_LOAD_ADDRESS;
 	proc[ PROC_KERNEL ].code_start_virt = kernel_main;
 	proc[ PROC_KERNEL ].data_start_phys = (void *)0x06400000;
 	proc[ PROC_KERNEL ].data_start_virt = (void *)0xA0000000;
@@ -102,11 +102,12 @@ uint32_t add_process( process p ) {
 	proc[i].page_table = kmalloc( sizeof( page_directory_entry ) * 1024 );
 	proc[i].page_table[0].rw = 1;
 	proc[i].page_table[0].present = 1;
-	proc[i].page_table[0].address = (0x06400000 + (uint32_t)proc[i].code_start_virt - 0xA0000000)>>11;
+	proc[i].page_table[0].address = ((uint32_t)get_physical_memory_base() + (uint32_t)proc[i].code_start_virt - 0xA0000000)>>11;
+	klog( "pte address created: 0x%08X\n", (uint32_t)get_physical_memory_base() + (uint32_t)proc[i].code_start_virt - 0xA0000000 );
 
 	proc[i].page_table[1].rw = 1;
 	proc[i].page_table[1].present = 1;
-	proc[i].page_table[1].address = (0x06400000 + (uint32_t)proc[i].code_start_virt + 0x1000 - 0xA0000000)>>11;
+	proc[i].page_table[1].address = ((uint32_t)get_physical_memory_base() + (uint32_t)proc[i].code_start_virt + 0x1000 - 0xA0000000)>>11;
 
 	//kdebug_peek_at( proc[i].code_start_virt );
 	

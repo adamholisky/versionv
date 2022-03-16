@@ -1,13 +1,16 @@
 #include "kernel.h"
+#include "multiboot.h"
 
 //#define kdebug_memory_pages 1
 
 static const char * vv_magic_word = "VersionV";
+uint32_t * physical_memory_base = (uint32_t *)0x06400000;
 uint32_t * phsyical_memory_top = (uint32_t *)0x06400000;
 uint32_t * kernel_virtual_memory_top = (uint32_t *)0xA0000000;
 
 extern page_directory_entry * boot_page_directory;
 extern page_directory_entry * boot_page_table;
+extern uint32_t _kernel_end;
 
 extern void asm_refresh_cr3( void );
 
@@ -16,12 +19,52 @@ page_directory_entry second_page_table[1024] __attribute__ ((aligned (4096)));
 page_directory_entry process_pd[1024] __attribute__ ((aligned (4096)));
 page_directory_entry process_pt[1024] __attribute__ ((aligned (4096)));
 
+//#define kdebug_memory
+//#define kdebug_memory_pages
+
 
 void memory_initalize( void ) {
 	log_entry_enter();
+
+	uint32_t mem_start = 0;
+	uint32_t mem_size = 0;
+	uint32_t alloc_start = (uint32_t)&_kernel_end - KERNEL_LOAD_ADDRESS;
+
+	multiboot_info_t *mbh = get_multiboot_header();
+	klog( "Usable memory detected: 0x%08X\n", mbh->mem_upper * 1024 );
+
+	for( int i = 0; i < mbh->mmap_length; i = i + sizeof(multiboot_memory_map_t)) {
+        multiboot_memory_map_t* mm = (multiboot_memory_map_t*) (mbh->mmap_addr + i);
+ 
+        if(mm->type == MULTIBOOT_MEMORY_AVAILABLE) {
+			// This corrects for the weird last entry in the mmap saying we have an extra 1G?
+			if( mm->addr_high == 0 ) {
+				// For now let's just use the largest continual space, which works in QEMU
+				if( mem_size < mm->len_low ) {
+					mem_start = mm->addr_low; // 32 bit only
+					mem_size = mm->len_low; // 32 bit only
+				}
+				
+				//klog("Start Addr: %x %x | Length: %x %x | Size: %x | Type: %d\n", mm->addr_high, mm->addr_low, mm->len_high, mm->len_low, mm->size, mm->type);
+			}
+        }
+    }
+
+	// Calculate the alloc start so it ends up on a 4k boundry
+	alloc_start = (alloc_start % 0x1000) + alloc_start;
+
+	klog( "Memory start:       0x%08X\n", mem_start );
+	klog( "Memory alloc start: 0x%08X\n", alloc_start );
+	klog( "Memory allocatable: 0x%08X\n", mem_size );
+
+	phsyical_memory_top = (uint32_t *)alloc_start;
+	physical_memory_base = (uint32_t *)alloc_start;
+
+	klog( "Physical memory start: 0x%08X\n", phsyical_memory_top );
+
 	page_allocate( 1 );
 
-	#if kdebug_memory
+	#ifdef kdebug_memory
 
 	memory_test();
 
@@ -56,13 +99,13 @@ void memory_initalize( void ) {
 
 	#ifdef kdebug_memory_pages
 	klog( "process_pt paddr:  0x%08X\n", ((uint32_t)process_pt - 0xC0000000) );
-	klog( "process paddr sp:  0x%08X\n", 0x06400000 + (uint32_t)process_address_space - 0xA0000000 );
-	klog( "process paddr>>11: 0x%08X\n", (0x06400000 + (uint32_t)process_address_space - 0xA0000000)>>11 );
+	klog( "process paddr sp:  0x%08X\n", (uint32_t)physical_memory_base + (uint32_t)process_address_space - 0xA0000000 );
+	klog( "process paddr>>11: 0x%08X\n", ((uint32_t)physical_memory_base + (uint32_t)process_address_space - 0xA0000000)>>11 );
 	#endif
 
 	pte->present = 1;
 	pte->rw = 1;
-	pte->address = (0x06400000 + (uint32_t)process_address_space - 0xA0000000)>>11;
+	pte->address = ((uint32_t)physical_memory_base + (uint32_t)process_address_space - 0xA0000000)>>11;
 
 	#ifdef kdebug_memory_pages
 	klog( "pte->address: 0x%08X\n", pte->address<<11 );
@@ -87,6 +130,10 @@ void memory_initalize( void ) {
 	#endif
 	
 	log_entry_exit();
+}
+
+uint32_t * get_physical_memory_base( void ) {
+	return physical_memory_base;
 }
 
 void set_process_pde( page_directory_entry * pte ) {
@@ -161,9 +208,7 @@ uint32_t * page_allocate( uint32_t num ) {
 		phsyical_memory_top = (uint32_t *)((uint32_t)phsyical_memory_top + page_size_in_bytes);
 
 		#ifdef kdebug_memory_pages
-
 		debugf( "kvm_top: 0x%08X    pmt: 0x%08X\n", kernel_virtual_memory_top, phsyical_memory_top );
-
 		#endif
 	}
 
@@ -172,15 +217,17 @@ uint32_t * page_allocate( uint32_t num ) {
 	return return_pointer;
 }
 
-#define memtest_dump( v ) k_log( sys_memory, level_info, #v ": 0x%04X %04X",( ( uint32_t )( v ) >> 16 ), ( uint32_t )( v )&0xFFFF)
+#define memtest_dump( v ) klog( #v " mem dump: 0x%04X %04X",( ( uint32_t )( v ) >> 16 ), ( uint32_t )( v )&0xFFFF)
 
 void memory_test( void ) {
+	log_entry_enter();
+
 	void * p2;
 	void * p3;
 	void * p4;
 	void * p5;
 
-	memtest_dump( kernel_virtual_memory_top );
+	//memtest_dump( kernel_virtual_memory_top );
 
 	/*
 	void * p;
@@ -190,24 +237,26 @@ void memory_test( void ) {
 	*/
 	
 	p2 = kmalloc( 0x256 );
-	k_log( sys_memory, level_info, "kmalloc(0x256) into p2" );
-	memtest_dump( p2 );
+	klog( "kmalloc(0x256) into p2" );
+	//memtest_dump( p2 );
 
-	k_log( sys_memory, level_info, "kmalloc(0x512) into p3" );
+	klog( "kmalloc(0x512) into p3" );
 	p3 = kmalloc( 0x512 );
-	memtest_dump( p3 );
+	//memtest_dump( p3 );
 
-	k_log( sys_memory, level_info, "kmalloc(0x11000) into p4" );
+	klog( "kmalloc(0x11000) into p4" );
 	p4 = kmalloc( 0x11000 );
-	memtest_dump( p4 );
+	//memtest_dump( p4 );
 
-	k_log( sys_memory, level_info, "kmalloc(0x11000) into p5" );
+	klog( "kmalloc(0x11000) into p5" );
 	p5 = kmalloc( 0x11000 );
-	memtest_dump( p5 );
+	//memtest_dump( p5 );
 
-	memtest_dump( kernel_virtual_memory_top );
+	//memtest_dump( kernel_virtual_memory_top );
 	
 	liballoc_dump();
+
+	log_entry_exit();
 }
 
 

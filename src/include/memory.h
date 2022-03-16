@@ -2,6 +2,7 @@
 #define MEMORY_INCLUDED
 
 #define page_size_in_bytes 0x00001000
+#define KERNEL_LOAD_ADDRESS 0xC0000000
 
 typedef struct {
 	uint8_t		present : 1;
@@ -20,6 +21,7 @@ void memory_initalize( void );
 uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr );
 uint32_t * page_allocate( uint32_t num );
 void set_process_pde( page_directory_entry * pte );
+uint32_t * get_physical_memory_base( void );
 
 /** This function is supposed to lock the memory data structures. It
  * could be as simple as disabling interrupts or acquiring a spinlock.

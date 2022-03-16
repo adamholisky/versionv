@@ -78,7 +78,7 @@ void load_module_elf_image( uint32_t *raw_data_start ) {
 	process *module_proc = kmalloc( sizeof( process ) );
 
 	module_proc->code_start_virt = page_allocate( 4 );
-	module_proc->code_start_phys = module_proc->code_start_virt - 0xA0000000;
+	module_proc->code_start_phys = module_proc->code_start_virt - (void *)0xA0000000 + (void *)get_physical_memory_base();
 	module_proc->stack = page_allocate( 1 );
 
 	// Parse raw data to identify secrtions to load, and to copy them into memory
