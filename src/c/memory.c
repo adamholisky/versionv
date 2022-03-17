@@ -165,12 +165,12 @@ void set_process_pde( page_directory_entry * pte ) {
 	// debugf( "pde->addr: 0x%08X\n", pde->address << 11 );
 	// debugf( "pte->addr: 0x%08X\n", pte->address << 11 );
 
-	page_directory_entry * pt = (pde[0].address << 11) + KERNEL_VIRT_LOAD_BASE;
+	page_directory_entry * pt = (page_directory_entry *)((pde[0].address << 11) + KERNEL_VIRT_LOAD_BASE);
 
 	asm_refresh_cr3();
 
-	asm_invalidate_page( (pt[0].address << 11) );
-	asm_invalidate_page( &process_pt );
+	//asm_invalidate_page( (pt[0].address << 11) );
+	//asm_invalidate_page( &process_pt );
 
 	/*
 	kdebug_peek_at( 0 );
@@ -193,7 +193,7 @@ void dump_active_pt( void ) {
 
 	for( int i = 0; i < 1024; i++ ) {
 		if( pde[i].present == 1 ) {
-			page_directory_entry *pt = (pde[i].address << 11) + KERNEL_VIRT_LOAD_BASE;
+			page_directory_entry *pt = (page_directory_entry *)((pde[i].address << 11) + KERNEL_VIRT_LOAD_BASE);
 
 			for( int j = 0; j < 1024; j++ ) {
 				if( pt[j].present == 1 ) {

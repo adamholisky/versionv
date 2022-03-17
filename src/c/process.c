@@ -91,7 +91,7 @@ uint32_t add_process( process p ) {
 	proc[i].code_start_virt = p.code_start_virt;
 	proc[i].data_start_phys = p.data_start_phys;
 	proc[i].data_start_virt = p.data_start_virt;
-	proc[i].virt_heap_top = PROC_VIRT_HEAP_BASE;	
+	proc[i].virt_heap_top = (void *)PROC_VIRT_HEAP_BASE;	
 	proc[i].entry = (void *)p.entry;
 	proc[i].stack_eip = (uint32_t)p.entry;
 	proc[i].stack_at_interrupt = p.stack;
