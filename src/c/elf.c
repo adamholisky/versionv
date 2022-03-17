@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "terminal.h"
 #include "string.h"
+#include "memory.h"
 
 void elf_initalize( uint32_t kmain ) {
     log_entry_enter();
@@ -39,8 +40,8 @@ void elf_initalize( uint32_t kmain ) {
 		}
 	}
 
-	name_addr = section_headers[string_index].sh_addr + 0xC0000000;
-	symbol_table = (Elf32_Sym *)(section_headers[symtable_index].sh_addr + 0xC0000000 );
+	name_addr = section_headers[string_index].sh_addr + KERNEL_VIRT_LOAD_BASE;
+	symbol_table = (Elf32_Sym *)(section_headers[symtable_index].sh_addr + KERNEL_VIRT_LOAD_BASE );
 
 
 
@@ -69,6 +70,16 @@ void elf_load_program_headers(Elf32_Ehdr* elf_header, uint8_t* process_space, ui
             #endif
 
             memcpy(dest, source, elf_pheader->p_filesz);
+
+           /*  for( int i = 0; i < 3; i++ ) {
+                uint32_t *srci = (uint32_t*)source + i;
+                klog( "Source 0x%08X: 0x%08X\n", srci, *srci);
+            }
+
+            for( int i = 0; i < 3; i++ ) {
+                uint32_t *desti = (uint32_t*)dest + i;
+                klog( "Dest 0x%08X: 0x%08X\n", desti, *desti);
+            } */
         }
     }
 }

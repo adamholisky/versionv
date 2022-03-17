@@ -7,6 +7,8 @@
 #define PROC_STATUS_UNKNOWN 0
 #define PROC_STATUS_ACTIVE 1
 
+#define PROC_VIRT_HEAP_BASE 0x40000000
+
 typedef struct {
 	bool present;
 	uint32_t id;
@@ -21,9 +23,12 @@ typedef struct {
 	void * code_start_virt;
 	void * data_start_virt;
 
+	void * virt_heap_top;
+
 	void * entry;
 
-	page_directory_entry * page_table;
+	page_directory_entry * code_page_table;
+	page_directory_entry * data_page_table;
 } process;
 
 extern void process_test_alpha( void );

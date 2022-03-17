@@ -4,6 +4,8 @@
 #include "elf.h"
 #include "modules.h"
 
+#undef kdebug_process_loader
+
 uint32_t num_modules;
 kmodule *modules;
 
@@ -78,8 +80,13 @@ void load_module_elf_image( uint32_t *raw_data_start ) {
 	process *module_proc = kmalloc( sizeof( process ) );
 
 	module_proc->code_start_virt = page_allocate( 4 );
-	module_proc->code_start_phys = module_proc->code_start_virt - (void *)0xA0000000 + (void *)get_physical_memory_base();
+	module_proc->code_start_phys = module_proc->code_start_virt - (void *)KERNEL_VIRT_HEAP_BASE + (void *)get_physical_memory_base();
 	module_proc->stack = page_allocate( 1 );
+	module_proc->data_start_virt = page_allocate( 4 );
+	module_proc->data_start_phys = module_proc->data_start_virt - (void *)KERNEL_VIRT_HEAP_BASE + (void *)get_physical_memory_base();
+
+	klog( "code_start_virt: 0x%08X\n", module_proc->code_start_virt );
+	klog( "code_start_phys: 0x%08X\n", module_proc->code_start_phys );
 
 	// Parse raw data to identify secrtions to load, and to copy them into memory
 	uint8_t *process_space = module_proc->code_start_virt;
@@ -111,11 +118,13 @@ void load_module_elf_image( uint32_t *raw_data_start ) {
 
     elf_load_program_headers(elf_header, (uint8_t *)process_space, (uint8_t *)raw_data_start);
 
+	/* I have no idea why I did this or what 0x1288 means...
 	#ifdef kdebug_process_loader
 	for (int k = 0x1288; k < 0x12a0; k = k + 4) {
         debugf("0x%03X: %02X %02X %02X %02X\n", k, (uint8_t) * ((uint8_t*)process_space + k), (uint8_t) * ((uint8_t*)process_space + k + 1), (uint8_t) * ((uint8_t*)process_space + k + 2), (uint8_t) * ((uint8_t*)process_space + k + 3));
     }
-	#endif
+	#endif 
+	*/
 
 	Elf32_Shdr* got_plt = elf_find_got_plt((uint32_t*)raw_data_start, elf_header);
     if (got_plt != NULL) {
@@ -150,7 +159,7 @@ void load_module_elf_image( uint32_t *raw_data_start ) {
 		*got_entry = (uint32_t)kdebug_get_symbol_addr( elf_get_sym_name_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) );
 		
 		#ifdef kdebug_process_loader
-		klog( "rel sym: 0x%08X, %X, %s\n", elf_rel->r_offset, ELF32_R_SYM(elf_rel->r_info), elf_get_sym_name_from_index((uint8_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) );
+		klog( "rel sym: 0x%08X, %X, %s\n", elf_rel->r_offset, ELF32_R_SYM(elf_rel->r_info), elf_get_sym_name_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) );
 		#endif
 	}
 

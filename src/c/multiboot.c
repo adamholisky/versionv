@@ -11,13 +11,13 @@ void multiboot_initalize( unsigned long _mb_magic, multiboot_info_t *mbh ) {
 	memcpy( &multiboot_header, mbh, sizeof( multiboot_info_t ) );
 
     
-    multiboot_header.cmdline += 0xC0000000;
-    multiboot_header.mods_addr += 0xC0000000;
-    multiboot_header.u.elf_sec.addr += 0xC0000000;
-    multiboot_header.mmap_addr += 0xC0000000;
-    multiboot_header.drives_addr += 0xC0000000;
-    multiboot_header.boot_loader_name += 0xC0000000;
-    multiboot_header.framebuffer_addr += 0xC0000000;
+    multiboot_header.cmdline += KERNEL_VIRT_LOAD_BASE;
+    multiboot_header.mods_addr += KERNEL_VIRT_LOAD_BASE;
+    multiboot_header.u.elf_sec.addr += KERNEL_VIRT_LOAD_BASE;
+    multiboot_header.mmap_addr += KERNEL_VIRT_LOAD_BASE;
+    multiboot_header.drives_addr += KERNEL_VIRT_LOAD_BASE;
+    multiboot_header.boot_loader_name += KERNEL_VIRT_LOAD_BASE;
+    multiboot_header.framebuffer_addr += KERNEL_VIRT_LOAD_BASE;
 }
 
 multiboot_info_t * get_multiboot_header( void ) {

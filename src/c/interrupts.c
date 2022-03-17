@@ -86,30 +86,43 @@ void interrupts_initalize( void ) {
 void interrupt_default_handler( unsigned long interrupt_num, unsigned long route_code, interrupt_stack ** _stack ) {
 	process *p;
 	interrupt_stack * stack = *_stack;
+	uint32_t * uint32_stack_pointer = (uint32_t *)stack;
 	//dbC();
 	//debugf( "interrupt_default_handler:\n    interrupt_num: 0x%X\n    route_code: 0x%0X\n", interrupt_num, route_code );
 
 	if( route_code == 0x01 ) {
         switch( interrupt_num ) {
             case 0:
-				printf( "[SYSTEM] Exception: divide by zero.\n" );
+				klog( "Exception: Divide-by-zero.\n" );
                 break;
+			case 0x05:
+				klog( "Exception: Bound Range Exceeded\n" );
+				break;
+			case 0x0E:
+				klog( "Page Fault\n" );
+				break;
             default:
-                debugf( "[SYSTEM] Unhandled exception %02X.\n", interrupt_num );
-				debugf( "  eax:  0x%08X  ebx:  0x%08X  ecx:  0x%08X  edx:  0x%08X\n", stack->eax, stack->ebx, stack->ecx, stack->edx );
-				debugf( "  esp:  0x%08X  ebp:  0x%08X  esi:  0x%08X  edi:  0x%08X\n", stack->esp, stack->ebp, stack->esi, stack->edi );
-				debugf( "  ds:   0x%04X  es:   0x%04X  fs:   0x%04X  gs:   0x%04X\n", stack->ds, stack->es, stack->fs, stack->gs );
-				debugf( "  _esp: 0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", stack->_esp, stack->cs, stack->eflags, stack->err );
-				debugf( "  eip:  0x%08X\n", stack->eip );
-				debugf( "Shutdown via END_IMMEDIATELY.\n");
-				outportb( 0xF4, 0x00 );
-				uint32_t * pointer = (uint32_t *)stack;
-				for( int i = -10; i < 5; i++ ) {
-					debugf( "0x%08X:    0x%08X\n", (pointer + i), *(pointer + i) );
-				}
-				asm( "cli" );
-				asm( "hlt" );
+                debugf( "Exception: Unhandled %02X.\n", interrupt_num );
         }
+
+		klog( "  eax:  0x%08X  ebx:  0x%08X  ecx:  0x%08X  edx:  0x%08X\n", stack->eax, stack->ebx, stack->ecx, stack->edx );
+		klog( "  esp:  0x%08X  ebp:  0x%08X  esi:  0x%08X  edi:  0x%08X\n", stack->esp, stack->ebp, stack->esi, stack->edi );
+		klog( "  ds:   0x%04X  es:   0x%04X  fs:   0x%04X  gs:   0x%04X\n", stack->ds, stack->es, stack->fs, stack->gs );
+		klog( "  _esp: 0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", stack->_esp, stack->cs, stack->eflags, stack->err );
+		klog( "  eip:  0x%08X\n", stack->eip );
+
+		klog( "uint32_stack_pointer:  0x%08X\n", uint32_stack_pointer );
+		
+		klog( "Shutdown via END_IMMEDIATELY.\n");
+		outportb( 0xF4, 0x00 );
+
+		if( uint32_stack_pointer == NULL ) {
+			klog( "uint32_stack_pointer is null, output surpressed\n" );
+		} else {
+			for( int i = -10; i < 5; i++ ) {
+				klog( "0x%08X:    0x%08X\n", (uint32_stack_pointer + i), *(uint32_stack_pointer + i) );
+			}
+		}
     }
 
 	if( route_code == 0x02 ) {
@@ -145,7 +158,7 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				(*_stack)->eip = p->stack_eip;
 
 				if( p->id != 0 ) {
-					set_process_pde( p->page_table );
+					set_process_pde( p->code_page_table );
 				}
 				
 				// debugf( "    To eip:      0x%08X\n", p->stack_eip );

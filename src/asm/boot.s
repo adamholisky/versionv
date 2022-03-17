@@ -150,4 +150,10 @@ asm_refresh_cr3:
 	movl %ecx, %cr3
 	ret
 
+.global asm_invalidate_page
+asm_invalidate_page:
+	movl	(%esp),%eax
+	invlpg	(%eax)
+	ret
+
 .size _asm_kernel_start, . - _asm_kernel_start

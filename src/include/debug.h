@@ -67,6 +67,7 @@ kdebug_symbol * kdebug_get_symbol_array( void );
 uint32_t kdebug_get_symbol_addr( char * name );
 char * kdebug_get_function_at( uint32_t addr );
 char * kdebug_peek_at( uint32_t addr );
+uint32_t reverse_uint32( uint32_t x );
 char peek_char( char c );
 void profile_test( void );
 void profile_test_run( uint32_t num_of_nops );

@@ -11,7 +11,6 @@
 #include "debug.h"
 
 #define END_IMMEDIATELY
-#undef kdebug_process_loader
 
 void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info ) 
 {
@@ -27,18 +26,28 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 	memory_initalize();
 	elf_initalize( (uint32_t)kernel_main );
 	interrupts_initalize();
-
-	pci_initalize();
-	intel8254_initalize();
-
-	ata_initalize();
-
 	process_initalize();
+	modules_initalize();
+
+	//pci_initalize();
+	//intel8254_initalize();
+	//ata_initalize();
+
+	while( true ) {
+		sched_yield();
+	}
+
+	#ifdef END_IMMEDIATELY
+
+	klog( "Shutdown via END_IMMEDIATELY at end of kernel.c.\n");
+	outportb( 0xF4, 0x00 );
+
+	#endif
 
 	#ifdef kdebug_paging
 
 	char * page_fault_addr = NULL;
-	page_fault_addr = (char *)0xA0000000;	
+	page_fault_addr = (char *)KERNEL_VIRT_HEAP_BASE;	
 	klog( "String at 0x%08X: \"%s\"\n", page_fault_addr, page_fault_addr );
 	page_fault_addr = (char *)page_allocate( 1 );
 	klog( "String at 0x%08X: \"%s\"\n", page_fault_addr, page_fault_addr );
@@ -58,19 +67,6 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 	#ifdef kdebug_profile_test
 
 	profile_test();
-
-	#endif
-
-	modules_initalize();
-
-	while( true ) {
-		sched_yield();
-	}
-
-	#ifdef END_IMMEDIATELY
-
-	klog( "Shutdown via END_IMMEDIATELY at end of kernel.c.\n");
-	outportb( 0xF4, 0x00 );
 
 	#endif
 

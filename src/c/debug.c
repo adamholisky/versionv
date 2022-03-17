@@ -78,22 +78,28 @@ char * kdebug_peek_at( uint32_t addr ) {
 	uint8_t *ptrn = (uint8_t *)addr;
 	char *ptr = (char *)addr;
 
-	for( int x = 0; x < 10; x++ ) {
+	for( int x = 0; x < 20; x++ ) {
 		debugf( "0x%08X    %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X    %c%c%c%c%c%c%c%c%c%c\n",
 		addr + (x * 10), 
-		*(ptrn + 9), *(ptrn + 8), *(ptrn + 7), *(ptrn + 6), *(ptrn + 5), *(ptrn + 4), *(ptrn + 3), *(ptrn + 2), *(ptrn + 1), *(ptrn + 0), 
-		peek_char( *(ptr + 9) ), peek_char( *(ptr + 8) ), peek_char( *(ptr + 7) ), peek_char( *(ptr + 6) ), peek_char( *(ptr + 5) ), peek_char( *(ptr + 4) ), peek_char( *(ptr + 3) ), peek_char( *(ptr + 2) ), peek_char( *(ptr + 1) ), peek_char( *(ptr + 0) ) );
-
-		printf( "0x%08X    %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X    %c%c%c%c%c%c%c%c%c%c\n",
-		addr + (x * 10), 
-		*(ptrn + 9), *(ptrn + 8), *(ptrn + 7), *(ptrn + 6), *(ptrn + 5), *(ptrn + 4), *(ptrn + 3), *(ptrn + 2), *(ptrn + 1), *(ptrn + 0), 
-		peek_char( *(ptr + 9) ), peek_char( *(ptr + 8) ), peek_char( *(ptr + 7) ), peek_char( *(ptr + 6) ), peek_char( *(ptr + 5) ), peek_char( *(ptr + 4) ), peek_char( *(ptr + 3) ), peek_char( *(ptr + 2) ), peek_char( *(ptr + 1) ), peek_char( *(ptr + 0) ) );
+		*(ptrn + 0), *(ptrn + 1), *(ptrn + 2), *(ptrn + 3), *(ptrn + 4), *(ptrn + 5), *(ptrn + 6), *(ptrn + 7), *(ptrn + 8), *(ptrn + 9), 
+		peek_char( *(ptr + 0) ), peek_char( *(ptr + 1) ), peek_char( *(ptr + 2) ), peek_char( *(ptr + 3) ), peek_char( *(ptr + 4) ), peek_char( *(ptr + 5) ), peek_char( *(ptr + 6) ), peek_char( *(ptr + 7) ), peek_char( *(ptr + 8) ), peek_char( *(ptr + 9) ) );
 
 		ptr = ptr + 10;
 		ptrn = ptrn + 10;
 	}
 
 	printf( "\n" );
+}
+
+// Modified from https://stackoverflow.com/questions/9144800/c-reverse-bits-in-unsigned-integer
+uint32_t reverse_uint32( uint32_t x ) {
+    x = ((x >> 1) & 0x55555555u) | ((x & 0x55555555u) << 1);
+    x = ((x >> 2) & 0x33333333u) | ((x & 0x33333333u) << 2);
+    x = ((x >> 4) & 0x0f0f0f0fu) | ((x & 0x0f0f0f0fu) << 4);
+    x = ((x >> 8) & 0x00ff00ffu) | ((x & 0x00ff00ffu) << 8);
+    x = ((x >> 16) & 0xffffu) | ((x & 0xffffu) << 16);
+
+    return x;
 }
 
 void k_log( uint32_t system_id, uint32_t level, char * message, ... ) {

@@ -30,10 +30,15 @@ uint32_t syscall_sched_yield( interrupt_stack ** _stack ) {
 	#endif
 
 	if( p->id != 0 ) {
-		set_process_pde( p->page_table );
+		set_process_pde( p->code_page_table );
 	}
 
 	#ifdef kdebug_sched_yield
+	for( int i = 0; i < 10; i++ ) {
+		uint32_t *eip = (uint32_t *)(*_stack)->eip + i;
+		klog( "0x%08X: 0x%08X\n", eip, *eip);
+	}
+
 	debugf( "sched_yield done\n" );
 	#endif
 

@@ -37,10 +37,10 @@ uint32_t setup_kernel_process( void ) {
 	proc[ PROC_KERNEL ].present = true;
 	proc[ PROC_KERNEL ].status = 1;
 	proc[ PROC_KERNEL ].id = PROC_KERNEL;
-	proc[ PROC_KERNEL ].code_start_phys = kernel_main - KERNEL_LOAD_ADDRESS;
+	proc[ PROC_KERNEL ].code_start_phys = kernel_main - KERNEL_VIRT_LOAD_BASE;
 	proc[ PROC_KERNEL ].code_start_virt = kernel_main;
-	proc[ PROC_KERNEL ].data_start_phys = (void *)0x06400000;
-	proc[ PROC_KERNEL ].data_start_virt = (void *)0xA0000000;
+	proc[ PROC_KERNEL ].data_start_phys = (void *)get_physical_memory_base();
+	proc[ PROC_KERNEL ].data_start_virt = (void *)KERNEL_VIRT_HEAP_BASE;
 }
 
 uint32_t add_process( process p ) {
@@ -90,7 +90,8 @@ uint32_t add_process( process p ) {
 	proc[i].code_start_phys = p.code_start_phys;
 	proc[i].code_start_virt = p.code_start_virt;
 	proc[i].data_start_phys = p.data_start_phys;
-	proc[i].data_start_virt = p.data_start_virt;	
+	proc[i].data_start_virt = p.data_start_virt;
+	proc[i].virt_heap_top = PROC_VIRT_HEAP_BASE;	
 	proc[i].entry = (void *)p.entry;
 	proc[i].stack_eip = (uint32_t)p.entry;
 	proc[i].stack_at_interrupt = p.stack;
@@ -99,17 +100,19 @@ uint32_t add_process( process p ) {
 	is->_esp = (uint32_t)&is->_esp + (uint32_t)proc[i].stack_at_interrupt;
 	stack_initial._esp = (uint32_t)&is->_esp + (uint32_t)proc[i].stack_at_interrupt;
 
-	proc[i].page_table = kmalloc( sizeof( page_directory_entry ) * 1024 );
-	proc[i].page_table[0].rw = 1;
-	proc[i].page_table[0].present = 1;
-	proc[i].page_table[0].address = ((uint32_t)get_physical_memory_base() + (uint32_t)proc[i].code_start_virt - 0xA0000000)>>11;
-	klog( "pte address created: 0x%08X\n", (uint32_t)get_physical_memory_base() + (uint32_t)proc[i].code_start_virt - 0xA0000000 );
+	proc[i].code_page_table = kmalloc( sizeof( page_directory_entry ) * 1024 );
+	memset( proc[i].code_page_table, 0, sizeof( page_directory_entry ) * 1024 );
+	proc[i].code_page_table[0].rw = 1;
+	proc[i].code_page_table[0].present = 1;
+	proc[i].code_page_table[0].address = ((uint32_t)get_physical_memory_base() + (uint32_t)proc[i].code_start_virt - KERNEL_VIRT_HEAP_BASE)>>11;
+	klog( "pte address created: 0x%08X\n", (uint32_t)get_physical_memory_base() + (uint32_t)proc[i].code_start_virt - KERNEL_VIRT_HEAP_BASE );
+	klog( "full: 0x%08X\n", ((uint32_t)get_physical_memory_base() + (uint32_t)proc[i].code_start_virt - KERNEL_VIRT_HEAP_BASE)>>11 );
 
-	proc[i].page_table[1].rw = 1;
-	proc[i].page_table[1].present = 1;
-	proc[i].page_table[1].address = ((uint32_t)get_physical_memory_base() + (uint32_t)proc[i].code_start_virt + 0x1000 - 0xA0000000)>>11;
+	proc[i].code_page_table[1].rw = 1;
+	proc[i].code_page_table[1].present = 1;
+	proc[i].code_page_table[1].address = ((uint32_t)get_physical_memory_base() + (uint32_t)proc[i].code_start_virt + 0x1000 - KERNEL_VIRT_HEAP_BASE)>>11;
 
-	//kdebug_peek_at( proc[i].code_start_virt );
+	//kdebug_peek_at( proc[i].code_start_virt + proc[i].stack_eip);
 	
 	// debugf( "page_table.addr: 0x%08X\n", proc[i].page_table[0].address << 11);
 	// debugf( "stack_initial._esp: %08X\n", stack_initial._esp );
