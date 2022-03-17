@@ -33,6 +33,12 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 	//intel8254_initalize();
 	//ata_initalize();
 
+	uint32_t *page_fault_pointer = (uint32_t *)0xFFFF0000;
+
+	*page_fault_pointer = 0xBBBBAAAA;
+
+	klog( "page_fault_pointer: 0x%08X --> 0x%08X\n", page_fault_pointer, *page_fault_pointer );
+
 	while( true ) {
 		sched_yield();
 	}

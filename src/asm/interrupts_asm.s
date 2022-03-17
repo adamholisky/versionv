@@ -42,13 +42,15 @@ interrupt_\interrupt_number :
 .macro exception_handler interrupt_number
 .global interrupt_\interrupt_number
 interrupt_\interrupt_number :
-    pushl %esp
+    push %esp
+	/*push $0xBAD0BAD0*/
 		pushal
 			push %ds
 			push %es
 			push %fs
 			push %gs
-				pushl %esp
+				push %esp
+				push %esp
 					mov $0x10, %eax
 					mov %eax, %ds
 					mov %eax, %es
@@ -61,13 +63,15 @@ interrupt_\interrupt_number :
 							call interrupt_default_handler
 						pop %eax
 					pop %eax
-				add $4, %esp
+				add $8, %esp
 			pop %gs
 			pop %fs
 			pop %es
 			pop %ds
 		popal
+	/*add $4, %esp */
 	pop %esp
+	add $4, %esp
 	iret
 .endm
 

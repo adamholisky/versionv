@@ -111,6 +111,19 @@ union x86flags {
 	} eflags_bits;
 };
 
+typedef struct {
+	uint32_t present:1;
+	uint32_t write:1;
+	uint32_t user:1;
+	uint32_t reserved_write:1;
+	uint32_t instruction_fetch:1;
+	uint32_t protection_key:1;
+	uint32_t shadow_stack:1;
+	uint32_t reserved:8;
+	uint32_t sgx:1;
+	uint32_t reserved2:15;
+} __attribute__ ((packed)) page_fault_err;
+
 extern void interrupt_0( void );
 extern void interrupt_1( void );
 extern void interrupt_2( void );

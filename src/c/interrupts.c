@@ -86,7 +86,9 @@ void interrupts_initalize( void ) {
 void interrupt_default_handler( unsigned long interrupt_num, unsigned long route_code, interrupt_stack ** _stack ) {
 	process *p;
 	interrupt_stack * stack = *_stack;
-	uint32_t * uint32_stack_pointer = (uint32_t *)stack;
+	uint32_t * uint32_stack_pointer = (uint32_t *)*_stack;
+	uint32_t fault_addr = 0;
+	page_fault_err *pf_err = NULL;
 	//dbC();
 	//debugf( "interrupt_default_handler:\n    interrupt_num: 0x%X\n    route_code: 0x%0X\n", interrupt_num, route_code );
 
@@ -99,30 +101,47 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				klog( "Exception: Bound Range Exceeded\n" );
 				break;
 			case 0x0E:
+				debugf( "\n" );
 				klog( "Page Fault\n" );
+				klog( "    %s() @ 0x%08X\n", kdebug_get_function_at( stack->eip ), stack->eip );
+
+				asm volatile("movl %%cr2,%0" :"=g"(fault_addr));
+				klog( "    Fault address: 0x%08X\n", fault_addr );
+
+				pf_err = (page_fault_err *)&stack->err;
+				klog( "    Flags present:" );
+				if( pf_err->present ) { debugf( " present "); }
+				if( pf_err->write ) { debugf( " write "); }
+				if( pf_err->user ) { debugf( " user "); }
+				if( pf_err->reserved_write ) { debugf( " reserved_write "); }
+				if( pf_err->instruction_fetch ) { debugf( " inst_fetch "); }
+				if( pf_err->protection_key ) { debugf( " pk "); }
+				if( pf_err->shadow_stack ) { debugf( " shadow_stack "); }
+				if( pf_err->sgx ) { debugf( " sgx "); }
+				debugf( "\n" );
+
 				break;
             default:
-                debugf( "Exception: Unhandled %02X.\n", interrupt_num );
+                klog( "Exception: Unhandled %02X.\n", interrupt_num );
         }
 
-		klog( "  eax:  0x%08X  ebx:  0x%08X  ecx:  0x%08X  edx:  0x%08X\n", stack->eax, stack->ebx, stack->ecx, stack->edx );
-		klog( "  esp:  0x%08X  ebp:  0x%08X  esi:  0x%08X  edi:  0x%08X\n", stack->esp, stack->ebp, stack->esi, stack->edi );
-		klog( "  ds:   0x%04X  es:   0x%04X  fs:   0x%04X  gs:   0x%04X\n", stack->ds, stack->es, stack->fs, stack->gs );
-		klog( "  _esp: 0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", stack->_esp, stack->cs, stack->eflags, stack->err );
-		klog( "  eip:  0x%08X\n", stack->eip );
+		klog( "    eax:  0x%08X  ebx:  0x%08X  ecx:  0x%08X  edx:  0x%08X\n", stack->eax, stack->ebx, stack->ecx, stack->edx );
+		klog( "    esp:  0x%08X  ebp:  0x%08X  esi:  0x%08X  edi:  0x%08X\n", stack->esp, stack->ebp, stack->esi, stack->edi );
+		klog( "    ds:   0x%04X  es:   0x%04X  fs:   0x%04X  gs:   0x%04X\n", stack->ds, stack->es, stack->fs, stack->gs );
+		klog( "    esp:  0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", stack->_esp, stack->cs, stack->eflags, stack->err );
+		klog( "    eip:  0x%08X\n", stack->eip );
 
-		klog( "uint32_stack_pointer:  0x%08X\n", uint32_stack_pointer );
-		
+		/* if( uint32_stack_pointer == NULL ) {
+			klog( "uint32_stack_pointer is null, output surpressed\n" );
+		} else {
+			for( int i = -2; i < 30; i++ ) {
+				klog( "%d: 0x%08X:    0x%08X\n", i, (uint32_stack_pointer + i), *(uint32_stack_pointer + i) );
+			}
+		} */
+
 		klog( "Shutdown via END_IMMEDIATELY.\n");
 		outportb( 0xF4, 0x00 );
 
-		if( uint32_stack_pointer == NULL ) {
-			klog( "uint32_stack_pointer is null, output surpressed\n" );
-		} else {
-			for( int i = -10; i < 5; i++ ) {
-				klog( "0x%08X:    0x%08X\n", (uint32_stack_pointer + i), *(uint32_stack_pointer + i) );
-			}
-		}
     }
 
 	if( route_code == 0x02 ) {
