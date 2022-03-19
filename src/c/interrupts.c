@@ -94,13 +94,46 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 
 	if( route_code == 0x01 ) {
         switch( interrupt_num ) {
-            case 0:
-				klog( "Exception: Divide-by-zero.\n" );
-                break;
-			case 0x05:
-				klog( "Exception: Bound Range Exceeded\n" );
+			case EXCEPTION_DIVIDE_BY_ZERO:
+				klog( "Exception: EXCEPTION_DIVIDE_BY_ZERO\n");
 				break;
-			case 0x0E:
+			case EXCEPTION_DEBUG:
+				klog( "Exception: EXCEPTION_DEBUG\n");
+				break;
+			case EXCEPTION_NMI:
+				klog( "Exception: EXCEPTION_NMI\n");
+				break;
+			case EXCEPTION_BREAKPOINT:
+				klog( "Exception: EXCEPTION_BREAKPOINT\n");
+				break;
+			case EXCEPTION_OVERFLOW:
+				klog( "Exception: EXCEPTION_OVERFLOW\n");
+				break;
+			case EXCEPTION_BOUND_RANGE_EXCEEDED:
+				klog( "Exception: EXCEPTION_BOUND_RANGE_EXCEEDED\n");
+				break;
+			case EXCEPTION_INVALID_OPCODE:
+				klog( "Exception: EXCEPTION_INVALID_OPCODE\n");
+				break;
+			case EXCEPTION_DEVICE_NOT_AVAILABLE:
+				klog( "Exception: EXCEPTION_DEVICE_NOT_AVAILABLE\n");
+				break;
+			case EXCEPTION_DOUBLE_FAULT:
+				klog( "Exception: EXCEPTION_DOUBLE_FAULT\n");
+				break;
+			case EXCEPTION_INVALID_TSS:
+				klog( "Exception: EXCEPTION_INVALID_TSS\n");
+				break;
+			case EXCEPTION_SEGMENT_NOT_PRESENT:
+				klog( "Exception: EXCEPTION_SEGMENT_NOT_PRESENT\n");
+				break;
+			case EXCEPTION_STACK_SEGMENT_FAULT :
+				klog( "Exception: EXCEPTION_STACK_SEGMENT_FAULT\n");
+				break;
+			case EXCEPTION_GENERAL_PROTECTION_FAULT:
+				klog( "Exception: EXCEPTION_GENERAL_PROTECTION_FAULT\n");
+				break;
+			case EXCEPTION_PAGE_FAULT:
 				debugf( "\n" );
 				klog( "Page Fault\n" );
 				klog( "    %s() @ 0x%08X\n", kdebug_get_function_at( stack->eip ), stack->eip );
@@ -118,8 +151,35 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				if( pf_err->protection_key ) { debugf( " pk "); }
 				if( pf_err->shadow_stack ) { debugf( " shadow_stack "); }
 				if( pf_err->sgx ) { debugf( " sgx "); }
-				debugf( "\n" );
-
+				debugf( "\n" );	
+				klog( "Exception: EXCEPTION_PAGE_FAULT\n");
+				break;
+			case EXCEPTION_FLOATING_POINT :
+				klog( "Exception: EXCEPTION_FLOATING_POINT\n");
+				break;
+			case EXCEPTION_ALIGNMENT_CHECK :
+				klog( "Exception: EXCEPTION_ALIGNMENT_CHECK\n");
+				break;
+			case EXCEPTION_MACHINE_CHECK :
+				klog( "Exception: EXCEPTION_MACHINE_CHECK\n");
+				break;
+			case EXCEPTION_SIMD_FLOATING_POINT :
+				klog( "Exception: EXCEPTION_SIMD_FLOATING_POINT\n");
+				break;
+			case EXCEPTION_VIRT_EXCEPTION :
+				klog( "Exception: EXCEPTION_VIRT_EXCEPTION\n");
+				break;
+			case EXCEPTION_CONTROL_PROTECTION :
+				klog( "Exception: EXCEPTION_CONTROL_PROTECTION\n");
+				break;
+			case EXCEPTION_HV_INJECTION :
+				klog( "Exception: EXCEPTION_HV_INJECTION\n");
+				break;
+			case EXCEPTION_VMM_COMM :
+				klog( "Exception: EXCEPTION_VMM_COMM\n");
+				break;
+			case EXCEPTION_SECURITY :
+				klog( "Exception: EXCEPTION_SECURITY\n");
 				break;
             default:
                 klog( "Exception: Unhandled %02X.\n", interrupt_num );
@@ -161,28 +221,6 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				break;
 			case 0x31:
 				debugf( "-\n" );
-				break;
-			case 0x32:
-				
-				p = get_current_process();
-				p->stack_eip = stack->eip;
-				p->stack_at_interrupt = (uint32_t *)*_stack;
-
-				// debugf( "Int 0x32:\n" );
-				// debugf( "    From eip:    0x%08X\n", stack->eip );
-				// debugf( "    From _stack: 0x%08X\n", *_stack );
-				
-				p = switch_next_process();
-				*_stack = (interrupt_stack *)p->stack_at_interrupt;
-				(*_stack)->eip = p->stack_eip;
-
-				if( p->id != 0 ) {
-					set_process_pde( p->code_page_table );
-				}
-				
-				// debugf( "    To eip:      0x%08X\n", p->stack_eip );
-				// debugf( "    To saved st: 0x%08X\n", p->stack_at_interrupt );
-				// debugf( "    To _stack:   0x%08X\n", *_stack );
 				break;
 			case 0x99:
 				syscall_handler( _stack );
