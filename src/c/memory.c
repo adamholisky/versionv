@@ -16,6 +16,7 @@ uint32_t * kernel_virtual_memory_base = (uint32_t *)KERNEL_VIRT_HEAP_BASE;
 uint32_t * kernel_virtual_memory_top = (uint32_t *)KERNEL_VIRT_HEAP_BASE;
 
 page_directory_entry second_page_table[1024] __attribute__ ((aligned (4096)));
+page_directory_entry another_page_table[1024] __attribute__ ((aligned (4096)));
 
 page_directory_entry process_pd[1024] __attribute__ ((aligned (4096)));
 page_directory_entry process_pt[1024] __attribute__ ((aligned (4096)));
@@ -36,6 +37,8 @@ void memory_initalize( void ) {
 	uint32_t alloc_start = (uint32_t)&_kernel_end - KERNEL_VIRT_LOAD_BASE;
 
 	multiboot_info_t *mbh = get_multiboot_header();
+
+	memset( (void *)another_page_table, 0, 1024 );
 	
 
 	for( int i = 0; i < mbh->mmap_length; i = i + sizeof(multiboot_memory_map_t)) {
@@ -147,6 +150,10 @@ uint32_t * get_physical_memory_base( void ) {
 	return physical_memory_base;
 }
 
+uint32_t * get_physical_addr_from_virt( uint32_t * virt ) {
+	return (uint32_t)physical_memory_base + (uint32_t)virt - KERNEL_VIRT_HEAP_BASE;
+}
+
 /**
  * @brief Set the process PDE object
  * 
@@ -221,21 +228,33 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	page_directory_entry * pt;
 
 	// Find entry in BPD
-	pd_index = ((uint32_t)virt_addr >> 8) / 0x4000;
-	pt_index = ((uint32_t)virt_addr >> 12) % 0x4000;
+	pd_index = (uint32_t)virt_addr >> 22;
+	pt_index = ((uint32_t)virt_addr >> 12) & 0x03FF;
+
+	// for now cheese it, allow the page fault test
+	if( virt_addr > 0xFF000000 ) {
+		pt_addr_physical = (uint32_t)another_page_table - KERNEL_VIRT_LOAD_BASE;
+		pt = (page_directory_entry *)(another_page_table + pt_index);
+	} else {
+		pt = (page_directory_entry *)(second_page_table + pt_index);
+	}
 
 	// Set the page directory entry up correctly
 	pd = (page_directory_entry *)(&boot_page_directory + pd_index);
-	pd->present = 1;
-	pd->rw = 1;
-	pd->address = pt_addr_physical >> 11;
 
-	// Set the page table entry up correctly
-	// Physical memory allocation starts at 0x0640 0000 (100mb)
-	pt = (page_directory_entry *)(second_page_table + pt_index);
-	pt->present = 1;
-	pt->rw = 1;
-	pt->address = (uint32_t)phys_addr >> 11;
+	if( pd->present == 1 ) {
+		pt->present = 1;
+		pt->rw = 1;
+		pt->address = (uint32_t)phys_addr >> 11;
+	} else {
+		pd->present = 1;
+		pd->rw = 1;
+		pd->address = pt_addr_physical >> 11;
+
+		pt->present = 1;
+		pt->rw = 1;
+		pt->address = (uint32_t)phys_addr >> 11;
+	}
 
 	#ifdef kdebug_memory_pages_more
 

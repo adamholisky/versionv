@@ -13,6 +13,8 @@ uint32_t 		timer_var = 0;
 uint32_t		timer_counter = 0;
 interrupt_stack	new_post_interrupt_stack;
 bool			use_new_post_interrupt_stack = false;
+bool			handle_page_fault_test = false;
+uint32_t 		*page_fault_mem;
 
 void interrupts_initalize( void ) {
 	log_entry_enter();
@@ -79,16 +81,21 @@ void interrupts_initalize( void ) {
 
 	klog( "Enabled" );
 
+	page_fault_mem = kmalloc( 4 );
+
 	asm( "int %0" : : "i"(0x30) );
 	log_entry_exit();
 }
 
+/* #pragma GCC push_options
+#pragma GCC optimize ("O0") */
 void interrupt_default_handler( unsigned long interrupt_num, unsigned long route_code, interrupt_stack ** _stack ) {
 	process *p;
 	interrupt_stack * stack = *_stack;
 	uint32_t * uint32_stack_pointer = (uint32_t *)*_stack;
 	uint32_t fault_addr = 0;
 	page_fault_err *pf_err = NULL;
+	bool allow_return = false;
 	//dbC();
 	//debugf( "interrupt_default_handler:\n    interrupt_num: 0x%X\n    route_code: 0x%0X\n", interrupt_num, route_code );
 
@@ -135,10 +142,11 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				break;
 			case EXCEPTION_PAGE_FAULT:
 				debugf( "\n" );
-				klog( "Page Fault\n" );
+				klog( "Exception: EXCEPTION_PAGE_FAULT\n");
 				klog( "    %s() @ 0x%08X\n", kdebug_get_function_at( stack->eip ), stack->eip );
 
-				asm volatile("movl %%cr2,%0" :"=g"(fault_addr));
+				//asm volatile("movL %%cr2,%0" :"=m"(fault_addr));
+				fault_addr = get_cr2();
 				klog( "    Fault address: 0x%08X\n", fault_addr );
 
 				pf_err = (page_fault_err *)&stack->err;
@@ -152,7 +160,19 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				if( pf_err->shadow_stack ) { debugf( " shadow_stack "); }
 				if( pf_err->sgx ) { debugf( " sgx "); }
 				debugf( "\n" );	
-				klog( "Exception: EXCEPTION_PAGE_FAULT\n");
+
+				
+				if( handle_page_fault_test ) {
+					uint32_t *addr = (uint32_t *)fault_addr;
+					klog( "    Pagefault test caught 0x%08X\n", addr );
+
+					uint32_t *allocd = page_allocate( 1 );
+					uint32_t *phys_addr = get_physical_addr_from_virt( allocd );
+					page_map( addr, phys_addr );
+
+					allow_return = true;
+				}
+				
 				break;
 			case EXCEPTION_FLOATING_POINT :
 				klog( "Exception: EXCEPTION_FLOATING_POINT\n");
@@ -199,9 +219,12 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 			}
 		} */
 
-		klog( "Shutdown via END_IMMEDIATELY.\n");
-		outportb( 0xF4, 0x00 );
-
+		if( !allow_return ) {
+			klog( "Shutdown via END_IMMEDIATELY.\n");
+			outportb( 0xF4, 0x00 );
+		} else {
+			klog( "Allowing return...\n" );
+		}
     }
 
 	if( route_code == 0x02 ) {
@@ -235,7 +258,8 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 
 	outportb( 0x20, 0x20 );
 }
-
+/* #pragma GCC pop_options
+ */
 void replace_stack_on_int_exit( interrupt_stack * stack ) {
 	memcpy( &new_post_interrupt_stack, stack, sizeof( interrupt_stack ) );
 	use_new_post_interrupt_stack = true;
@@ -343,4 +367,23 @@ void interrupt_unmask_irq( uint8_t irq ) {
 			outportb( PIC_SECONDARY_DATA, pic2_irq_mask );
 		}
 	}
+}
+
+// let's see if we can handle a page fault correctly!
+void page_fault_test( void ) {
+	uint32_t *page_fault_pointer = (uint32_t *)0xFFFF0000;
+
+	handle_page_fault_test = true;
+
+	klog( "Starting test...\n" );
+	
+	*page_fault_pointer = 0xBBBBAAAA;
+
+	if( *page_fault_pointer == 0xBBBBAAAA) {
+		klog( "Test passed! page_fault_pointer @ 0x%08X == 0x%08X\n", page_fault_pointer, *page_fault_pointer );
+	} else {
+		klog( "Test failed? Ummm...\n" );
+	}
+	
+	handle_page_fault_test = false;
 }

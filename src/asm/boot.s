@@ -34,10 +34,12 @@
 	.align 4096
 	.global boot_page_directory
 	boot_page_directory:
-	.skip 4096
+	; .skip 4096
+	.fill 1024, 4, 0
 	.global boot_page_table
 	boot_page_table:
-	.skip 4096
+	.fill 1024, 4, 0
+	; .skip 4096
 
 .section .data
 .global GDTR
@@ -155,5 +157,10 @@ asm_invalidate_page:
 	movl	(%esp),%eax
 	invlpg	(%eax)
 	ret
+
+.global get_cr2
+get_cr2:
+	movl %cr2, %eax
+	ret;
 
 .size _asm_kernel_start, . - _asm_kernel_start

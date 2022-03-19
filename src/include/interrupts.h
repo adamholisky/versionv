@@ -199,6 +199,7 @@ void interrupt_mask_irq( uint8_t irq );
 void interrupt_unmask_irq( uint8_t irq );
 uint32_t get_timer_counter( void );
 void replace_stack_on_int_exit( interrupt_stack * stack );
-
+void page_fault_test( void );
+extern uint32_t get_cr3( void );
 
 #endif
