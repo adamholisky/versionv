@@ -16,6 +16,8 @@ bool			use_new_post_interrupt_stack = false;
 bool			handle_page_fault_test = false;
 uint32_t 		*page_fault_mem;
 
+extern uint32_t get_cr2( void );
+
 void interrupts_initalize( void ) {
 	log_entry_enter();
     remap_pic( 0x20, 0x28 );

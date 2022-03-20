@@ -151,7 +151,7 @@ uint32_t * get_physical_memory_base( void ) {
 }
 
 uint32_t * get_physical_addr_from_virt( uint32_t * virt ) {
-	return (uint32_t)physical_memory_base + (uint32_t)virt - KERNEL_VIRT_HEAP_BASE;
+	return (uint32_t *)((uint32_t)physical_memory_base + (uint32_t)virt - KERNEL_VIRT_HEAP_BASE);
 }
 
 /**
@@ -232,7 +232,7 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	pt_index = ((uint32_t)virt_addr >> 12) & 0x03FF;
 
 	// for now cheese it, allow the page fault test
-	if( virt_addr > 0xFF000000 ) {
+	if( (uint32_t)virt_addr > 0xFF000000 ) {
 		pt_addr_physical = (uint32_t)another_page_table - KERNEL_VIRT_LOAD_BASE;
 		pt = (page_directory_entry *)(another_page_table + pt_index);
 	} else {
