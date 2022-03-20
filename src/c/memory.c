@@ -8,6 +8,7 @@ extern page_directory_entry * boot_page_table;
 extern uint32_t _kernel_end;
 extern void asm_refresh_cr3( void );
 extern void asm_invalidate_page( void * p );
+extern void load_cr3( page_directory_entry * p );
 
 static const char * vv_magic_word = "VersionV";
 uint32_t * physical_memory_base = (uint32_t *)0xFFFFFFFF;
@@ -21,6 +22,9 @@ page_directory_entry another_page_table[1024] __attribute__ ((aligned (4096)));
 page_directory_entry process_pd[1024] __attribute__ ((aligned (4096)));
 page_directory_entry process_pt[1024] __attribute__ ((aligned (4096)));
 
+page_directory_entry kernel_page_directory[1024] __attribute__ ((aligned (4096)));
+page_directory_entry kernel_page_tables[1024][1024] __attribute__ ((aligned (4096)));
+
 //#define kdebug_memory
 //#define kdebug_memory_pages
 
@@ -31,6 +35,7 @@ page_directory_entry process_pt[1024] __attribute__ ((aligned (4096)));
 
 void memory_initalize( void ) {
 	log_entry_enter();
+	int i;
 
 	uint32_t mem_start = 0;
 	uint32_t mem_size = 0;
@@ -41,7 +46,7 @@ void memory_initalize( void ) {
 	memset( (void *)another_page_table, 0, 1024 );
 	
 
-	for( int i = 0; i < mbh->mmap_length; i = i + sizeof(multiboot_memory_map_t)) {
+	for( i = 0; i < mbh->mmap_length; i = i + sizeof(multiboot_memory_map_t)) {
         multiboot_memory_map_t* mm = (multiboot_memory_map_t*) (mbh->mmap_addr + i);
  
         if(mm->type == MULTIBOOT_MEMORY_AVAILABLE) {
@@ -60,6 +65,49 @@ void memory_initalize( void ) {
 
 	// Calculate the alloc start so it ends up on a 4k boundry
 	//alloc_start = (alloc_start % 0x1000) + alloc_start;
+
+
+
+	// Setup the kernel page tables
+	memset( (void *)kernel_page_directory, 0, 1024 );
+
+	for( i = 0; i < 780; i++ ) {
+		void *kpt = (void *)kernel_page_tables;
+		kpt = kpt + (i * 1024);
+		memset( kpt, 0, 1024);
+	}
+	
+	uint32_t start_address = 0;
+
+	for( int j = 0; j < 1024; j++ ) {
+		kernel_page_tables[768][j].present = 1;
+		kernel_page_tables[768][j].rw = 1;
+		kernel_page_tables[768][j].address = start_address >> 11;
+
+		kernel_page_tables[769][j].present = 1;
+		kernel_page_tables[769][j].rw = 1;
+		kernel_page_tables[769][j].address = (start_address + 0x00400000) >> 11;
+
+		kernel_page_tables[770][j].present = 1;
+		kernel_page_tables[770][j].rw = 1;
+		kernel_page_tables[770][j].address = (start_address + 0x00800000) >> 11;
+
+		start_address =+ 4096;
+	}
+
+	kernel_page_directory[768].present = 1;
+	kernel_page_directory[768].rw = 1;
+	kernel_page_directory[768].address = ((uint32_t)(kernel_page_tables) + 768 * 4096) - KERNEL_VIRT_LOAD_BASE >> 11;
+
+
+	kernel_page_directory[769].present = 1;
+	kernel_page_directory[769].rw = 1;
+	kernel_page_directory[769].address = ((uint32_t)(kernel_page_tables) + 769 * 4096) - KERNEL_VIRT_LOAD_BASE >> 11;
+
+	debugf( "add: %08X\n", (kernel_page_directory[768].address << 11));
+	debugf( "add: %08X\n", (kernel_page_directory[769].address << 11));
+
+	load_cr3( kernel_page_directory );
 
 	phsyical_memory_top = (uint32_t *)alloc_start;
 	physical_memory_base = (uint32_t *)alloc_start;
@@ -98,6 +146,7 @@ void memory_initalize( void ) {
 
 	#endif
 
+	/*
 	void * process_address_space = kmalloc( 0x1000 );
 	process_address_space = (void *)((uint32_t)process_address_space + 0x1000 - 0x0040);
 
@@ -137,6 +186,7 @@ void memory_initalize( void ) {
 	//#endif
 	
 	//dump_active_pt();
+	*/
 
 	log_entry_exit();
 }
@@ -240,7 +290,11 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	}
 
 	// Set the page directory entry up correctly
-	pd = (page_directory_entry *)(&boot_page_directory + pd_index);
+	pt = (page_directory_entry *)((uint32_t)kernel_page_tables + (pt_index * 1024));
+	pd = (page_directory_entry *)(&kernel_page_directory + pd_index);
+
+	debugf( "pd: 0x%08X\n", pd );
+	debugf( "pt: 0x%08X\n", pt );
 
 	if( pd->present == 1 ) {
 		pt->present = 1;

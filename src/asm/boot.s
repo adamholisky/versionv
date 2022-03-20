@@ -34,12 +34,15 @@
 	.align 4096
 	.global boot_page_directory
 	boot_page_directory:
-	; .skip 4096
 	.fill 1024, 4, 0
+
 	.global boot_page_table
 	boot_page_table:
 	.fill 1024, 4, 0
-	; .skip 4096
+
+	.global boot_page_table_two
+	boot_page_table_two:
+	.fill 1024, 4, 0
 
 .section .data
 .global GDTR
@@ -103,11 +106,29 @@ stage2:
 	addl $4096, %esi								/* Increment esi (physical address) by 4k */
 	addl $4, %edi									/* Increment the table entry by 1 (1 entry == 32 bits == 4 bytes) */
 	loop stage1
+
+setup_page_table_two:
+	movl $(boot_page_table_two - 0xC0000000), %edi		/* EDI gets the physical page table  address */
+	movl $0x00400000, %esi									/* 0 == first address mapped */
+	movl $1024, %ecx								/* Map our pages */
+
+stage1_page_table_two:	
+	cmpl $0, %ecx
+	dec %ecx
+
+stage2_page_table_two:
+	movl %esi, %edx									/* Load physical address into EDX */
+	orl  $0x003, %edx								/* Make the kernel's phsyical mem present and writeable */
+	movl %edx, (%edi)								/* Move table entry to address pointed to in edi */
+	addl $4096, %esi								/* Increment esi (physical address) by 4k */
+	addl $4, %edi									/* Increment the table entry by 1 (1 entry == 32 bits == 4 bytes) */
+	loop stage1_page_table_two
  
 stage3:
 	/* Setup physical 0 and 0xC0000000 to be present, writable so when we load CR3 we don't error out */
 	movl $(boot_page_table - 0xC0000000 + 0x003), boot_page_directory - 0xC0000000
 	movl $(boot_page_table - 0xC0000000 + 0x003), boot_page_directory - 0xC0000000 + 768 * 4
+	movl $(boot_page_table_two - 0xC0000000 + 0x003), boot_page_directory - 0xC0000000 + 769 * 4
 
 	movl $(boot_page_directory - 0xC0000000), %ecx	/* Correct for linker 0xC0000000 offset */
 	movl %ecx, %cr3
@@ -161,6 +182,13 @@ asm_invalidate_page:
 .global get_cr2
 get_cr2:
 	movl %cr2, %eax
+	ret;
+
+.global load_cr3
+load_cr3:
+	movl	4(%esp),%eax
+	sub		$0xC0000000, %eax
+	movl	%eax, %cr3
 	ret;
 
 .size _asm_kernel_start, . - _asm_kernel_start
