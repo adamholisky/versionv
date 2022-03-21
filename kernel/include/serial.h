@@ -2,6 +2,7 @@
 #define SERIAL_INCLUDED
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define serial_use_default_port 0
 
@@ -14,9 +15,12 @@
 #define serial_read( ) serial_read_port( serial_use_default_port )
 
 void initalize_serial( void );
+void serial_enable_interrupts( void );
 void serial_setup_port( uint32_t port );
 void serial_set_default_port( uint32_t port );
 void serial_write_port( char c, uint32_t port );
 char serial_read_port( uint32_t port );
+bool serial_buffer_is_ready( void );
+char serial_buffer_get_char( void );
 
 #endif

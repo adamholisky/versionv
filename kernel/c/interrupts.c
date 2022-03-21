@@ -76,6 +76,7 @@ void interrupts_initalize( void ) {
 	// unmask the timer
 	interrupt_unmask_irq( 0x20 );
 	interrupt_unmask_irq( 0x21 );
+	interrupt_unmask_irq( 0x23 );
 
     load_idtr();
 
@@ -241,6 +242,9 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 					timer_var = 0;
 				}
 				break;
+			case 0x23:
+				serial_interrupt_read_from_com2();
+				break;
 			case 0x30:
 				debugf( "+\n" );
 				break;
@@ -388,4 +392,13 @@ void page_fault_test( void ) {
 	}
 	
 	handle_page_fault_test = false;
+}
+
+
+void serial_interrupt_read_from_com2( void ) {
+	serial_read_port( COM2 );
+	
+	/* if( serial_buffer_is_ready() ) {
+		klog( "COM2: %c\n", serial_buffer_get_char() );
+	} */
 }

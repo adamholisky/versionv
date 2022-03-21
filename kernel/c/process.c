@@ -158,10 +158,10 @@ process * switch_next_process( void ) {
 
 	process_switch_counter++;
 
-	if( process_switch_counter > 100000 ) {
+/* 	if( process_switch_counter > 100000 ) {
 		klog( "END. Processes switched over 100,000 times.\n");
 		outportb( 0xF4, 0x00 );
-	}
+	} */
 
 	return (proc + proc_current);
 }

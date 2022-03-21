@@ -26,6 +26,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 	memory_initalize();
 	elf_initalize( (uint32_t)kernel_main );
 	interrupts_initalize();
+	serial_enable_interrupts();
 	process_initalize();
 	modules_initalize();
 
