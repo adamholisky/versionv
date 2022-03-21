@@ -36,7 +36,25 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 
 	page_fault_test();
 
+	debugf( "Serial console active.\n" );
+
 	while( true ) {
+		if( serial_buffer_is_ready() ) {
+			char c = serial_buffer_get_char();
+			
+			switch( c ) {
+				case 'a':
+					run_module_by_name( "alpha" );
+					break;
+				case 'p':
+					run_module_by_name( "ps" );
+					break;
+				case 'q':
+					debugf( "Goodbye, Dave.\n");
+					outportb( 0xF4, 0x00 );
+					break;
+			}
+		}
 		sched_yield();
 	}
 

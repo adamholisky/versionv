@@ -23,6 +23,11 @@ uint32_t syscall_sched_yield( interrupt_stack ** _stack ) {
 	
 	p = switch_next_process();
 	*_stack = (interrupt_stack *)p->stack_at_interrupt;
+
+	if( p->reset == true ) {
+		p->stack_eip = p->entry;
+	}
+
 	(*_stack)->eip = p->stack_eip;
 
 	#ifdef kdebug_sched_yield

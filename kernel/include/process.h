@@ -1,6 +1,8 @@
 #if !defined(PROCESS_INCLUDED)
 #define PROCESS_INCLUDED
 
+#include "memory.h"
+
 #define PROC_MAX	256
 #define PROC_KERNEL 0
 
@@ -11,6 +13,7 @@
 
 typedef struct {
 	bool present;
+	bool reset;
 	uint32_t id;
 	uint32_t status;
 	uint32_t stack_eip;
@@ -29,6 +32,8 @@ typedef struct {
 
 	page_directory_entry * code_page_table;
 	page_directory_entry * data_page_table;
+
+	char name[25];
 } process;
 
 extern void process_test_alpha( void );
@@ -39,7 +44,12 @@ uint32_t setup_kernel_process( void );
 uint32_t add_process( process p );
 process * get_current_process( void );
 process * switch_next_process( void );
+process * get_processes( void );
+void process_set_name( uint32_t proc_id, char * n );
+void process_set_active( uint32_t proc_id );
+void process_set_inactive( uint32_t proc_id );
 void process_test_a( void );
 void process_test_b( void );
+void process_reset( void );
 
 #endif

@@ -68,10 +68,20 @@ void load_module( kmodule *mod ) {
 	#ifdef kdebug_process_loader
 	klog( "Loading %s...\n", mod->name);
 	#endif
-	load_module_elf_image( (uint32_t *)mod->elf_object_start_addr );
+	uint32_t proc_id = load_module_elf_image( (uint32_t *)mod->elf_object_start_addr );
+	mod->process_id = proc_id;
+	process_set_name( proc_id, mod->name );
 }
 
-void load_module_elf_image( uint32_t *raw_data_start ) {
+void run_module_by_name( char * name ) {
+	for( int i = 0; i < num_modules; i++ ) {
+		if( strcmp( name, modules[i].name ) == 0 ) {
+			process_set_active( modules[i].process_id );
+		}
+	}
+}
+
+uint32_t load_module_elf_image( uint32_t *raw_data_start ) {
 	// Locate the raw data, confirm it's what we expect (ELF Ident)
 	// debugf( "raw_data_start: 0x%08X\n", raw_data_start);
 	// kdebug_peek_at( raw_data_start );
@@ -179,5 +189,8 @@ void load_module_elf_image( uint32_t *raw_data_start ) {
 
 	module_proc->stack_eip = (uint32_t)module_proc->entry;
 
-	add_process( *module_proc );
+	uint32_t process_id = add_process( *module_proc );
+	process_set_inactive( process_id );
+
+	return process_id;
 }

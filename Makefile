@@ -34,7 +34,7 @@ export
 
 all: install
 
-build/versionv.bin: $(SOURCES_C) $(SOURCES_ASM) $(OBJECTS_C) $(OBJECTS_ASM)
+build/versionv.bin: $(SOURCES_C) $(SOURCES_ASM) $(OBJECTS_C) $(OBJECTS_ASM) $(APPS)
 	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) vvlibc/vvlibc.o $(OBJECTS_C) $(OBJECTS_ASM) $(APPS)
 	objdump -x -d build/versionv.bin > objdump.txt
 	readelf -a build/versionv.bin > elfdump.txt
@@ -46,6 +46,10 @@ build/%.o: kernel/*/%.c
 build/%.o: kernel/*/%.s
 	$(eval OBJNAME := $(shell basename $@))
 	$(ASM) $(AFLAGS) -c $< -o build/$(OBJNAME)
+
+build_test_apps:
+	make -C test_apps genasm
+	make -C test_apps all
 
 install: build/versionv.bin
 	mount hd_mount_dir
@@ -70,3 +74,4 @@ clean:
 	rm -rf build/*.bin 
 	rm -rf objdump.txt
 	rm -rf versionv.iso
+	make -C test_apps clean

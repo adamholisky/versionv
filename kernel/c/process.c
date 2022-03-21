@@ -41,6 +41,7 @@ uint32_t setup_kernel_process( void ) {
 	proc[ PROC_KERNEL ].code_start_virt = kernel_main;
 	proc[ PROC_KERNEL ].data_start_phys = (void *)get_physical_memory_base();
 	proc[ PROC_KERNEL ].data_start_virt = (void *)KERNEL_VIRT_HEAP_BASE;
+	strcpy( proc[ PROC_KERNEL ].name, "kernel_main" );
 }
 
 uint32_t add_process( process p ) {
@@ -125,13 +126,17 @@ process * get_current_process( void ) {
 	return (proc + proc_current);
 }
 
+void process_set_name( uint32_t proc_id, char * n ) {
+	strcpy( proc[proc_id].name, n );
+}
+
 process * switch_next_process( void ) {
 	int proc_next = -1;
 
 	// do a simple round-robin process scheduler, array based for easy debugging
 	// starting from current proc spot + 1, iterate through end of possible processes
 	for( int i = proc_current + 1; i < PROC_MAX; i++ ) {
-		if( proc[i].present == true ) {
+		if( (proc[i].present == true) && (proc[i].status == 1) ) {
 			proc_next = i;
 			break;
 		}
@@ -141,7 +146,7 @@ process * switch_next_process( void ) {
 	// iterate up through and including the current process spot, so we can handle a single process system
 	if( proc_next == -1 ) {
 		for( int j = 0; j < proc_current + 1; j++ ) {
-			if( proc[j].present == true ) {
+			if( (proc[j].present == true) && (proc[j].status == 1) ) {
 				proc_next = j;
 				break;
 			}
@@ -164,6 +169,25 @@ process * switch_next_process( void ) {
 	} */
 
 	return (proc + proc_current);
+}
+
+void process_set_active( uint32_t proc_id ) {
+	proc[proc_id].status = 1;
+}
+
+void process_set_inactive( uint32_t proc_id ) {
+	proc[proc_id].status = 0;
+}
+
+void process_reset( void ) {
+	proc[proc_current].status = 0;
+	proc[proc_current].reset = true;
+
+	sched_yield();
+}
+
+process * get_processes( void ) {
+	return proc;
 }
 
 volatile void process_test_a( void ) {
