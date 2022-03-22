@@ -8,11 +8,13 @@ SOURCES_C = $(shell ls kernel/**/*.c)
 SOURCES_ASM = $(shell ls kernel/**/*.s)
 OBJECTS_C = $(patsubst %.c, build/%.o, $(shell ls kernel/**/*.c | xargs -n 1 basename))
 OBJECTS_ASM = $(patsubst %.s, build/%.o, $(shell ls kernel/**/*.s | xargs -n 1 basename))
-APPS := $(wildcard test_apps/build_objout/*.bin)
+OBJECTS_APPS = $(patsubst %.c, test_apps/build_objout/%.bin, $(shell ls test_apps/**/*.c | xargs -n 1 basename))
+APPS := $(wildcard test_apps/*.c)
+
 
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
-CFLAGS = -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/vvlibc/include $(C_OPTS) 
+CFLAGS = -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include $(C_OPTS) 
 ASM = /usr/local/osdev/bin/i686-elf-as
 AFLAGS = $(C_OPTS) -I$(ROOT_DIR)/kernel/include
 
@@ -34,27 +36,33 @@ export
 
 all: install
 
-build/versionv.bin: $(SOURCES_C) $(SOURCES_ASM) $(OBJECTS_C) $(OBJECTS_ASM) $(APPS)
-	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) vvlibc/vvlibc.o $(OBJECTS_C) $(OBJECTS_ASM) $(APPS)
+build/versionv.bin: build_test_apps $(SOURCES_C) $(SOURCES_ASM) $(OBJECTS_C) $(OBJECTS_ASM) $(APPS)
+	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_ASM) $(OBJECTS_APPS)
 	objdump -x -d build/versionv.bin > objdump.txt
 	readelf -a build/versionv.bin > elfdump.txt
 
 build/%.o: kernel/*/%.c
+	@>&2 echo [Build] $<
 	$(eval OBJNAME := $(shell basename $@))
-	$(CC) $(CFLAGS) -c $< -o build/$(OBJNAME)
+	$(CC) $(CFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
 build/%.o: kernel/*/%.s
+	@>&2 echo [Build] $<
 	$(eval OBJNAME := $(shell basename $@))
-	$(ASM) $(AFLAGS) -c $< -o build/$(OBJNAME)
+	$(ASM) $(AFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
 build_test_apps:
-	make -C test_apps genasm
-	make -C test_apps all
+	@>&2 echo [Build] Test apps
+	make -C test_apps >> $(BUILD_LOG) 
 
-install: build/versionv.bin
-	mount hd_mount_dir
+install:
+	@make installv2 >> $(BUILD_LOG)
+
+installv2: build/versionv.bin
+	@>&2 echo [Install] Installing to vv_hd.img
+	mount hd_mount_dir >> $(BUILD_LOG)
 	cp build/versionv.bin -f hd_mount_dir/boot/versionv.bin >> $(BUILD_LOG)
-	umount hd_mount_dir
+	umount hd_mount_dir >> $(BUILD_LOG)
 
 run: install
 	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL)
@@ -69,9 +77,10 @@ run_ng_debug: install
 	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NONE) $(QEMU_DEBUG_COMMON)
 
 clean:
-	rm -rf build.log
-	rm -rf build/*.o
-	rm -rf build/*.bin 
-	rm -rf objdump.txt
-	rm -rf versionv.iso
-	make -C test_apps clean
+	@rm -rf build.log
+	@rm -rf build/*.o >> $(BUILD_LOG)
+	@rm -rf build/*.bin >> $(BUILD_LOG)
+	@rm -rf objdump.txt >> $(BUILD_LOG)
+	@rm -rf versionv.iso >> $(BUILD_LOG)
+	@make -C test_apps clean >> $(BUILD_LOG)
+	@>&2 echo [Clean] Done

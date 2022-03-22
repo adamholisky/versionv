@@ -10,7 +10,7 @@ BUILD_LOG = $(ROOT_DIR)/build.log
 
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
-CFLAGS = -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I../vvlibc/include -I../kernel/include
+CFLAGS = -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I../libcvv/include -I../libvv/include -I../kernel/include
 LD = /usr/local/osdev/bin/i686-elf-ld
 ASM = /usr/local/osdev/bin/i686-elf-as
 ALAGS = $(C_OPTS) -I$(ROOT_DIR)/src/include
@@ -24,7 +24,7 @@ AMSWRAPERS := $(patsubst %.s, ./build_objout/_%.o, $(SOURCESASM))
 
 export
 
-all: $(OBJECTS) genapp
+all: genasm $(OBJECTS) genapp
 	echo $(OBJECTS)
 
 #	$(CC) -fPIC -c alpha.c -o build_objout/alpha.o

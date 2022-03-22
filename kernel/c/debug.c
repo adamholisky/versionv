@@ -116,6 +116,28 @@ void k_log( uint32_t system_id, uint32_t level, char * message, ... ) {
 	debug_out_off();
 }
 
+void kpanic( char * message, ... ) {
+	va_list args;
+
+	debug_out_on();
+
+	printf( "Kernel Panic: " );
+	va_start( args, message );
+	vprintf_( message, args );
+	va_end( args );
+	printf( "\n" );
+
+	debug_out_off();
+
+	printf( "Kernel Panic: " );
+	va_start( args, message );
+	vprintf_( message, args );
+	va_end( args );
+	printf( "\n" );
+
+	outportb( 0xF4, 0x00 );
+}
+
 
 char peek_char( char c ) {
 	if( (c > 31) && (c < 127) ) {
