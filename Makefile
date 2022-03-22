@@ -40,14 +40,15 @@ build/versionv.bin: build_test_apps $(SOURCES_C) $(SOURCES_ASM) $(OBJECTS_C) $(O
 	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_ASM) $(OBJECTS_APPS)
 	objdump -x -d build/versionv.bin > objdump.txt
 	readelf -a build/versionv.bin > elfdump.txt
+	@>&2 printf "[Build] Done\n"
 
 build/%.o: kernel/*/%.c
-	@>&2 echo [Build] $<
+	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
 	$(CC) $(CFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
 build/%.o: kernel/*/%.s
-	@>&2 echo [Build] $<
+	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
 	$(ASM) $(AFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
@@ -56,9 +57,10 @@ build_test_apps:
 	make -C test_apps >> $(BUILD_LOG) 
 
 install:
-	@make installv2 >> $(BUILD_LOG)
+	@make install_stage2 >> $(BUILD_LOG)
+	@>&2 printf "[Install] Done\n"
 
-installv2: build/versionv.bin
+install_stage2: build/versionv.bin
 	@>&2 echo [Install] Installing to vv_hd.img
 	mount hd_mount_dir >> $(BUILD_LOG)
 	cp build/versionv.bin -f hd_mount_dir/boot/versionv.bin >> $(BUILD_LOG)
