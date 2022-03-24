@@ -8,7 +8,7 @@ SOURCES_C = $(shell ls kernel/**/*.c)
 SOURCES_ASM = $(shell ls kernel/**/*.s)
 OBJECTS_C = $(patsubst %.c, build/%.o, $(shell ls kernel/**/*.c | xargs -n 1 basename))
 OBJECTS_ASM = $(patsubst %.s, build/%.o, $(shell ls kernel/**/*.s | xargs -n 1 basename))
-OBJECTS_APPS = $(patsubst %.c, test_apps/build_objout/%.bin, $(shell ls test_apps/**/*.c | xargs -n 1 basename))
+OBJECTS_APPS = $(patsubst %.c, test_apps/build_objout/%.bin, $(shell ls test_apps/*.c | xargs -n 1 basename))
 APPS := $(wildcard test_apps/*.c)
 
 

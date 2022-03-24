@@ -3,7 +3,7 @@
 
 #include "memory.h"
 
-#define PROC_MAX	256
+#define PROC_MAX	15
 #define PROC_KERNEL 0
 
 #define PROC_STATUS_UNKNOWN 0

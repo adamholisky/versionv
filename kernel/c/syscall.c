@@ -1,5 +1,6 @@
 #include "kernel.h"
 #include "syscall.h"
+#include "task.h"
 #include "interrupts.h"
 
 /*
@@ -23,8 +24,8 @@
 	4	sched_yield	
 */
 
-uint32_t syscall_handler( interrupt_stack ** _stack ) {
-	interrupt_stack *stack = *_stack;
+uint32_t syscall_handler( x86_context ** _stack ) {
+	x86_context *stack = *_stack;
 
 	switch( stack->eax ) {
 		case SYSCALL_READ:
@@ -40,6 +41,9 @@ uint32_t syscall_handler( interrupt_stack ** _stack ) {
 			break;
 		case SYSCALL_SBRK:
 			syscall_sbrk( stack->edi );
+			break;
+		case SYSCALL_END:
+			syscall_exit_from_wrapper();
 			break;
 		default:
 			klog( "Undefined syscall number: 0x%04X\n", stack->eax );

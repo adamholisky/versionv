@@ -1,5 +1,6 @@
 #include "kernel.h"
 #include "syscall.h"
+#include "task.h"
 
 #undef kdebug_sched_yield
 
@@ -9,33 +10,33 @@ uint32_t sched_yield( void ) {
 	return syscall( 4, 0, &args );
 }
 
-uint32_t syscall_sched_yield( interrupt_stack ** _stack ) {
-	interrupt_stack * stack = *_stack;
-	process *p;
+uint32_t syscall_sched_yield( x86_context ** _stack ) {
+	x86_context * stack = *_stack;
+	task *t;
 
-	p = get_current_process();
-	p->stack_eip = stack->eip;
-	p->stack_at_interrupt = (uint32_t *)*_stack;
+	t = get_current_task();
+	t->stack_eip = stack->eip;
+	t->context_at_interrupt = (uint32_t *)*_stack;
 
 	#ifdef kdebug_sched_yield
 	debugf( "pre switch:  *_stack: %08X  stack: %08X  eip: %08X\n", *_stack, stack, (*_stack)->eip );
 	#endif
 	
-	p = switch_next_process();
-	*_stack = (interrupt_stack *)p->stack_at_interrupt;
+	t = switch_next_task();
+	*_stack = (x86_context *)t->context_at_interrupt;
 
-	if( p->reset == true ) {
+/* 	if( p->reset == true ) {
 		p->stack_eip = p->entry;
-	}
+	} */
 
-	(*_stack)->eip = p->stack_eip;
+	(*_stack)->eip = t->stack_eip;
 
 	#ifdef kdebug_sched_yield
 	debugf( "post switch: *_stack: %08X  stack: %08X  eip: %08X\n", *_stack, stack, (*_stack)->eip );
 	#endif
 
-	if( p->id != 0 ) {
-		set_process_pde( p->code_page_table );
+	if( t->id != 0 ) {
+		set_task_pde( t->code_page_table );
 	}
 
 	#ifdef kdebug_sched_yield

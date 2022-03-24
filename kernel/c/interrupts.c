@@ -1,5 +1,6 @@
 #include "kernel.h"
 #include "interrupts.h"
+#include "task.h"
 #include "syscall.h"
 
 idtr            sIDTR;
@@ -11,8 +12,8 @@ bool 	        gpf_fired = false;
 bool			can_switch = true;
 uint32_t 		timer_var = 0;
 uint32_t		timer_counter = 0;
-interrupt_stack	new_post_interrupt_stack;
-bool			use_new_post_interrupt_stack = false;
+x86_context		new_post_x86_context;
+bool			use_new_post_x86_context = false;
 bool			handle_page_fault_test = false;
 uint32_t 		*page_fault_mem;
 
@@ -92,9 +93,9 @@ void interrupts_initalize( void ) {
 
 /* #pragma GCC push_options
 #pragma GCC optimize ("O0") */
-void interrupt_default_handler( unsigned long interrupt_num, unsigned long route_code, interrupt_stack ** _stack ) {
-	process *p;
-	interrupt_stack * stack = *_stack;
+void interrupt_default_handler( unsigned long interrupt_num, unsigned long route_code, x86_context ** _stack ) {
+	task *p;
+	x86_context * stack = *_stack;
 	uint32_t * uint32_stack_pointer = (uint32_t *)*_stack;
 	uint32_t fault_addr = 0;
 	page_fault_err *pf_err = NULL;
@@ -266,9 +267,9 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 }
 /* #pragma GCC pop_options
  */
-void replace_stack_on_int_exit( interrupt_stack * stack ) {
-	memcpy( &new_post_interrupt_stack, stack, sizeof( interrupt_stack ) );
-	use_new_post_interrupt_stack = true;
+void replace_stack_on_int_exit( x86_context * stack ) {
+	memcpy( &new_post_x86_context, stack, sizeof( x86_context ) );
+	use_new_post_x86_context = true;
 }
 
 uint32_t get_timer_counter( void ) {

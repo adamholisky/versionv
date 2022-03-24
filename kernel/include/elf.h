@@ -115,8 +115,10 @@ Elf32_Shdr* elf_find_got_plt(uint32_t* mem, Elf32_Ehdr* elf_header);
 char* elf_get_section_name(uint32_t* mem, Elf32_Ehdr* elf_header, uint32_t sec_num);
 void elf_load_program_headers(Elf32_Ehdr* elf_header, uint8_t* process_space, uint8_t* data);
 char* elf_get_sym_name_from_index(uint32_t* mem, Elf32_Ehdr* elf_header, uint32_t index);
+uint16_t elf_get_sym_shndx_from_index(uint32_t* mem, Elf32_Ehdr* elf_header, uint32_t index);
 Elf32_Shdr * elf_find_sym_strtab(uint32_t* mem, Elf32_Ehdr* elf_header);
 Elf32_Shdr * elf_find_dynstr_tab(uint32_t* mem, Elf32_Ehdr* elf_header);
+uint16_t elf_get_sym_value_from_index(uint32_t* mem, Elf32_Ehdr* elf_header, uint32_t index);
 
 
 #endif

@@ -1,6 +1,7 @@
 #include "kernel.h"
 #include "interrupts.h"
 #include "syscall.h"
+#include "task.h"
 
 extern uint32_t * boot_page_directory;
 extern uint32_t * boot_page_table;
@@ -34,6 +35,17 @@ void process_initalize( void ) {
 }
 
 uint32_t setup_kernel_process( void ) {
+	task temp_kernel_task;
+	temp_kernel_task.id = TASK_ID_KERNEL;
+	temp_kernel_task.type = TASK_TYPE_PROCESS;
+	temp_kernel_task.code_start_phys = kernel_main - KERNEL_VIRT_LOAD_BASE;
+	temp_kernel_task.code_start_virt = kernel_main;
+	temp_kernel_task.data_start_phys = (void *)get_physical_memory_base();
+	temp_kernel_task.data_start_virt = (void *)KERNEL_VIRT_HEAP_BASE;
+	strcpy( temp_kernel_task.name, "kernel_main" );
+
+	task_add( &temp_kernel_task );
+
 	proc[ PROC_KERNEL ].present = true;
 	proc[ PROC_KERNEL ].status = 1;
 	proc[ PROC_KERNEL ].id = PROC_KERNEL;

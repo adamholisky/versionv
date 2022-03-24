@@ -24,7 +24,7 @@ AMSWRAPERS := $(patsubst %.s, ./build_objout/_%.o, $(SOURCESASM))
 
 export
 
-all: genasm $(OBJECTS) genapp
+all: genasm genappwrapper $(OBJECTS) genapp
 	echo $(OBJECTS)
 
 #	$(CC) -fPIC -c alpha.c -o build_objout/alpha.o
@@ -32,7 +32,9 @@ all: genasm $(OBJECTS) genapp
 
 ./build_objout/%.o : %.c
 	$(CC) -fPIC $(CFLAGS) -c $< -o $@
-	$(LD) -nostdlib -fPIC -shared -o ./build_objout/$*.vvs ./build_objout/$*.o
+	$(LD) -nostdlib -fPIC -shared --entry=__start -o ./build_objout/$*.vvs ./build_temp/app.o ./build_objout/$*.o
+	objdump -x -d build_objout/$*.vvs > ./build_temp/$*_objdump.txt
+	readelf -a build_objout/$*.vvs > ./build_temp/$*_elfdump.txt
 	$(CC) -fPIC $(CFLAGS) -c ./build_temp/$*.s -o ./build_objout/$*.bin
 	
 genasm:
@@ -41,10 +43,14 @@ genasm:
 genapp:
 	./buildapp.sh
 
+genappwrapper:
+	$(CC) -fPIC $(CFLAGS) -c ./build_support/app.c -o ./build_temp/app.o
+
 clean:
 	rm -rf build_objout/*.o
 	rm -rf build_objout/*.vvs
 	rm -rf build_objout/*.bin
 	rm -rf build_temp/*.s
+	rm -rf build_temp/*.o
 
 # TODO:  objcopy --input binary --output elf32-i386 --binary i386 magic.txt magic_txt.o

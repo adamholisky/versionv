@@ -1,12 +1,14 @@
 #include "kernel.h"
 #include "multiboot.h"
 #include "elf.h"
+#include "task.h"
 #include "interrupts.h"
 #include "pci.h"
 #include "intel8254.h"
 #include "vv_list.h"
 #include "ata.h"
 #include <cpuid.h>
+#include "task.h"
 #include "syscall.h"
 #include "debug.h"
 
@@ -27,7 +29,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 	elf_initalize( (uint32_t)kernel_main );
 	interrupts_initalize();
 	serial_enable_interrupts();
-	process_initalize();
+	task_initalize();
+	//process_initalize();
 	modules_initalize();
 
 	pci_initalize();
@@ -37,10 +40,15 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 	page_fault_test();
 
 	debugf( "Serial console active.\n" );
+	debugf( "\nVersionV: " );
+
+	bool show_carrot = false;
 
 	while( true ) {
 		if( serial_buffer_is_ready() ) {
 			char c = serial_buffer_get_char();
+
+			debugf( "%c", c );
 			
 			switch( c ) {
 				case 'a':
@@ -50,12 +58,22 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 					run_module_by_name( "ps" );
 					break;
 				case 'q':
-					debugf( "Goodbye, Dave.\n");
+					debugf( "\nGoodbye, Dave.\n");
 					outportb( 0xF4, 0x00 );
 					break;
 			}
+
+			debugf( "\n" );
+			show_carrot = true;
 		}
 		sched_yield();
+
+		if( show_carrot ) {
+			debugf( "VersionV: " );
+			show_carrot = false;
+		}
+		
+		//debugf( "!" );
 	}
 
 	#ifdef END_IMMEDIATELY

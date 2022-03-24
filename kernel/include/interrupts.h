@@ -104,7 +104,7 @@ typedef struct {
 	uint32_t	eflags;
 	uint32_t  	useresp;
 	uint32_t	ss;
-} interrupt_stack ;
+} x86_context;
 
 union x86flags {
 	uint32_t	all_flags;
@@ -190,7 +190,7 @@ extern void interrupt_0x32( void );
 extern void interrupt_0x99( void );
 
 void interrupts_initalize( void );
-void interrupt_default_handler( unsigned long interrupt_num, unsigned long route_code, interrupt_stack ** _stack );
+void interrupt_default_handler( unsigned long interrupt_num, unsigned long route_code, x86_context ** _stack );
 void load_idtr( void );
 void add_interrupt( int number, void (*handler)(), uint32_t dpl );
 void load_exceptions();
@@ -198,7 +198,7 @@ void remap_pic( int pic1, int pic2 );
 void interrupt_mask_irq( uint8_t irq );
 void interrupt_unmask_irq( uint8_t irq );
 uint32_t get_timer_counter( void );
-void replace_stack_on_int_exit( interrupt_stack * stack );
+void replace_stack_on_int_exit( x86_context * stack );
 void page_fault_test( void );
 extern uint32_t get_cr3( void );
 void serial_interrupt_read_from_com2( void );

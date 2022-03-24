@@ -79,13 +79,13 @@ char * kdebug_peek_at( uint32_t addr ) {
 	char *ptr = (char *)addr;
 
 	for( int x = 0; x < 20; x++ ) {
-		debugf( "0x%08X    %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X    %c%c%c%c%c%c%c%c%c%c\n",
-		addr + (x * 10), 
-		*(ptrn + 0), *(ptrn + 1), *(ptrn + 2), *(ptrn + 3), *(ptrn + 4), *(ptrn + 5), *(ptrn + 6), *(ptrn + 7), *(ptrn + 8), *(ptrn + 9), 
-		peek_char( *(ptr + 0) ), peek_char( *(ptr + 1) ), peek_char( *(ptr + 2) ), peek_char( *(ptr + 3) ), peek_char( *(ptr + 4) ), peek_char( *(ptr + 5) ), peek_char( *(ptr + 6) ), peek_char( *(ptr + 7) ), peek_char( *(ptr + 8) ), peek_char( *(ptr + 9) ) );
+		debugf( "0x%08X    %02X %02X %02X %02X    %02X %02X %02X %02X    %c%c%c%c%c%c%c%c\n",
+		addr + (x * 8), 
+		*(ptrn + 0), *(ptrn + 1), *(ptrn + 2), *(ptrn + 3), *(ptrn + 4), *(ptrn + 5), *(ptrn + 6), *(ptrn + 7), 
+		peek_char( *(ptr + 0) ), peek_char( *(ptr + 1) ), peek_char( *(ptr + 2) ), peek_char( *(ptr + 3) ), peek_char( *(ptr + 4) ), peek_char( *(ptr + 5) ), peek_char( *(ptr + 6) ), peek_char( *(ptr + 7) ) );
 
-		ptr = ptr + 10;
-		ptrn = ptrn + 10;
+		ptr = ptr + 8;
+		ptrn = ptrn + 8;
 	}
 
 	printf( "\n" );

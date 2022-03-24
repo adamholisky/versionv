@@ -1,8 +1,8 @@
 #include "kernel.h"
 #include "debug.h"
-#include "process.h"
 #include "elf.h"
 #include "modules.h"
+#include "task.h"
 
 #undef kdebug_process_loader
 
@@ -68,15 +68,16 @@ void load_module( kmodule *mod ) {
 	#ifdef kdebug_process_loader
 	klog( "Loading %s...\n", mod->name);
 	#endif
-	uint32_t proc_id = load_module_elf_image( (uint32_t *)mod->elf_object_start_addr );
-	mod->process_id = proc_id;
-	process_set_name( proc_id, mod->name );
+	uint32_t task_id = load_module_elf_image( (uint32_t *)mod->elf_object_start_addr );
+	mod->task_id = task_id;
+	task_set_name( task_id, mod->name );
 }
 
 void run_module_by_name( char * name ) {
 	for( int i = 0; i < num_modules; i++ ) {
 		if( strcmp( name, modules[i].name ) == 0 ) {
-			process_set_active( modules[i].process_id );
+			//klog( "running %d\n", modules[i].task_id );
+			task_initalize_and_run( modules[i].task_id );
 		}
 	}
 }
@@ -87,19 +88,19 @@ uint32_t load_module_elf_image( uint32_t *raw_data_start ) {
 	// kdebug_peek_at( raw_data_start );
 
 	// Setup the process
-	process *module_proc = kmalloc( sizeof( process ) );
+	task *module_task = kmalloc( sizeof( task ) );
 
-	module_proc->code_start_virt = page_allocate( 4 );
-	module_proc->code_start_phys = module_proc->code_start_virt - (void *)KERNEL_VIRT_HEAP_BASE + (void *)get_physical_memory_base();
-	module_proc->stack = page_allocate( 1 );
-	module_proc->data_start_virt = page_allocate( 4 );
-	module_proc->data_start_phys = module_proc->data_start_virt - (void *)KERNEL_VIRT_HEAP_BASE + (void *)get_physical_memory_base();
+	module_task->code_start_virt = page_allocate( 4 );
+	module_task->code_start_phys = module_task->code_start_virt - (void *)KERNEL_VIRT_HEAP_BASE + (void *)get_physical_memory_base();
+	module_task->stack = page_allocate( 1 );
+	module_task->data_start_virt = page_allocate( 4 );
+	module_task->data_start_phys = module_task->data_start_virt - (void *)KERNEL_VIRT_HEAP_BASE + (void *)get_physical_memory_base();
 
-	klog( "code_start_virt: 0x%08X\n", module_proc->code_start_virt );
-	klog( "code_start_phys: 0x%08X\n", module_proc->code_start_phys );
+	klog( "code_start_virt: 0x%08X\n", module_task->code_start_virt );
+	klog( "code_start_phys: 0x%08X\n", module_task->code_start_phys );
 
 	// Parse raw data to identify secrtions to load, and to copy them into memory
-	uint8_t *process_space = module_proc->code_start_virt;
+	uint8_t *process_space = module_task->code_start_virt;
 	Elf32_Ehdr *elf_header = (Elf32_Ehdr *)raw_data_start;
 
 	#ifdef kdebug_process_loader
@@ -152,7 +153,9 @@ uint32_t load_module_elf_image( uint32_t *raw_data_start ) {
         klog("Could not find .got.plt section\n");
     }
 
-	module_proc->entry = (void *)elf_header->e_entry;
+	module_task->entry = (void *)elf_header->e_entry;
+	
+	debugf( "entry: 0x%08X\n", module_task->entry);
 	
     if (rel_plt == NULL) {
 		klog( "rel_pplt is null\n");
@@ -165,12 +168,22 @@ uint32_t load_module_elf_image( uint32_t *raw_data_start ) {
 	// Loop through the rel_plt and updating the corresponding GOT entry
 	for(int rel_num = 0; rel_num < (rel_plt->sh_size/4)/2; rel_num++) {
 		Elf32_Rel *elf_rel = (Elf32_Rel*)((uint8_t*)raw_data_start + rel_plt->sh_offset + (rel_num * sizeof(Elf32_Rel)));
-		uint32_t *got_entry = (uint32_t*)(process_space + elf_rel->r_offset);
-		*got_entry = (uint32_t)kdebug_get_symbol_addr( elf_get_sym_name_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) );
+
+		if( elf_get_sym_shndx_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) == 0 ) {
+			uint32_t *got_entry = (uint32_t*)(process_space + elf_rel->r_offset);
+			*got_entry = (uint32_t)kdebug_get_symbol_addr( elf_get_sym_name_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) );
+
+			klog( "rel sym: 0x%08X, %d, %d, %X, %s\n", elf_rel->r_offset, ELF32_R_TYPE(elf_rel->r_info), ELF32_R_SYM(elf_rel->r_info),  elf_get_sym_shndx_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)), elf_get_sym_name_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) );
+		} else {
+			// Link main -- I think I'm doing something wrong by having to do this, maybe not handling got right?
+			uint32_t *got_entry = (uint32_t*)(process_space + elf_rel->r_offset);
+
+			*got_entry = (uint32_t)elf_get_sym_value_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info));
+		}
 		
-		#ifdef kdebug_process_loader
-		klog( "rel sym: 0x%08X, %X, %s\n", elf_rel->r_offset, ELF32_R_SYM(elf_rel->r_info), elf_get_sym_name_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) );
-		#endif
+		//#ifdef kdebug_process_loader
+		
+		//#endif
 	}
 
 	#ifdef kdebug_process_loader
@@ -182,15 +195,17 @@ uint32_t load_module_elf_image( uint32_t *raw_data_start ) {
 	debugf("\n\n");
 	
 
-	debugf( "    module_proc entry:      0x%08X\n", module_proc->entry);
-	debugf( "    module_proc code virt:  0x%08X\n", module_proc->code_start_virt );
-	debugf( "    module_proc stack virt: 0x%08X\n", module_proc->stack );
+	debugf( "    module_task entry:      0x%08X\n", module_task->entry);
+	debugf( "    module_task code virt:  0x%08X\n", module_task->code_start_virt );
+	debugf( "    module_task stack virt: 0x%08X\n", module_task->stack );
 	#endif
 
-	module_proc->stack_eip = (uint32_t)module_proc->entry;
+	module_task->context.eip = (uint32_t)module_task->entry;
 
-	uint32_t process_id = add_process( *module_proc );
-	process_set_inactive( process_id );
+	module_task->type = TASK_TYPE_MODULE;
 
-	return process_id;
+	uint32_t task_id = task_add( module_task );
+	task_set_modhack( task_id );
+
+	return task_id;
 }

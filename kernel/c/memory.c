@@ -159,7 +159,7 @@ uint32_t * get_physical_addr_from_virt( uint32_t * virt ) {
  * 
  * @param pte Pointer to the dage_directory_entry to copy into the main process PTE
  */
-void set_process_pde( page_directory_entry * pte ) {
+void set_task_pde( page_directory_entry * pte ) {
 	page_directory_entry * pde = (page_directory_entry *)&boot_page_directory;
 
 /* 	pde->present = 1;

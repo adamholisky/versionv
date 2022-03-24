@@ -1,0 +1,165 @@
+
+build_objout/beta.vvs:     file format elf32-i386
+build_objout/beta.vvs
+architecture: i386, flags 0x00000150:
+HAS_SYMS, DYNAMIC, D_PAGED
+start address 0x00000240
+
+Program Header:
+    LOAD off    0x00000000 vaddr 0x00000000 paddr 0x00000000 align 2**12
+         filesz 0x000002a8 memsz 0x000002a8 flags r-x
+    LOAD off    0x000002a8 vaddr 0x000012a8 paddr 0x000012a8 align 2**12
+         filesz 0x0000009c memsz 0x0000009c flags rw-
+ DYNAMIC off    0x000002a8 vaddr 0x000012a8 paddr 0x000012a8 align 2**2
+         filesz 0x00000080 memsz 0x00000080 flags rw-
+
+Dynamic Section:
+  AUXILIARY            PIC
+  HASH                 0x00000094
+  STRTAB               0x00000120
+  SYMTAB               0x000000c0
+  STRSZ                0x00000037
+  SYMENT               0x00000010
+  PLTGOT               0x00001328
+  PLTRELSZ             0x00000020
+  PLTREL               0x00000011
+  JMPREL               0x00000158
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .hash         0000002c  00000094  00000094  00000094  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  1 .dynsym       00000060  000000c0  000000c0  000000c0  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  2 .dynstr       00000037  00000120  00000120  00000120  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  3 .rel.plt      00000020  00000158  00000158  00000158  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  4 .plt          00000050  00000180  00000180  00000180  2**4
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  5 .text         00000097  000001d0  000001d0  000001d0  2**4
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  6 .rodata       0000003d  00000268  00000268  00000268  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  7 .eh_frame     00000000  000002a8  000002a8  000002a8  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  8 .dynamic      00000080  000012a8  000012a8  000002a8  2**2
+                  CONTENTS, ALLOC, LOAD, DATA
+  9 .got.plt      0000001c  00001328  00001328  00000328  2**2
+                  CONTENTS, ALLOC, LOAD, DATA
+ 10 .comment      00000012  00000000  00000000  00000344  2**0
+                  CONTENTS, READONLY
+ 11 .debug_aranges 00000040  00000000  00000000  00000356  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 12 .debug_info   000001b5  00000000  00000000  00000396  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 13 .debug_abbrev 00000133  00000000  00000000  0000054b  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 14 .debug_line   000000e8  00000000  00000000  0000067e  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 15 .debug_frame  00000094  00000000  00000000  00000768  2**2
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 16 .debug_str    00000121  00000000  00000000  000007fc  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 17 .debug_line_str 000000c2  00000000  00000000  0000091d  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 18 .debug_rnglists 00000013  00000000  00000000  000009df  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+SYMBOL TABLE:
+00000000 l    df *ABS*	00000000 app.c
+00000000 l    df *ABS*	00000000 beta.c
+000002a0 l     O .rodata	00000005 __FUNCTION__.0
+00000000 l    df *ABS*	00000000 
+000012a8 l     O .dynamic	00000000 _DYNAMIC
+00000263 l     F .text	00000000 __x86.get_pc_thunk.bx
+00001328 l     O .got.plt	00000000 _GLOBAL_OFFSET_TABLE_
+00000000         *UND*	00000000 set_debug_output
+00000240 g     F .text	00000023 __start
+000001d0 g     F .text	00000067 main
+00000000         *UND*	00000000 printf_
+00000000         *UND*	00000000 sched_yield
+
+
+
+Disassembly of section .plt:
+
+00000180 <set_debug_output@plt-0x10>:
+ 180:	ff b3 04 00 00 00    	push   0x4(%ebx)
+ 186:	ff a3 08 00 00 00    	jmp    *0x8(%ebx)
+ 18c:	00 00                	add    %al,(%eax)
+	...
+
+00000190 <set_debug_output@plt>:
+ 190:	ff a3 0c 00 00 00    	jmp    *0xc(%ebx)
+ 196:	68 00 00 00 00       	push   $0x0
+ 19b:	e9 e0 ff ff ff       	jmp    180 <set_debug_output@plt-0x10>
+
+000001a0 <main@plt>:
+ 1a0:	ff a3 10 00 00 00    	jmp    *0x10(%ebx)
+ 1a6:	68 08 00 00 00       	push   $0x8
+ 1ab:	e9 d0 ff ff ff       	jmp    180 <set_debug_output@plt-0x10>
+
+000001b0 <printf_@plt>:
+ 1b0:	ff a3 14 00 00 00    	jmp    *0x14(%ebx)
+ 1b6:	68 10 00 00 00       	push   $0x10
+ 1bb:	e9 c0 ff ff ff       	jmp    180 <set_debug_output@plt-0x10>
+
+000001c0 <sched_yield@plt>:
+ 1c0:	ff a3 18 00 00 00    	jmp    *0x18(%ebx)
+ 1c6:	68 18 00 00 00       	push   $0x18
+ 1cb:	e9 b0 ff ff ff       	jmp    180 <set_debug_output@plt-0x10>
+
+Disassembly of section .text:
+
+000001d0 <main>:
+ 1d0:	8d 4c 24 04          	lea    0x4(%esp),%ecx
+ 1d4:	83 e4 f0             	and    $0xfffffff0,%esp
+ 1d7:	ff 71 fc             	push   -0x4(%ecx)
+ 1da:	55                   	push   %ebp
+ 1db:	89 e5                	mov    %esp,%ebp
+ 1dd:	53                   	push   %ebx
+ 1de:	e8 80 00 00 00       	call   263 <__x86.get_pc_thunk.bx>
+ 1e3:	81 c3 45 11 00 00    	add    $0x1145,%ebx
+ 1e9:	51                   	push   %ecx
+ 1ea:	83 ec 0c             	sub    $0xc,%esp
+ 1ed:	6a 01                	push   $0x1
+ 1ef:	e8 9c ff ff ff       	call   190 <set_debug_output@plt>
+ 1f4:	83 c4 0c             	add    $0xc,%esp
+ 1f7:	8d 83 78 ef ff ff    	lea    -0x1088(%ebx),%eax
+ 1fd:	6a 08                	push   $0x8
+ 1ff:	50                   	push   %eax
+ 200:	8d 83 40 ef ff ff    	lea    -0x10c0(%ebx),%eax
+ 206:	50                   	push   %eax
+ 207:	e8 a4 ff ff ff       	call   1b0 <printf_@plt>
+ 20c:	8d 83 5d ef ff ff    	lea    -0x10a3(%ebx),%eax
+ 212:	89 04 24             	mov    %eax,(%esp)
+ 215:	e8 96 ff ff ff       	call   1b0 <printf_@plt>
+ 21a:	c7 04 24 00 00 00 00 	movl   $0x0,(%esp)
+ 221:	e8 6a ff ff ff       	call   190 <set_debug_output@plt>
+ 226:	83 c4 10             	add    $0x10,%esp
+ 229:	8d b4 26 00 00 00 00 	lea    0x0(%esi,%eiz,1),%esi
+ 230:	e8 8b ff ff ff       	call   1c0 <sched_yield@plt>
+ 235:	eb f9                	jmp    230 <main+0x60>
+ 237:	66 90                	xchg   %ax,%ax
+ 239:	66 90                	xchg   %ax,%ax
+ 23b:	66 90                	xchg   %ax,%ax
+ 23d:	66 90                	xchg   %ax,%ax
+ 23f:	90                   	nop
+
+00000240 <__start>:
+ 240:	55                   	push   %ebp
+ 241:	89 e5                	mov    %esp,%ebp
+ 243:	53                   	push   %ebx
+ 244:	e8 1a 00 00 00       	call   263 <__x86.get_pc_thunk.bx>
+ 249:	81 c3 df 10 00 00    	add    $0x10df,%ebx
+ 24f:	83 ec 04             	sub    $0x4,%esp
+ 252:	e8 49 ff ff ff       	call   1a0 <main@plt>
+ 257:	b8 06 00 00 00       	mov    $0x6,%eax
+ 25c:	cd 99                	int    $0x99
+ 25e:	8b 5d fc             	mov    -0x4(%ebp),%ebx
+ 261:	c9                   	leave  
+ 262:	c3                   	ret    
+
+00000263 <__x86.get_pc_thunk.bx>:
+ 263:	8b 1c 24             	mov    (%esp),%ebx
+ 266:	c3                   	ret    

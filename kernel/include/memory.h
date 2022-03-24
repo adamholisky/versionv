@@ -21,7 +21,7 @@ typedef struct {
 void memory_initalize( void );
 uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr );
 uint32_t * page_allocate( uint32_t num );
-void set_process_pde( page_directory_entry * pte );
+void set_task_pde( page_directory_entry * pte );
 uint32_t * get_physical_memory_base( void );
 void dump_active_pt( void );
 uint32_t * get_physical_addr_from_virt( uint32_t * virt );
