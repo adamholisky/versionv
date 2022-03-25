@@ -56,6 +56,7 @@ void task_initalize( void );
 int32_t task_add( task *t );
 task * switch_next_task( void );
 task * get_current_task( void );
+int32_t get_current_task_id( void );
 void task_set_name( int32_t task_id, char * n );
 void task_set_active( int32_t task_id );
 void task_set_inactive( int32_t task_id );
@@ -64,5 +65,7 @@ task * get_tasks( void );
 void task_initalize_and_run( int32_t task_id );
 char * task_type_to_string( int32_t type );
 char * task_status_to_string( int32_t status );
+void task_exit( void );
+void task_end_from_wrapper( void );
 
 #endif

@@ -33,7 +33,7 @@ all: genasm genappwrapper $(OBJECTS) genapp
 ./build_objout/%.o : %.c
 	$(CC) -fPIC $(CFLAGS) -c $< -o $@
 	$(LD) -nostdlib -fPIC -shared --entry=__start -o ./build_objout/$*.vvs ./build_temp/app.o ./build_objout/$*.o
-	objdump -x -d build_objout/$*.vvs > ./build_temp/$*_objdump.txt
+	objdump -x -s -d build_objout/$*.vvs > ./build_temp/$*_objdump.txt
 	readelf -a build_objout/$*.vvs > ./build_temp/$*_elfdump.txt
 	$(CC) -fPIC $(CFLAGS) -c ./build_temp/$*.s -o ./build_objout/$*.bin
 	

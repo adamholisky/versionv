@@ -15,3 +15,10 @@ uint32_t syscall_exit_from_wrapper( void ) {
 
 	return SYSCALL_RT_SUCCESS;
 }
+
+uint32_t syscall_exit( int code ) {
+	debugf( "Exit Code: %d\n", code );
+	task_exit();
+
+	return SYSCALL_RT_SUCCESS;
+}

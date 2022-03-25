@@ -185,8 +185,25 @@ void task_end_from_wrapper( void ) {
 	sched_yield();
 }
 
+void task_exit( void ) {
+	tasks[task_current].status = TASK_STATUS_MODHACK;
+
+	// unload memory, etc...
+
+	sched_yield();
+}
+
+int32_t get_current_task_id( void ) {
+	return task_current;
+}
+
 void task_initalize_and_run( int32_t task_id ) {
 	tasks[task_id].status = TASK_STATUS_INACTIVE;
+
+	// setup null return so stack traces function correctly in tasks.
+/* 	uint32_t * task_stack = tasks[task_id].stack_base;
+	*task_stack = 0x0;
+	*(task_stack + 1) = 0x0; */
 
 	tasks[task_id].context.gs = 0x10;
 	tasks[task_id].context.gs_padding = 0;
@@ -199,7 +216,7 @@ void task_initalize_and_run( int32_t task_id ) {
 	tasks[task_id].context.edi = 0;
 	tasks[task_id].context.esi = 0;
 	tasks[task_id].context.ebp = 0;
-	tasks[task_id].context.esp = (uint32_t)tasks[task_id].stack_base; // ignored in popad, but doing so for good measure
+	tasks[task_id].context.esp = (uint32_t)tasks[task_id].stack_base + 8; // ignored in popad, but doing so for good measure
 	tasks[task_id].context.ebx = 0;
 	tasks[task_id].context.edx = 0;
 	tasks[task_id].context.ecx = 0;

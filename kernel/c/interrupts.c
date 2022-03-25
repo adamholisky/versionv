@@ -209,11 +209,13 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
                 klog( "Exception: Unhandled %02X.\n", interrupt_num );
         }
 
+		klog( "    current_task: 0x%X\n", get_current_task_id() );
 		klog( "    eax:  0x%08X  ebx:  0x%08X  ecx:  0x%08X  edx:  0x%08X\n", stack->eax, stack->ebx, stack->ecx, stack->edx );
 		klog( "    esp:  0x%08X  ebp:  0x%08X  esi:  0x%08X  edi:  0x%08X\n", stack->esp, stack->ebp, stack->esi, stack->edi );
 		klog( "    ds:   0x%04X  es:   0x%04X  fs:   0x%04X  gs:   0x%04X\n", stack->ds, stack->es, stack->fs, stack->gs );
 		klog( "    esp:  0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", stack->_esp, stack->cs, stack->eflags, stack->err );
 		klog( "    eip:  0x%08X\n", stack->eip );
+		debugf_stack_trace();
 
 		/* if( uint32_stack_pointer == NULL ) {
 			klog( "uint32_stack_pointer is null, output surpressed\n" );

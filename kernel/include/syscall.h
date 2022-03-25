@@ -10,6 +10,7 @@
 #define SYSCALL_SCHED_YIELD	4
 #define SYSCALL_SBRK	5
 #define SYSCALL_END		6
+#define SYSCALL_EXIT	7
 
 
 #define SYSCALL_RT_SUCCESS 0
@@ -38,6 +39,18 @@ uint32_t syscall_sbrk( int inc );
 
 uint32_t exit_from_wrapper( void );
 uint32_t syscall_exit_from_wrapper( void );
+
+uint32_t syscall_exit( int code );
+
+#define exit_test( n, ret) asm volatile ( \
+				"movl %1, %%eax \n" \
+				"movl %2, %%edi \n" \
+				"int %3 \n" \
+				"movl %%eax, %0" \
+				:"=r"(ret) \
+				:"r"(SYSCALL_EXIT), "r"(n), "i"(0x99) \
+				:"%eax" \
+			)
 
 
 #endif

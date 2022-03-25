@@ -54,6 +54,9 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 				case 'a':
 					run_module_by_name( "alpha" );
 					break;
+				case 'b':
+					run_module_by_name( "beta" );
+					break;
 				case 'p':
 					run_module_by_name( "ps" );
 					break;

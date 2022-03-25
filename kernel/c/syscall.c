@@ -45,6 +45,9 @@ uint32_t syscall_handler( x86_context ** _stack ) {
 		case SYSCALL_END:
 			syscall_exit_from_wrapper();
 			break;
+		case SYSCALL_EXIT:
+			syscall_exit( stack->edi );
+			break;
 		default:
 			klog( "Undefined syscall number: 0x%04X\n", stack->eax );
 	}
