@@ -27,4 +27,6 @@ void ssvv_send( char * cmd ) {
 	for( int i = 0; i < len; i++ ) {
 		serial_write_port( cmd[i], COM1 );
 	}
+
+	serial_write_port( 26, COM1 );
 }

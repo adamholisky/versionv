@@ -70,13 +70,10 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 					outportb( 0xF4, 0x00 );
 					break;
 				case '1':
-					ssvv_send( "ls /usr/local/osdev/versions/v\n" );
+					ssvv_send( "ls /usr/local/osdev/versions/v" );
 					break;
 				case '2':
-					serial_write_port( '2', COM1 );
-					break;
-				case '3':
-					serial_write_port( '\n', COM1 );
+					ssvv_send( "vv:close-connection" );
 					break;
 			}
 

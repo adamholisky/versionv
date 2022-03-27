@@ -67,9 +67,8 @@ void serial_write_port(char c, uint32_t port)
 
 	// Make sure the transmit queue is empty
 	while((inportb(port + 5) & 0x20) == 0) {
-		debugf(".");
+		;
 	}
-		//debugf( "%c", c );
 
 	outportb(port, c);
 }
@@ -99,7 +98,7 @@ char serial_read_port(uint32_t port)
 		data_buff[ data_buff_loc ] = c;
 		data_buff_loc++;
 
-		if( c == '\n' ) {
+		if( c == 26 ) {
 			data_ready_callback( data_buff_loc );
 
 			data_buff_loc = 0;

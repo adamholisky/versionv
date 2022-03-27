@@ -6,6 +6,7 @@ using System.Text;
 public class SynchronousSocketListener {
 	public static void StartListening( ) {
 		byte[] bytes = new Byte[1024];
+		bool keep_alive = true;
 
 		IPHostEntry ipHostInfo = Dns.GetHostEntry( Dns.GetHostName() );
 		IPAddress ipAddress = ipHostInfo.AddressList[0];
@@ -17,25 +18,37 @@ public class SynchronousSocketListener {
 			listener.Bind( localEndPoint );
 			listener.Listen( 1 );
 
+			Console.WriteLine( "Server active" );
+
 			while( true ) {
-				Console.WriteLine( "Server active" );
+				Console.WriteLine( "Waiting for connection..." );
 				// Program is suspended while waiting for an incoming connection.  
 				Socket handler = listener.Accept();
 
 				Console.WriteLine( "Connection established" );  
-				while( true ) {
+				
+				keep_alive = true;
+
+				while( keep_alive ) {
 					string data = null;
 
 					do {
 						int bytesRec = handler.Receive( bytes );
 						data += Encoding.ASCII.GetString( bytes, 0, bytesRec );
-					}  while( data.IndexOf( "\n" ) == -1 );
+					}  while( data.IndexOf( (char)26 ) == -1 );
 
+					data = data.TrimEnd( (char)26 );
 					byte[] msg = Encoding.ASCII.GetBytes( data );
+					byte[] eof = { 26 };
 					
 					Console.WriteLine( "Command received: {0}", data );
 
+					if( data.Equals("vv:close-connection") ) {
+						keep_alive = false;
+					}
+
 					handler.Send( msg );
+					handler.Send( eof );
 				}
 
 				handler.Shutdown( SocketShutdown.Both );
