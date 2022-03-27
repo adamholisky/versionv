@@ -121,7 +121,7 @@ void kpanic( char * message, ... ) {
 
 	debug_out_on();
 
-	printf( "Kernel Panic: " );
+	printf( "\x1b[1;33mKernel Panic: " );
 	va_start( args, message );
 	vprintf_( message, args );
 	va_end( args );
@@ -129,7 +129,7 @@ void kpanic( char * message, ... ) {
 
 	debug_out_off();
 
-	printf( "Kernel Panic: " );
+	printf( "\x1b[0;31mKernel Panic: " );
 	va_start( args, message );
 	vprintf_( message, args );
 	va_end( args );
@@ -187,15 +187,15 @@ void profile_test_run( uint32_t num_of_nops ) {
 	debugf( "profile.length = 0x%08X / %d ticks / %d milliseconds\n", test_info->length, test_info->length, (test_info->length * 10) );
 }
 
-void debugf_stack_trace( void ) {
+inline void debugf_stack_trace( void ) {
 	stackframe *frame;
 
 	asm ("movl %%ebp,%0" : "=r"(frame));
 
-	debugf( "Stack Trace\n----------------------\n" );
+	klog( "Stack Trace\n----------------------\n" );
 	
 	for( int i = 0; (frame != NULL) && (i < STACKFRAME_MAX); i++ ) {
-		debugf( "% 2d:    0x%08X %s\n", i+1, frame->eip, kdebug_get_function_at(frame->eip) );
+		klog( "% 2d:    0x%08X %s\n", i+1, frame->eip, kdebug_get_function_at(frame->eip) );
 		frame = (stackframe *)frame->ebp;
 	}
 }

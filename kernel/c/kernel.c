@@ -10,6 +10,7 @@
 #include <cpuid.h>
 #include "task.h"
 #include "syscall.h"
+#include "serial_client.h"
 #include "debug.h"
 
 #define END_IMMEDIATELY
@@ -37,7 +38,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 	intel8254_initalize();
 	//ata_initalize();
 
-	page_fault_test();
+	//page_fault_test();
+	serial_client_initalize();
 
 	debugf( "Serial console active.\n" );
 	debugf( "\nVersionV: " );
@@ -57,12 +59,24 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 				case 'b':
 					run_module_by_name( "beta" );
 					break;
+				case 'g':
+					run_module_by_name( "gamma" );
+					break;
 				case 'p':
 					run_module_by_name( "ps" );
 					break;
 				case 'q':
 					debugf( "\nGoodbye, Dave.\n");
 					outportb( 0xF4, 0x00 );
+					break;
+				case '1':
+					ssvv_send( "ls /usr/local/osdev/versions/v\n" );
+					break;
+				case '2':
+					serial_write_port( '2', COM1 );
+					break;
+				case '3':
+					serial_write_port( '\n', COM1 );
 					break;
 			}
 

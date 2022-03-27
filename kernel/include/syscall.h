@@ -11,6 +11,7 @@
 #define SYSCALL_SBRK	5
 #define SYSCALL_END		6
 #define SYSCALL_EXIT	7
+#define SYSCALL_ACTTASK	8
 
 
 #define SYSCALL_RT_SUCCESS 0
@@ -42,7 +43,9 @@ uint32_t syscall_exit_from_wrapper( void );
 
 uint32_t syscall_exit( int code );
 
-#define exit_test( n, ret) asm volatile ( \
+uint32_t syscall_activate_task( int32_t task_id );
+
+#define exit_test( n, ret ) asm volatile ( \
 				"movl %1, %%eax \n" \
 				"movl %2, %%edi \n" \
 				"int %3 \n" \
@@ -52,5 +55,14 @@ uint32_t syscall_exit( int code );
 				:"%eax" \
 			)
 
+#define activate_task( n, ret ) asm volatile ( \
+				"movl %1, %%eax \n" \
+				"movl %2, %%edi \n" \
+				"int %3 \n" \
+				"movl %%eax, %0" \
+				:"=r"(ret) \
+				:"r"(SYSCALL_ACTTASK), "r"(n), "i"(0x99) \
+				:"%eax" \
+			)
 
 #endif

@@ -202,5 +202,6 @@ void replace_stack_on_int_exit( x86_context * stack );
 void page_fault_test( void );
 extern uint32_t get_cr3( void );
 void serial_interrupt_read_from_com2( void );
+void serial_interrupt_read_from_com1( void );
 
 #endif

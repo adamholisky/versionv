@@ -57,19 +57,19 @@ void term_put_char( char c ) {
 	unsigned int y;
 	unsigned int max_row;
 	unsigned short fg, bg;
-	bool send_to_com1 = false;
+	bool send_to_com4 = false;
 	bool send_to_com2 = false;
 	bool send_to_screen = false;
 
 	if( is_debug_output == true ) {
-		send_to_com1 = true;
+		send_to_com4 = true;
 		send_to_com2 = true;
 	}
 
 	if( c == '\x1b' ) {
 		term_capture_ansi_escape_code = true;
 		capture_i = 0;
-		send_to_com1 = false;
+		send_to_com4 = false;
 	} else if( term_capture_ansi_escape_code ) {
 		if( c == 'm' ) {
 			ansi_capture[capture_i] = 0;
@@ -91,6 +91,9 @@ void term_put_char( char c ) {
 					break;
 				case 32:
 					fg = VGA_COLOR_GREEN;
+					break;
+				case 33:
+					fg = VGA_COLOR_LIGHT_BROWN;
 					break;
 				case 34:
 					fg = VGA_COLOR_BLUE;
@@ -123,11 +126,11 @@ void term_put_char( char c ) {
 			}
 
 			term_current_color = vga_entry_color( fg, bg );
-			send_to_com1 = false;
+			send_to_com4 = false;
 		} else {
 			ansi_capture[capture_i] = c;
 			capture_i++;
-			send_to_com1 = false;
+			send_to_com4 = false;
 		}
 	} else {
 		send_to_screen = true;
@@ -135,8 +138,8 @@ void term_put_char( char c ) {
 		//update_cursor( term_current_row, term_current_column );
 	}
 
-	if( send_to_com1 ) {
-		serial_write_port( c, COM1 );
+	if( send_to_com4 ) {
+		serial_write_port( c, COM4 );
 	}
 
 	if( send_to_com2 ) {

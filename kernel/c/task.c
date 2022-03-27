@@ -97,8 +97,8 @@ int32_t task_add( task *t ) {
 	tasks[i].code_page_table[0].present = 1;
 	tasks[i].code_page_table[0].address = ((uint32_t)get_physical_memory_base() + (uint32_t)tasks[i].code_start_virt - KERNEL_VIRT_HEAP_BASE)>>11;
 	
-	klog( "pte address created: 0x%08X\n", (uint32_t)get_physical_memory_base() + (uint32_t)tasks[i].code_start_virt - KERNEL_VIRT_HEAP_BASE );
-	klog( "full: 0x%08X\n", ((uint32_t)get_physical_memory_base() + (uint32_t)tasks[i].code_start_virt - KERNEL_VIRT_HEAP_BASE)>>11 );
+	//klog( "pte address created: 0x%08X\n", (uint32_t)get_physical_memory_base() + (uint32_t)tasks[i].code_start_virt - KERNEL_VIRT_HEAP_BASE );
+	//klog( "full: 0x%08X\n", ((uint32_t)get_physical_memory_base() + (uint32_t)tasks[i].code_start_virt - KERNEL_VIRT_HEAP_BASE)>>11 );
 
 	tasks[i].code_page_table[1].rw = 1;
 	tasks[i].code_page_table[1].present = 1;
@@ -262,4 +262,8 @@ char * task_status_to_string( int32_t status ) {
 	}
 
 	return "";
+}
+
+void set_next_active_task( int32_t task_id ) {
+
 }

@@ -2,17 +2,30 @@
 #include <stdbool.h>
 #include "bootstrap.h"
 #include "serial.h"
+#include "debug.h"
 
 uint32_t default_port;
 char serial_in_buffer[256];
 uint32_t buffer_add_loc;
 uint32_t buffer_read_loc;
+void (*data_ready_callback)(int);
+char *data_buff;
+uint32_t data_buff_loc;
+bool data_is_being_read;
+int32_t data_buffer_task;
+bool data_ready;
 
 void initalize_serial(void)
 {
+	data_buff = NULL;
+	data_buff_loc = 0;
+	data_is_being_read = false;
+	data_ready = false;
+
 	// DO NOT PUT KLOG FUNCTIONS HERE
 	serial_setup_port(COM1);
 	serial_setup_port(COM2);
+	serial_setup_port(COM4);
 
 	default_port = COM1;
 
@@ -36,6 +49,7 @@ void serial_setup_port(uint32_t port)
 }
 
 void serial_enable_interrupts( void ) {
+	outportb(COM1 + 1, 0x01);
 	outportb(COM2 + 1, 0x01);
 }
 
@@ -52,10 +66,10 @@ void serial_write_port(char c, uint32_t port)
 	}
 
 	// Make sure the transmit queue is empty
-	while ((inportb(port + 5) & 0x20) == 0)
-	{
-		;
+	while((inportb(port + 5) & 0x20) == 0) {
+		debugf(".");
 	}
+		//debugf( "%c", c );
 
 	outportb(port, c);
 }
@@ -77,11 +91,26 @@ char serial_read_port(uint32_t port)
 
 	c = inportb( port );
 
-	serial_in_buffer[ buffer_add_loc ] = c;
-	buffer_add_loc++;
+	if( port == COM1 ) {
+		while( data_is_being_read ) {
+			;
+		}
 
-	if( buffer_add_loc == 256 ) {
-		buffer_add_loc = 0;
+		data_buff[ data_buff_loc ] = c;
+		data_buff_loc++;
+
+		if( c == '\n' ) {
+			data_ready_callback( data_buff_loc );
+
+			data_buff_loc = 0;
+		}
+	} else { // this is com2
+		serial_in_buffer[ buffer_add_loc ] = c;
+		buffer_add_loc++;
+
+		if( buffer_add_loc == 256 ) {
+			buffer_add_loc = 0;
+		}
 	}
 
 	return c;
@@ -102,4 +131,16 @@ char serial_buffer_get_char( void ) {
 	}
 
 	return ret_c;
+}
+
+void set_data_ready_callback( void *f ) {
+	data_ready_callback = f;
+}
+
+void set_data_buffer( char *buff ) {
+	data_buff = buff;
+}
+
+void set_data_is_being_read( bool b ) {
+	data_is_being_read = b;
 }

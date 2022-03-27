@@ -42,6 +42,9 @@ uint32_t syscall_handler( x86_context ** _stack ) {
 		case SYSCALL_SBRK:
 			syscall_sbrk( stack->edi );
 			break;
+		case SYSCALL_ACTTASK:
+			syscall_activate_task( stack->edi );
+			break;
 		case SYSCALL_END:
 			syscall_exit_from_wrapper();
 			break;

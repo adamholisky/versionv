@@ -96,8 +96,10 @@ uint32_t load_module_elf_image( uint32_t *raw_data_start ) {
 	module_task->data_start_virt = page_allocate( 4 );
 	module_task->data_start_phys = module_task->data_start_virt - (void *)KERNEL_VIRT_HEAP_BASE + (void *)get_physical_memory_base();
 
+	#ifdef kdebug_process_loader
 	klog( "code_start_virt: 0x%08X\n", module_task->code_start_virt );
 	klog( "code_start_phys: 0x%08X\n", module_task->code_start_phys );
+	#endif
 
 	// Parse raw data to identify secrtions to load, and to copy them into memory
 	uint8_t *process_space = module_task->code_start_virt;
@@ -155,7 +157,7 @@ uint32_t load_module_elf_image( uint32_t *raw_data_start ) {
 
 	module_task->entry = (void *)elf_header->e_entry;
 	
-	debugf( "entry: 0x%08X\n", module_task->entry);
+	//debugf( "entry: 0x%08X\n", module_task->entry);
 	
     if (rel_plt == NULL) {
 		klog( "rel_pplt is null\n");
@@ -173,7 +175,9 @@ uint32_t load_module_elf_image( uint32_t *raw_data_start ) {
 			uint32_t *got_entry = (uint32_t*)(process_space + elf_rel->r_offset);
 			*got_entry = (uint32_t)kdebug_get_symbol_addr( elf_get_sym_name_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) );
 
+			#ifdef kdebug_process_loader
 			klog( "rel sym: 0x%08X, %d, %d, %X, %s\n", elf_rel->r_offset, ELF32_R_TYPE(elf_rel->r_info), ELF32_R_SYM(elf_rel->r_info),  elf_get_sym_shndx_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)), elf_get_sym_name_from_index((uint32_t*)raw_data_start, elf_header, ELF32_R_SYM(elf_rel->r_info)) );
+			#endif
 		} else {
 			// Link main -- I think I'm doing something wrong by having to do this, maybe not handling got right?
 			uint32_t *got_entry = (uint32_t*)(process_space + elf_rel->r_offset);

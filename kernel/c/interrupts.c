@@ -78,6 +78,7 @@ void interrupts_initalize( void ) {
 	interrupt_unmask_irq( 0x20 );
 	interrupt_unmask_irq( 0x21 );
 	interrupt_unmask_irq( 0x23 );
+	interrupt_unmask_irq( 0x24 );
 
     load_idtr();
 
@@ -215,7 +216,19 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 		klog( "    ds:   0x%04X  es:   0x%04X  fs:   0x%04X  gs:   0x%04X\n", stack->ds, stack->es, stack->fs, stack->gs );
 		klog( "    esp:  0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", stack->_esp, stack->cs, stack->eflags, stack->err );
 		klog( "    eip:  0x%08X\n", stack->eip );
-		debugf_stack_trace();
+		stackframe *frame;
+
+		asm ("movl %%ebp,%0" : "=r"(frame));
+
+		klog( "\n" );
+		klog( "    Stack Trace\n" );
+		klog( "    ----------------------\n" );
+		
+		for( int i = 0; (frame != NULL) && (i < STACKFRAME_MAX); i++ ) {
+			klog( "    % 2d:    0x%08X %s\n", i+1, frame->eip, kdebug_get_function_at(frame->eip) );
+			//kdebug_peek_at( frame );
+			frame = (stackframe *)frame->ebp;
+		}
 
 		/* if( uint32_stack_pointer == NULL ) {
 			klog( "uint32_stack_pointer is null, output surpressed\n" );
@@ -247,6 +260,9 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				break;
 			case 0x23:
 				serial_interrupt_read_from_com2();
+				break;
+			case 0x24:
+				serial_interrupt_read_from_com1();
 				break;
 			case 0x30:
 				debugf( "+\n" );
@@ -404,4 +420,8 @@ void serial_interrupt_read_from_com2( void ) {
 	/* if( serial_buffer_is_ready() ) {
 		klog( "COM2: %c\n", serial_buffer_get_char() );
 	} */
+}
+
+void serial_interrupt_read_from_com1( void ) {
+	serial_read_port( COM1 );
 }

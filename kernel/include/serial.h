@@ -22,5 +22,8 @@ void serial_write_port( char c, uint32_t port );
 char serial_read_port( uint32_t port );
 bool serial_buffer_is_ready( void );
 char serial_buffer_get_char( void );
+void set_data_ready_callback( void *f );
+void set_data_buffer( char *buff );
+void set_data_is_being_read( bool b );
 
 #endif

@@ -67,5 +67,6 @@ char * task_type_to_string( int32_t type );
 char * task_status_to_string( int32_t status );
 void task_exit( void );
 void task_end_from_wrapper( void );
+void set_next_active_task( int32_t task_id );
 
 #endif
