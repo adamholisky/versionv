@@ -24,12 +24,13 @@ QEMU = qemu-system-i386
 QEMU_COMMON = 	-drive format=raw,if=ide,file=$(ROOT_DIR)/vv_hd.img \
 				-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
 				-nic user,ipv6=off,model=e1000,mac=52:54:98:76:54:32 \
-				-m 4G
-QEMU_DISPLAY_NONE =	-serial file:$(ROOT_DIR)/serial_out.txt \
-					-serial stdio \
-					-display none
-QEMU_DISPLAY_NORMAL = -serial file:$(ROOT_DIR)/serial_out.txt \
-					  -serial stdio
+				-m 4G \
+				-serial tcp:192.168.0.100:10100,nodelay=on,reconnect=1 \
+				-serial stdio \
+				-serial null \
+				-serial file:$(ROOT_DIR)/serial_out.txt
+QEMU_DISPLAY_NONE =	-display none
+QEMU_DISPLAY_NORMAL =  
 QEMU_DEBUG_COMMON = -S -gdb tcp::5894
 
 export

@@ -5,9 +5,5 @@
 #include "syscall.h"
 
 void main( void ) {
-	klog( "Hello, world from gamma!\n" );
-	
-	while ( true ) {
-		sched_yield();
-	}
+	kpanic( "Panic and run! %s\n", "Panic AND run!");
 }
