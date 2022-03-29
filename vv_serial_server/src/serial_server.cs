@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -16,7 +17,7 @@ public class SynchronousSocketListener {
 
 		try {
 			listener.Bind( localEndPoint );
-			listener.Listen( 1 );
+			listener.Listen( 3 );
 
 			Console.WriteLine( "Server active" );
 
@@ -42,6 +43,13 @@ public class SynchronousSocketListener {
 					byte[] eof = { 26 };
 					
 					Console.WriteLine( "Command received: {0}", data );
+
+					string[] cmd_parts = data.Split( ' ' );
+
+					if( cmd_parts[0].Equals("READ") ) {
+						msg = File.ReadAllBytes( cmd_parts[1] );
+						Console.WriteLine( "Sending: {0}", Encoding.ASCII.GetString( msg ) );
+					}
 
 					if( data.Equals("vv:close-connection") ) {
 						keep_alive = false;

@@ -14,7 +14,7 @@ APPS := $(wildcard test_apps/*.c)
 
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
-CFLAGS = -ffreestanding -fno-omit-frame-pointer -O2 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include $(C_OPTS) 
+CFLAGS = -ffreestanding -fno-omit-frame-pointer -O0 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include $(C_OPTS) 
 ASM = /usr/local/osdev/bin/i686-elf-as
 AFLAGS = $(C_OPTS) -I$(ROOT_DIR)/kernel/include
 

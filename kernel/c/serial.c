@@ -99,7 +99,8 @@ char serial_read_port(uint32_t port)
 		data_buff_loc++;
 
 		if( c == 26 ) {
-			data_ready_callback( data_buff_loc );
+			data_buff[ data_buff_loc - 1 ] = '\0';
+			data_ready_callback( data_buff_loc - 1 );
 
 			data_buff_loc = 0;
 		}

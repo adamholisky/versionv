@@ -75,6 +75,9 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 				case '2':
 					ssvv_send( "vv:close-connection" );
 					break;
+				case '3':
+					ssvv_read_file_test();
+					break;
 			}
 
 			debugf( "\n" );
