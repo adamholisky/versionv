@@ -6,17 +6,19 @@ BUILD_LOG = $(ROOT_DIR)/build.log
 SHELL :=/bin/bash -O globstar
 SOURCES_C = $(shell ls kernel/**/*.c)
 SOURCES_ASM = $(shell ls kernel/**/*.s)
+SOURCES_ASMS = $(shell ls kernel/**/*.S)
 OBJECTS_C = $(patsubst %.c, build/%.o, $(shell ls kernel/**/*.c | xargs -n 1 basename))
 OBJECTS_ASM = $(patsubst %.s, build/%.o, $(shell ls kernel/**/*.s | xargs -n 1 basename))
+OBJECTS_ASMS = $(patsubst %.S, build/%.o, $(shell ls kernel/**/*.S | xargs -n 1 basename))
 OBJECTS_APPS = $(patsubst %.c, test_apps/build_objout/%.bin, $(shell ls test_apps/*.c | xargs -n 1 basename))
 APPS := $(wildcard test_apps/*.c)
 
 
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
-CFLAGS = -ffreestanding -fno-omit-frame-pointer -O0 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include $(C_OPTS) 
+CFLAGS = -ffreestanding -fno-omit-frame-pointer -O0 -nostdlib -DPAGING4K -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
 ASM = /usr/local/osdev/bin/i686-elf-as
-AFLAGS = $(C_OPTS) -I$(ROOT_DIR)/kernel/include
+AFLAGS = $(C_FLAGS) -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
 
 #Support program and flags
 OBJDUMP = /usr/local/osdev/bin/i686-elf-objdump
@@ -37,8 +39,8 @@ export
 
 all: install
 
-build/versionv.bin: build_test_apps $(SOURCES_C) $(SOURCES_ASM) $(OBJECTS_C) $(OBJECTS_ASM) $(APPS)
-	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_ASM) $(OBJECTS_APPS)
+build/versionv.bin: build_test_apps $(SOURCES_C) $(SOURCES_ASM) $(SOURCES_ASMS) $(OBJECTS_C) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(APPS)
+	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(OBJECTS_APPS)
 	objdump -x -d build/versionv.bin > objdump.txt
 	readelf -a build/versionv.bin > elfdump.txt
 	@>&2 printf "[Build] Done\n"
@@ -49,6 +51,11 @@ build/%.o: kernel/*/%.c
 	$(CC) $(CFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
 build/%.o: kernel/*/%.s
+	@>&2 printf "[Build] $<\n"
+	$(eval OBJNAME := $(shell basename $@))
+	$(ASM) $(AFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
+
+build/%.o: kernel/*/%.S
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
 	$(ASM) $(AFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)

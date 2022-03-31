@@ -10,6 +10,7 @@
 #include <printf.h>
 #include "serial.h"
 #include "memory.h"
+#include "kmalloc.h"
 #include "task.h"
 #include "modules.h"
 #include "debug.h"
