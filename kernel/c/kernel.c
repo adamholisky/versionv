@@ -15,14 +15,13 @@
 
 #define END_IMMEDIATELY
 
-void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info ) 
-{
+void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	int x = 0;
-	
+
 	multiboot_initalize( mb_magic, mb_info );
 	term_initalize();
 	initalize_serial();
- 
+
 	printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m\n" );
 	debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m Serial Out\n" );
 
@@ -51,7 +50,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 			char c = serial_buffer_get_char();
 
 			debugf( "%c", c );
-			
+
 			switch( c ) {
 				case 'a':
 					run_module_by_name( "alpha" );
@@ -66,7 +65,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 					run_module_by_name( "ps" );
 					break;
 				case 'q':
-					debugf( "\nGoodbye, Dave.\n");
+					debugf( "\nGoodbye, Dave.\n" );
 					outportb( 0xF4, 0x00 );
 					break;
 				case '1':
@@ -77,6 +76,9 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 					break;
 				case '3':
 					ssvv_read_file_test();
+					break;
+				case '4':
+					callback_test_run();
 					break;
 			}
 
@@ -89,21 +91,21 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 			debugf( "VersionV: " );
 			show_carrot = false;
 		}
-		
+
 		//debugf( "!" );
 	}
 
 	#ifdef END_IMMEDIATELY
 
-	klog( "Shutdown via END_IMMEDIATELY at end of kernel.c.\n");
+	klog( "Shutdown via END_IMMEDIATELY at end of kernel.c.\n" );
 	outportb( 0xF4, 0x00 );
 
 	#endif
 
 	#ifdef kdebug_paging
 
-	char * page_fault_addr = NULL;
-	page_fault_addr = (char *)KERNEL_VIRT_HEAP_BASE;	
+	char *page_fault_addr = NULL;
+	page_fault_addr = (char *)KERNEL_VIRT_HEAP_BASE;
 	klog( "String at 0x%08X: \"%s\"\n", page_fault_addr, page_fault_addr );
 	page_fault_addr = (char *)page_allocate( 1 );
 	klog( "String at 0x%08X: \"%s\"\n", page_fault_addr, page_fault_addr );
@@ -131,11 +133,11 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t * mb_info )
 	while( true ) { x = x - x + 1; }
 }
 
-int register_io_device( char * name, void (*read_func)(), void (*write_func)() ) {
-	
+int register_io_device( char *name, void (*read_func)(), void (*write_func)() ) {
+
 }
 
-uint32_t write( int file, void * buff, uint32_t count ) {
+uint32_t write( int file, void *buff, uint32_t count ) {
 
 }
 

@@ -1,3 +1,5 @@
+#include "memory.h"
+
 .set MAGIC,    0x1BADB002 
 
 .section .multiboot
@@ -33,13 +35,23 @@
 .section .bss, "aw", @nobits 
 	.align 4096
 	.global boot_page_directory
+	.global paging_pd
+	paging_pd:
 	boot_page_directory:
-	; .skip 4096
 	.fill 1024, 4, 0
+
 	.global boot_page_table
+	.global paging_bpt
+	paging_bpt:
 	boot_page_table:
 	.fill 1024, 4, 0
-	; .skip 4096
+
+#ifdef PAGING_PAE
+	.align 4096
+	.global paging_pdpt
+	paging_pdpt:
+	.fill 4, 8, 0
+#endif
 
 .section .data
 .global GDTR
@@ -88,6 +100,49 @@ GDT_END:
 .global _asm_kernel_start
 .type _asm_kernel_start, @function
 _asm_kernel_start:
+	#ifdef PAGING_PAE
+
+	movl $(paging_pd - KERNEL_VIRT_LOAD_BASE), %edx		// edx gets the pd
+	orl  $1, %edx 										// set as present
+	movl %edx, $(paging_pdpt - KERNEL_VIRT_LOAD_BASE) 	// load PDPT[0] with EDX
+	movl %edx, $(paging_pdpt - KERNEL_VIRT_LOAD_BASE)   // load PDPT[3] with EDX (3 = 3gb = 0xC0000000)
+	
+	movl %cr4, %eax
+	bts  $5, %eax
+	movl %eax, %cr4
+	movl $(paging_pdpt - KERNEL_VIRT_LOAD_BASE), %cr3
+
+	movl %cr0, %eax
+	orl  $0x80000000, %eax
+	movl %eax, %cr0
+
+	lea  pae3, %ecx
+	jmp  *%ecx										/* BSG: "Jump" */
+
+	pae2:
+	lgdt GDTR
+	mov $0x10, %ax
+	mov %ax, %ds
+	mov %ax, %ss
+	mov %ax, %es
+	mov %ax, %fs 
+	mov %ax, %gs
+
+	jmp $0x08, $pae3
+
+	pae3:
+	mov  $(stack_top), %esp							/* Setup the stack */
+
+	addl $0xC0000000, %ebx
+	push %ebx										/* Multiboot header pointer */
+	push %eax										/* Magic number */
+
+	xor %ebp, %ebp									/* NULL Stack for tracing purposes */
+
+	call kernel_main
+
+	#endif
+	
 	movl $(boot_page_table - 0xC0000000), %edi		/* EDI gets the physical page table  address */
 	movl $0, %esi									/* 0 == first address mapped */
 	movl $1024, %ecx								/* Map our pages */

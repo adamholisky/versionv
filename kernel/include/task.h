@@ -4,6 +4,7 @@
 #include "bootstrap.h"
 #include "interrupts.h"
 #include "memory.h"
+#include "elf.h"
 
 #define TASK_MAX 255
 
@@ -36,6 +37,10 @@ typedef struct {
 
 	uint32_t * stack;
 	uint32_t stack_eip;
+	int32_t num_syms;
+ 	Elf32_Sym * sym_table;
+	uint8_t * str_table;
+	uint8_t * raw_data;
 	void * code_start_phys;
 	void * data_start_phys;
 	void * code_start_virt;
@@ -51,6 +56,8 @@ typedef struct {
 	uint32_t total_share_time;
 	uint32_t share_time_start;
 } task;
+
+
 
 void task_initalize( void );
 int32_t task_add( task *t );
@@ -68,5 +75,6 @@ char * task_status_to_string( int32_t status );
 void task_exit( void );
 void task_end_from_wrapper( void );
 void set_next_active_task( int32_t task_id );
+void set_current_task_id( int32_t task_id );
 
 #endif

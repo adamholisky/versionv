@@ -204,6 +204,15 @@ uint32_t load_module_elf_image( uint32_t *raw_data_start ) {
 	debugf( "    module_task stack virt: 0x%08X\n", module_task->stack );
 	#endif
 
+	Elf32_Shdr * strtab_shdr = elf_find_sym_strtab( (uint32_t*)raw_data_start, elf_header );
+	Elf32_Shdr * elf_sym_shdr = elf_find_symtab( raw_data_start, elf_header); 
+
+
+	module_task->raw_data = (uint8_t *)raw_data_start;
+	module_task->sym_table = (Elf32_Sym*)((uint8_t*)raw_data_start + elf_sym_shdr->sh_offset);
+	module_task->str_table = (uint8_t *)raw_data_start + strtab_shdr->sh_offset;
+	module_task->num_syms = elf_sym_shdr->sh_size / sizeof( Elf32_Sym );
+
 	module_task->context.eip = (uint32_t)module_task->entry;
 
 	module_task->type = TASK_TYPE_MODULE;

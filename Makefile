@@ -16,7 +16,9 @@ APPS := $(wildcard test_apps/*.c)
 
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
-CFLAGS = -ffreestanding -fno-omit-frame-pointer -O0 -nostdlib -DPAGING4K -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
+DEFINES = -DPAGING_4K \
+		  -DGRAPHICS_OFF 
+CFLAGS = $(DEFINES) -ffreestanding -fno-omit-frame-pointer -O0 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
 ASM = /usr/local/osdev/bin/i686-elf-as
 AFLAGS = $(C_FLAGS) -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
 
@@ -58,7 +60,7 @@ build/%.o: kernel/*/%.s
 build/%.o: kernel/*/%.S
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
-	$(ASM) $(AFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
+	$(CC) $(AFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
 build_test_apps:
 	@>&2 echo [Build] Test apps

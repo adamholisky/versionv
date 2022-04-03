@@ -3,11 +3,20 @@
 #include <stdbool.h>
 #include "debug.h"
 #include "syscall.h"
+#include <task.h>
+
+void callback_test_call( char * str );
 
 void main( void ) {
-	klog( "Hello, world from alpha on linuxtwo and remote dev!\n" );
+	callback_test_register( "callback_test_call" );
+	klog( "Callback registered.\n" );
 	
 	while ( true ) {
 		sched_yield();
 	}
+}
+
+void callback_test_call( char * str ) {
+	debugf( "\n" );
+	klog( "%s\n", str );
 }

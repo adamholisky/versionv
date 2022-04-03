@@ -61,4 +61,9 @@ static inline uint32_t in_port_long( uint16_t port ) {
 #define debug_region_start(x)   if( x == 1 ) {
 #define debug_region_end(x)     }
 
+#define set_bit(x,b) x | 1<<b
+#define clear_bit(x,b) x ~ 1<<b 
+#define flip_bit(x,b) x ^ 1<<b
+#define test_bit(x,b) x & 1<<b
+
 #endif

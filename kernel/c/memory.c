@@ -229,7 +229,15 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	page_directory_entry * pd;
 	page_directory_entry * pt;
 
-	// Find entry in BPD
+	#define PAGING_PAEE
+	#ifdef PAGING_PAE
+
+	//uint32_t pdpt_index = (uint32_t)virt_addr; // 0x30000000;
+	//uint32_t pd_index = ((uint32_t)virt_addr - (pdpt_index * 0x30000000)); // PAGE_SIZE_IN_BYTES
+	
+
+	#else
+		// Find entry in BPD
 	pd_index = (uint32_t)virt_addr >> 22;
 	pt_index = ((uint32_t)virt_addr >> 12) & 0x03FF;
 
@@ -257,6 +265,7 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 		pt->rw = 1;
 		pt->address = (uint32_t)phys_addr >> 11;
 	}
+	#endif
 
 	#ifdef kdebug_memory_pages_more
 

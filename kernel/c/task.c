@@ -1,6 +1,7 @@
 #include "kernel.h"
 #include "interrupts.h"
 #include "syscall.h"
+#include "elf.h"
 #include "task.h"
 
 uint32_t task_current;
@@ -56,6 +57,10 @@ int32_t task_add( task *t ) {
 	tasks[i].data_start_phys = t->data_start_phys;
 	tasks[i].data_start_virt = t->data_start_virt;
 	tasks[i].virt_heap_top = (void *)TASK_VIRT_HEAP_BASE;	
+	tasks[i].sym_table = t->sym_table;
+	tasks[i].str_table = t->str_table;
+	tasks[i].raw_data = t->raw_data;
+	tasks[i].num_syms = t->num_syms;
 
 	tasks[i].context.gs = 0x10;
 	tasks[i].context.gs_padding = 0;
@@ -197,6 +202,10 @@ int32_t get_current_task_id( void ) {
 	return task_current;
 }
 
+void set_current_task_id( int32_t task_id ) {
+	task_current = task_id;
+}
+
 void task_initalize_and_run( int32_t task_id ) {
 	tasks[task_id].status = TASK_STATUS_INACTIVE;
 
@@ -267,3 +276,5 @@ char * task_status_to_string( int32_t status ) {
 void set_next_active_task( int32_t task_id ) {
 
 }
+
+
