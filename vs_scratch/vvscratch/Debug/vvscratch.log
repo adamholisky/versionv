@@ -1,8 +1,10 @@
 ﻿  vvscratch.cpp
-Y:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(158,11): warning C4200: nonstandard extension used: zero-sized array in struct/union
-Y:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(158,11): message : This member will be ignored by a defaulted constructor or copy/move assignment operator
-Y:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(438,27): warning C4018: '<': signed/unsigned mismatch
-Y:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(451,27): warning C4018: '<': signed/unsigned mismatch
-Y:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(485,23): warning C4018: '<': signed/unsigned mismatch
-Y:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(507,23): warning C4018: '<': signed/unsigned mismatch
-  vvscratch.vcxproj -> Y:\versions\v\vs_scratch\vvscratch\Debug\vvscratch.exe
+X:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(158,11): warning C4200: nonstandard extension used: zero-sized array in struct/union
+X:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(158,11): message : This member will be ignored by a defaulted constructor or copy/move assignment operator
+X:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(336,12): warning C4101: 'j': unreferenced local variable
+X:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(336,9): warning C4101: 'i': unreferenced local variable
+X:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(492,27): warning C4018: '<': signed/unsigned mismatch
+X:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(505,27): warning C4018: '<': signed/unsigned mismatch
+X:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(539,23): warning C4018: '<': signed/unsigned mismatch
+X:\versions\v\vs_scratch\vvscratch\vvscratch.cpp(561,23): warning C4018: '<': signed/unsigned mismatch
+  vvscratch.vcxproj -> X:\versions\v\vs_scratch\vvscratch\Debug\vvscratch.exe

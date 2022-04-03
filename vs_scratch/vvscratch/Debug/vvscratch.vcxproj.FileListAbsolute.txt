@@ -1,1 +1,2 @@
 Y:\versions\v\vs_scratch\vvscratch\Debug\vvscratch.exe
+X:\versions\v\vs_scratch\vvscratch\Debug\vvscratch.exe

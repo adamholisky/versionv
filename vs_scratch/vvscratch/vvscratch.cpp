@@ -16,7 +16,7 @@ uint32_t swap_uint32(uint32_t val)
 }
 
 #undef do_ext2_tests
-#define do_elf_tests
+#undef do_elf_tests
 
 #define MAXBUFLEN 1000000
 
@@ -199,128 +199,184 @@ Elf32_Shdr* elf_find_got_plt(uint32_t* mem, Elf32_Ehdr* elf_header);
 char* elf_get_section_name(uint32_t* mem, Elf32_Ehdr* elf_header, uint32_t sec_num);
 void elf_load_program_headers(Elf32_Ehdr* elf_header, uint8_t* process_space, uint8_t* data);
 
-int main()
-{
+#define set_bit(x,b) x | 1<<b
+#define clear_bit(x,b) x ~ 1<<b 
+#define flip_bit(x,b) x ^ 1<<b
+#define test_bit(x,b) x & 1<<b
 
-#ifdef do_ext2_tests
-    uint8_t * source = nullptr;
+#define test_bit_array(a,b) ((1<<(b%32)) & a[b/32])
+
+int find_open_page_1( uint32_t *pages );
+int find_open_page_2( uint32_t *pages );
+
+int main() {
+
+    #ifdef do_ext2_tests
+    uint8_t *source = nullptr;
     long numbytes;
 
-    Elf32_Ehdr* elf_header = nullptr;
-    Elf32_Shdr* elf_sheader = nullptr;
+    Elf32_Ehdr *elf_header = nullptr;
+    Elf32_Shdr *elf_sheader = nullptr;
 
-    ext2_super_block* super_block = nullptr;
+    ext2_super_block *super_block = nullptr;
 
     uint32_t num_bytes_to_read = 1024 * 1024 * 400;
 
-    FILE* fp = fopen("Y:\\versions\\v\\vs_scratch\\vvscratch\\Debug\\vv_hd.img", "r");
+    FILE *fp = fopen( "Y:\\versions\\v\\vs_scratch\\vvscratch\\Debug\\vv_hd.img", "r" );
 
-    if (fp != NULL) {
-        fseek(fp, 0L, SEEK_END);
-        numbytes = ftell(fp);
+    if( fp != NULL ) {
+        fseek( fp, 0L, SEEK_END );
+        numbytes = ftell( fp );
 
-        fseek(fp, 0L, SEEK_SET);
+        fseek( fp, 0L, SEEK_SET );
 
         //source = (char*)calloc(numbytes, sizeof(char));
-        source = (uint8_t *)calloc(num_bytes_to_read, sizeof(uint8_t));
+        source = (uint8_t *)calloc( num_bytes_to_read, sizeof( uint8_t ) );
 
-        if (source == NULL) {
-            printf("souce is null\n");
+        if( source == NULL ) {
+            printf( "souce is null\n" );
         }
 
         //fread(source, sizeof(char), numbytes, fp);
-        fread(source, sizeof(uint8_t), num_bytes_to_read, fp);
+        fread( source, sizeof( uint8_t ), num_bytes_to_read, fp );
 
-        if (ferror(fp) != 0) {
-            fputs("Error reading file\n", stderr);
+        if( ferror( fp ) != 0 ) {
+            fputs( "Error reading file\n", stderr );
         }
 
-        printf("Total bytes read: 0x%08X\n",num_bytes_to_read);
-        
-        fclose(fp);
-    }
-    else {
-        printf("fp is null\n");
+        printf( "Total bytes read: 0x%08X\n", num_bytes_to_read );
+
+        fclose( fp );
+    } else {
+        printf( "fp is null\n" );
     }
 
-    if (source != NULL) {
-        printf("00 and 01: %02X %02X\n", *(source), *(source + 1));
-        printf("Should be 0x0000: %02X %02X\n", *(source + 0x1BC - 1), *(source + 0x1BD - 1));
-        printf("Drive attrib: %02X\n", *(source + 0x1BE - 1));
-        printf("parition type: %02X\n", *(source + 0x1BE + 0x4 - 1));
-        printf("num sectors in partition: %02X %02X %02X %02X\n", *(source + 0x1BE + 0x0C - 1), *(source + 0x1BE + 0x0D - 1), *(source + 0x1BE + 0x0E - 1), *(source + 0x1BE + 0x0F - 1));
+    if( source != NULL ) {
+        printf( "00 and 01: %02X %02X\n", *(source), *(source + 1) );
+        printf( "Should be 0x0000: %02X %02X\n", *(source + 0x1BC - 1), *(source + 0x1BD - 1) );
+        printf( "Drive attrib: %02X\n", *(source + 0x1BE - 1) );
+        printf( "parition type: %02X\n", *(source + 0x1BE + 0x4 - 1) );
+        printf( "num sectors in partition: %02X %02X %02X %02X\n", *(source + 0x1BE + 0x0C - 1), *(source + 0x1BE + 0x0D - 1), *(source + 0x1BE + 0x0E - 1), *(source + 0x1BE + 0x0F - 1) );
 
         uint32_t num_sectors = (*(source + 0x1BE + 0x0C - 1) << 24) + ((*(source + 0x1BE + 0x0D - 1)) << 16) + ((*(source + 0x1BE + 0x0E - 1)) << 8) + (*(source + 0x1BE + 0x0F - 1));
 
-        uint32_t partition_start = *((uint32_t*)(source + 0x1BE + 0x8 - 1));
+        uint32_t partition_start = *((uint32_t *)(source + 0x1BE + 0x8 - 1));
         uint32_t superblock_offset = (partition_start * 512) + 1024;
 
-        printf("partition start:            %08X\n", partition_start);
-        printf("num sectors little-endian:  %08X\n", *((uint32_t*)(source + 0x1BE + 0xC - 1)));
-        printf("expecting superblock at:    %08X\n", superblock_offset);
+        printf( "partition start:            %08X\n", partition_start );
+        printf( "num sectors little-endian:  %08X\n", *((uint32_t *)(source + 0x1BE + 0xC - 1)) );
+        printf( "expecting superblock at:    %08X\n", superblock_offset );
 
-        super_block = (ext2_super_block*)(source + superblock_offset);
-        printf("lol magic? 0x%04X\n", super_block->s_magic);
+        super_block = (ext2_super_block *)(source + superblock_offset);
+        printf( "lol magic? 0x%04X\n", super_block->s_magic );
 
         uint32_t block_size = 1024 << (super_block->s_log_block_size);
-        printf("block size: 0x%08X\n", block_size);
+        printf( "block size: 0x%08X\n", block_size );
 
         uint32_t num_block_groups = super_block->s_blocks_count / super_block->s_blocks_per_group;
-        printf("num block groups: %d\n", num_block_groups);
+        printf( "num block groups: %d\n", num_block_groups );
 
-        for (int z = 0; z < num_block_groups; z++) {
-            uint32_t block_adjustment = (z > 0) ? (block_size + (sizeof(ext2_block_group_desc) * z)) : block_size;
+        for( int z = 0; z < num_block_groups; z++ ) {
+            uint32_t block_adjustment = (z > 0)?(block_size + (sizeof( ext2_block_group_desc ) * z)):block_size;
             uint32_t blockgroup_offset = (partition_start * 512) + block_adjustment;
 
-            ext2_block_group_desc* blockgroup = (ext2_block_group_desc*)(source + blockgroup_offset);
+            ext2_block_group_desc *blockgroup = (ext2_block_group_desc *)(source + blockgroup_offset);
 
-            printf("block of inode table: %d\n", blockgroup->bg_inode_table);
-            printf("num directories: %d\n", blockgroup->bg_used_dirs_count);
+            printf( "block of inode table: %d\n", blockgroup->bg_inode_table );
+            printf( "num directories: %d\n", blockgroup->bg_used_dirs_count );
 
             uint32_t inode_table_offset = (partition_start * 512) + (block_size * blockgroup->bg_inode_table);
-            printf("inode table offset: 0x%08X\n", inode_table_offset);
-            printf("free inodes: 0x%04X\n", blockgroup->bg_free_inodes_count);
+            printf( "inode table offset: 0x%08X\n", inode_table_offset );
+            printf( "free inodes: 0x%04X\n", blockgroup->bg_free_inodes_count );
             uint16_t num_inodes = super_block->s_inodes_per_group - blockgroup->bg_free_inodes_count;
-            printf("num inodes in bg: %d / 0x%04X\n", num_inodes, num_inodes);
+            printf( "num inodes in bg: %d / 0x%04X\n", num_inodes, num_inodes );
 
-            for (int i = 0; i < num_inodes; i++) {
-                ext2_inode* inode = (ext2_inode*)(source + inode_table_offset + (sizeof(ext2_inode) * i));
-                ext2_dir_entry* dir = (ext2_dir_entry*)(source + (partition_start * 512) + (block_size * inode->i_block[0]));
+            for( int i = 0; i < num_inodes; i++ ) {
+                ext2_inode *inode = (ext2_inode *)(source + inode_table_offset + (sizeof( ext2_inode ) * i));
+                ext2_dir_entry *dir = (ext2_dir_entry *)(source + (partition_start * 512) + (block_size * inode->i_block[0]));
 
                 //printf("%02d: %04X", i + 1, (uint16_t)(inode->i_mode)); //i+1 b/c ext2 starts at 1
 
-                if (inode->i_mode & 0x4000) {
-                    printf("   dir");
-                    printf("   start addr: 0x%08X\n", (uint32_t)((uint32_t*)(dir)));
+                if( inode->i_mode & 0x4000 ) {
+                    printf( "   dir" );
+                    printf( "   start addr: 0x%08X\n", (uint32_t)((uint32_t *)(dir)) );
 
                     uint16_t current_rec_length = 0xFFFF; // safety feature
 
                     do {
-                        if (dir->inode != 0) {
+                        if( dir->inode != 0 ) {
                             dir->name[dir->name_len - 512] = 0;
-                            printf("    Name: \"%s\"    \n    inode: %d    name_len: %d    rec len: 0x%04X    next addr: 0x%08X\n    -----\n", dir->name, dir->inode, dir->name_len - 512, dir->rec_len, (uint32_t)((uint32_t*)(dir)) + dir->rec_len);
+                            printf( "    Name: \"%s\"    \n    inode: %d    name_len: %d    rec len: 0x%04X    next addr: 0x%08X\n    -----\n", dir->name, dir->inode, dir->name_len - 512, dir->rec_len, (uint32_t)((uint32_t *)(dir)) + dir->rec_len );
                         }
 
                         current_rec_length = dir->rec_len;
 
-                        dir = (ext2_dir_entry*)(((uint32_t)dir) + ((uint32_t)dir->rec_len));
+                        dir = (ext2_dir_entry *)(((uint32_t)dir) + ((uint32_t)dir->rec_len));
 
-                    } while ((current_rec_length & 0x0F00) == 0);
+                    } while( (current_rec_length & 0x0F00) == 0 );
 
-                    printf("\n");
+                    printf( "\n" );
                 }
 
-                if (inode->i_mode & 0x8000) {
+                if( inode->i_mode & 0x8000 ) {
                     // printf("   file");
                 }
             }
         }
     }
-#endif
+    #endif
 
-#ifdef do_elf_tests
+    #ifdef do_elf_tests
     elf_run();
-#endif
+    #endif
+
+    uint32_t pages[32];
+    int32_t open_page_major = -1;
+    int32_t open_page_minor = -1;
+    int i, j;
+
+    memchr( pages, 0, 31 );
+
+    for( i = 0; i < 200000; i++ ) {
+       printf( "Open page number: %d\n", find_open_page_1( pages ) );
+
+       printf( "Open page number: %d\n", find_open_page_2( pages ) );
+    }
+
+    exit( 0 );
+}
+
+int find_open_page_1( uint32_t *pages ) {
+    int open_page_major = -1;
+    int open_page_minor = -1;
+    int i, j;
+
+    // find open page
+    for( i = 0; i < 32; i++ ) {
+        for( j = 0; j < 32; j++ ) {
+            if( (1 << j & pages[i]) == 0 ) {
+                open_page_major = i;
+                open_page_minor = j;
+
+                j = 10000;
+                i = 10000;
+            }
+        }
+    }
+
+    return (open_page_major * 32) + open_page_minor;
+}
+
+int find_open_page_2( uint32_t *pages ) {
+    int i;
+
+    for( i = 0; i < 1024; i++ ) {
+        if( test_bit_array( pages, i ) == 0 ) {
+            break;
+        }
+    }
+
+    return i;
 }
 
 void elf_run(void) {
