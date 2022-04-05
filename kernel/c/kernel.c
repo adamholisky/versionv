@@ -12,6 +12,7 @@
 #include "syscall.h"
 #include "serial_client.h"
 #include "debug.h"
+#include "observer.h"
 
 #define END_IMMEDIATELY
 
@@ -26,6 +27,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m Serial Out\n" );
 
 	memory_initalize();
+	observer_initalize();
 	elf_initalize( (uint32_t)kernel_main );
 	interrupts_initalize();
 	serial_enable_interrupts();
@@ -39,6 +41,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	//page_fault_test();
 	serial_client_initalize();
+
+	observer_test();
 
 	debugf( "Serial console active.\n" );
 	debugf( "\nVersionV: " );
