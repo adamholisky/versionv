@@ -1,0 +1,22 @@
+make all -f /usr/local/osdev/versions/v/Makefile -C /usr/local/osdev/versions/v --dry-run --always-make --keep-going --print-directory
+make: Entering directory '/usr/local/osdev/versions/v'
+make -C src
+ 
+make[1]: Entering directory '/usr/local/osdev/versions/v/src'
+make -C libvv >> /usr/local/osdev/versions/v/build.log
+ 
+make -C test_apps >> /usr/local/osdev/versions/v/build.log
+ 
+make -C asm >> /usr/local/osdev/versions/v/build.log
+make -C bootstrap >> /usr/local/osdev/versions/v/build.log
+make -C c >> /usr/local/osdev/versions/v/build.log
+make -C c/syscall >> /usr/local/osdev/versions/v/build.log
+make -C build_support >> /usr/local/osdev/versions/v/build.log
+make[1]: Leaving directory '/usr/local/osdev/versions/v/src'
+objdump -x -d build/versionv.bin > objdump.txt
+readelf -a build/versionv.bin > elfdump.txt
+mount hd_mount_dir
+cp build/versionv.bin -f hd_mount_dir/boot/versionv.bin >> /usr/local/osdev/versions/v/build.log
+umount hd_mount_dir
+make: Leaving directory '/usr/local/osdev/versions/v'
+ 

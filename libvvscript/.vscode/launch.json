@@ -1,0 +1,16 @@
+ {
+	"configurations": [
+	{
+		"name": "VV Debug",
+		"type": "cppdbg",
+		"request": "launch",
+		"program": "${workspaceFolder}/v/build/versionv.bin",
+		"args": [],
+		"stopAtEntry": false,
+		"cwd": "${fileDirname}",
+		"externalConsole": false,
+		"MIMode": "gdb",
+		"miDebuggerServerAddress": "localhost:5894",
+	},
+	]
+}
