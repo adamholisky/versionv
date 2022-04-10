@@ -1,4 +1,4 @@
-#if !defined(INTERRUPTS_INCLUDED)
+#ifndef INTERRUPTS_INCLUDED
 #define INTERRUPTS_INCLUDED
 
 #define INT_0 0x8E00     // 1000111000000000 = present, ring0, int_gate

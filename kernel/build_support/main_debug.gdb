@@ -18,4 +18,4 @@ end
 #break stage5
 #break interrupts.c:107 if interrupt_num == 0x30
 #break interrupts.c:107 if interrupt_num == 0x31 
-break sched_yield.c:51
+break *0x0010aaaa

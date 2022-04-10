@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "syscall.h"
 #include <task.h>
+#include <callback.h>
 
 void callback_test_call( char * str );
 

@@ -14,6 +14,7 @@ context_switch_callback * register_callback( context_switch_callback * callback,
 void do_callback( context_switch_callback * callback );
 void do_callback_with_data( context_switch_callback * callback, void * data );
 
+void callback_test_run( void );
 void callback_test_register( char * func_name );
 void callback_test_docallback( void );
 

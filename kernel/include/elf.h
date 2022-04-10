@@ -119,6 +119,6 @@ uint16_t elf_get_sym_shndx_from_index(uint32_t* mem, Elf32_Ehdr* elf_header, uin
 Elf32_Shdr * elf_find_sym_strtab(uint32_t* mem, Elf32_Ehdr* elf_header);
 Elf32_Shdr * elf_find_dynstr_tab(uint32_t* mem, Elf32_Ehdr* elf_header);
 uint16_t elf_get_sym_value_from_index(uint32_t* mem, Elf32_Ehdr* elf_header, uint32_t index);
-
+Elf32_Shdr * elf_find_symtab(uint32_t* mem, Elf32_Ehdr* elf_header);
 
 #endif

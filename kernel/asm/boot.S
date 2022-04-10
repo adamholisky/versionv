@@ -14,10 +14,18 @@
 	.long 0
 	.long 0
 	
+	#ifdef GRAPHICS_OFF
 	.long 1
 	.long 80
 	.long 25
 	.long 0
+	#endif
+	#ifdef GRAPHICS_ON
+	.long 0
+	.long 1280
+	.long 720
+	.long 32
+	#endif
 
 .section .versionv_magic, "aw"
 	.asciz "VersionV"
@@ -102,47 +110,68 @@ GDT_END:
 _asm_kernel_start:
 	#ifdef PAGING_PAE
 
-	movl $(paging_pd - KERNEL_VIRT_LOAD_BASE), %edx		// edx gets the pd
-	orl  $1, %edx 										// set as present
-	movl %edx, $(paging_pdpt - KERNEL_VIRT_LOAD_BASE) 	// load PDPT[0] with EDX
-	movl %edx, $(paging_pdpt - KERNEL_VIRT_LOAD_BASE)   // load PDPT[3] with EDX (3 = 3gb = 0xC0000000)
-	
-	movl %cr4, %eax
-	bts  $5, %eax
-	movl %eax, %cr4
-	movl $(paging_pdpt - KERNEL_VIRT_LOAD_BASE), %cr3
+		/* Setup the PDPT with the right PD */
+		movl $(paging_pd - KERNEL_VIRT_LOAD_BASE), %ecx		// ecx gets the pd
+		orl  $0x1, %ecx 										// set as present
+		movl $(paging_pdpt - KERNEL_VIRT_LOAD_BASE), %edi
+		movl %ecx, (%edi)	// load PDPT[0] with EDX
+		movl $(paging_pdpt + 3*8 - KERNEL_VIRT_LOAD_BASE), %edi
+		movl %ecx, (%edi)   // load PDPT[3] with EDX (3 = 3gb = 0xC0000000)
+		
+		/* Setup the PD with the right address and info */
+		movl $(paging_pd - KERNEL_VIRT_LOAD_BASE), %edi
+		movl 0b10000011, %edx
+		movl %edx, (%edi)
 
-	movl %cr0, %eax
-	orl  $0x80000000, %eax
-	movl %eax, %cr0
+		movl %cr4, %edx
+		bts  $5, %edx
+		movl %edx, %cr4
 
-	lea  pae3, %ecx
-	jmp  *%ecx										/* BSG: "Jump" */
+		movl $(paging_pdpt - KERNEL_VIRT_LOAD_BASE), %edi
+		movl %edi, %cr3
 
-	pae2:
-	lgdt GDTR
-	mov $0x10, %ax
-	mov %ax, %ds
-	mov %ax, %ss
-	mov %ax, %es
-	mov %ax, %fs 
-	mov %ax, %gs
+		movl %cr0, %edx
+		orl  $0x80000000, %edx
+		movl %edx, %cr0
 
-	jmp $0x08, $pae3
+		lea  pae2, %ecx
+		jmp  *%ecx										/* BSG: "Jump" */
 
-	pae3:
-	mov  $(stack_top), %esp							/* Setup the stack */
+		pae2:
+		lgdt GDTR
+		mov $0x10, %ax
+		mov %ax, %ds
+		mov %ax, %ss
+		mov %ax, %es
+		mov %ax, %fs 
+		mov %ax, %gs
 
-	addl $0xC0000000, %ebx
-	push %ebx										/* Multiboot header pointer */
-	push %eax										/* Magic number */
+		jmp $0x08, $pae3
 
-	xor %ebp, %ebp									/* NULL Stack for tracing purposes */
+		pae3:
+		mov  $(stack_top), %esp							/* Setup the stack */
 
-	call kernel_main
+		addl $0xC0000000, %ebx
+		push %ebx										/* Multiboot header pointer */
+		push %eax										/* Magic number */
+
+		xor %ebp, %ebp									/* NULL Stack for tracing purposes */
+
+		call kernel_main
 
 	#endif
 	
+	movl $12800, %ecx
+	movl $0xFD00c828, %edi
+	g1:
+	movl $0x00AAAAAA, (%edi)
+	addl $4, %edi
+	dec %ecx
+	cmpl $0, %ecx
+	jnz g1
+	
+
+
 	movl $(boot_page_table - 0xC0000000), %edi		/* EDI gets the physical page table  address */
 	movl $0, %esi									/* 0 == first address mapped */
 	movl $1024, %ecx								/* Map our pages */

@@ -1,4 +1,4 @@
-#if !defined(KERNELHEADER_INCLUDED)
+#ifndef KERNELHEADER_INCLUDED
 #define KERNELHEADER_INCLUDED
 
 #include <stdbool.h>

@@ -17,10 +17,10 @@ APPS := $(wildcard test_apps/*.c)
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
 DEFINES = -DPAGING_4K \
-		  -DGRAPHICS_OFF 
+		  -DGRAPHICS_ON
 CFLAGS = $(DEFINES) -ffreestanding -fno-omit-frame-pointer -O0 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
 ASM = /usr/local/osdev/bin/i686-elf-as
-AFLAGS = $(C_FLAGS) -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
+AFLAGS = $(CFLAGS) -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
 
 #Support program and flags
 OBJDUMP = /usr/local/osdev/bin/i686-elf-objdump
@@ -32,10 +32,11 @@ QEMU_COMMON = 	-drive format=raw,if=ide,file=$(ROOT_DIR)/vv_hd.img \
 				-serial tcp:192.168.0.100:10100,nodelay=on,reconnect=1 \
 				-serial stdio \
 				-serial null \
-				-serial file:$(ROOT_DIR)/serial_out.txt
+				-serial file:$(ROOT_DIR)/serial_out.txt \
+				-D $(ROOT_DIR)/qemu_debug_log.txt -d int,cpu_reset -no-reboot
 QEMU_DISPLAY_NONE =	-display none
-QEMU_DISPLAY_NORMAL =  
-QEMU_DEBUG_COMMON = -S -gdb tcp::5894
+QEMU_DISPLAY_NORMAL = -vga std
+QEMU_DEBUG_COMMON = -S -gdb tcp::5894 
 
 export
 
@@ -43,7 +44,7 @@ all: install
 
 build/versionv.bin: build_test_apps $(SOURCES_C) $(SOURCES_ASM) $(SOURCES_ASMS) $(OBJECTS_C) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(APPS)
 	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(OBJECTS_APPS)
-	objdump -x -d build/versionv.bin > objdump.txt
+	objdump -x -D -S build/versionv.bin > objdump.txt
 	readelf -a build/versionv.bin > elfdump.txt
 	@>&2 printf "[Build] Done\n"
 
@@ -55,7 +56,7 @@ build/%.o: kernel/*/%.c
 build/%.o: kernel/*/%.s
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
-	$(ASM) $(AFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
+	$(ASM) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
 build/%.o: kernel/*/%.S
 	@>&2 printf "[Build] $<\n"

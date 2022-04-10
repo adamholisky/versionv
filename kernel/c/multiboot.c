@@ -17,7 +17,7 @@ void multiboot_initalize( unsigned long _mb_magic, multiboot_info_t *mbh ) {
     multiboot_header.mmap_addr += KERNEL_VIRT_LOAD_BASE;
     multiboot_header.drives_addr += KERNEL_VIRT_LOAD_BASE;
     multiboot_header.boot_loader_name += KERNEL_VIRT_LOAD_BASE;
-    multiboot_header.framebuffer_addr += KERNEL_VIRT_LOAD_BASE;
+    //multiboot_header.framebuffer_addr += KERNEL_VIRT_LOAD_BASE;
 }
 
 multiboot_info_t * get_multiboot_header( void ) {
@@ -27,6 +27,7 @@ multiboot_info_t * get_multiboot_header( void ) {
 void multiboot_echo_to_serial( void ) {
     uint32_t mb_flags = multiboot_header.flags;
 
+    #define kdebug_multiboot
     #ifdef kdebug_multiboot
  
     debugf( "\nMultiboot v1 Dump\n" );

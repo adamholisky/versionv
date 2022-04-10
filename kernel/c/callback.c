@@ -1,12 +1,14 @@
+#include <kernel.h>
 #include "callback.h"
 #include "task.h"
+#include <string.h>
 
 context_switch_callback * register_callback( context_switch_callback * callback, void * func_name ) {
 	strcpy( callback->func_name, func_name );
 	callback->t = get_current_task();
 
 	Elf32_Sym * symbol_table = callback->t->sym_table;
-	uint32_t string_addr = callback->t->str_table;
+	uint32_t string_addr = (uint32_t)callback->t->str_table;
 
 	for( int i = 0; i < callback->t->num_syms; i++ ) {
 		//klog( "0x%08X -> %s\n", symbol_table[i].st_value, (char *)(symbol_table[i].st_name + string_addr)  );
@@ -39,7 +41,7 @@ void do_callback( context_switch_callback * callback ) {
 	set_task_pde( callback->t->code_page_table );
 
 	// switch
-	callback_function = callback->addr;
+	callback_function = (void *)callback->addr;
 	callback_function( callback->arg1 );
 
 	// restore task
