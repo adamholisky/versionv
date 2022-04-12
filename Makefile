@@ -16,7 +16,7 @@ APPS := $(wildcard test_apps/*.c)
 
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
-DEFINES = -DPAGING_4K \
+DEFINES = -DPAGING_PAE \
 		  -DGRAPHICS_ON
 CFLAGS = $(DEFINES) -ffreestanding -fno-omit-frame-pointer -O0 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
 ASM = /usr/local/osdev/bin/i686-elf-as

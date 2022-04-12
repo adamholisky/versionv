@@ -55,7 +55,7 @@
 	.fill 1024, 4, 0
 
 #ifdef PAGING_PAE
-	.align 4096
+	.align 0x1000
 	.global paging_pdpt
 	paging_pdpt:
 	.fill 4, 8, 0
@@ -110,18 +110,18 @@ GDT_END:
 _asm_kernel_start:
 	#ifdef PAGING_PAE
 
-		/* Setup the PDPT with the right PD */
-		movl $(paging_pd - KERNEL_VIRT_LOAD_BASE), %ecx		// ecx gets the pd
-		orl  $0x1, %ecx 										// set as present
-		movl $(paging_pdpt - KERNEL_VIRT_LOAD_BASE), %edi
-		movl %ecx, (%edi)	// load PDPT[0] with EDX
-		movl $(paging_pdpt + 3*8 - KERNEL_VIRT_LOAD_BASE), %edi
-		movl %ecx, (%edi)   // load PDPT[3] with EDX (3 = 3gb = 0xC0000000)
+		movl $(paging_pd - KERNEL_VIRT_LOAD_BASE + 0x1), paging_pdpt - KERNEL_VIRT_LOAD_BASE	    // load PDPT[0] with EDX
+		movl $(paging_pd - KERNEL_VIRT_LOAD_BASE + 0x1), paging_pdpt - KERNEL_VIRT_LOAD_BASE + 3*8  // load PDPT[3] with EDX (3 = 3gb = 0xC0000000)
 		
 		/* Setup the PD with the right address and info */
-		movl $(paging_pd - KERNEL_VIRT_LOAD_BASE), %edi
+		/*movl $(paging_pd - KERNEL_VIRT_LOAD_BASE), %edi
 		movl 0b10000011, %edx
-		movl %edx, (%edi)
+		movl %edx, (%edi)*/
+
+		xor %ecx, %ecx
+		movl $(paging_pd - KERNEL_VIRT_LOAD_BASE), %edi
+		movl $0x83, %ecx
+		movl %ecx, (%edi)
 
 		movl %cr4, %edx
 		bts  $5, %edx
@@ -132,12 +132,14 @@ _asm_kernel_start:
 
 		movl %cr0, %edx
 		orl  $0x80000000, %edx
+		
 		movl %edx, %cr0
 
 		lea  pae2, %ecx
 		jmp  *%ecx										/* BSG: "Jump" */
 
 		pae2:
+
 		lgdt GDTR
 		mov $0x10, %ax
 		mov %ax, %ds

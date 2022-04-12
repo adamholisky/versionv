@@ -4,15 +4,19 @@
 #ifdef PAGING_4K
 	#define page_size_in_bytes 0x00001000
 	#define PAGE_SIZE_IN_BYTES 0x00001000
+	#define SBRK_NUM_PAGES 16
 #elif PAGING_4M
 	#define page_size_in_bytes 0x00400000
 	#define PAGE_SIZE_IN_BYTES 0x00400000
+	#define SBRK_NUM_PAGES 1
 #elif PAGING_PAE
 	#define page_size_in_bytes 0x00200000
 	#define PAGE_SIZE_IN_BYTES 0x00200000
+	#define SBRK_NUM_PAGES 1
 #else
 	#define page_size_in_bytes 0x00001000
 	#define PAGE_SIZE_IN_BYTES 0x00001000
+	#define SBRK_NUM_PAGES 16
 #endif
 
 #define KERNEL_VIRT_LOAD_BASE 0xC0000000

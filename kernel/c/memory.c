@@ -67,6 +67,14 @@ void memory_initalize( void ) {
 	// Calculate the alloc start so it ends up on a 4k boundry
 	//alloc_start = (alloc_start % 0x1000) + alloc_start;
 
+	#ifdef PAGING_PAE
+		
+		klog( "alloc start: %08X\n", alloc_start );
+		klog( "alloc start mod: %08X\n", alloc_start % 0x200000);
+		klog( "alloc addition: %08X\n", 0x200000 - (alloc_start % 0x200000) );
+		alloc_start = alloc_start + 0x200000 - (alloc_start % 0x200000);
+	#endif
+
 	phsyical_memory_top = (uint32_t *)alloc_start;
 	physical_memory_base = (uint32_t *)alloc_start;
 
@@ -77,6 +85,7 @@ void memory_initalize( void ) {
 
 	page_allocate( 5 );
 
+	#define kdebug_memory
 	#ifdef kdebug_memory
 
 	memory_test();
@@ -229,25 +238,38 @@ void dump_active_pt( void ) {
 uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	uint32_t pt_addr_physical = 0;
 	
-	#undef PAGING_PAE
+	#define PAGING_PAE
 	#ifdef PAGING_PAE
 
-	uint32_t pdpt_index = (uint32_t)virt_addr / 0x30000000; // 0x30000000;
-	uint32_t pd_index = ((uint32_t)virt_addr - (pdpt_index * 0x30000000)) % PAGE_SIZE_IN_BYTES; // PAGE_SIZE_IN_BYTES
-	page_directory_entry *pdpt = paging_pdpt;
-	page_directory_entry *pd = paging_pd;
+	uint32_t pdpt_index = (uint32_t)virt_addr / 0x40000000; // 0x40000000;
+	uint32_t pd_index = ((uint32_t)virt_addr - (pdpt_index * 0x40000000)) / PAGE_SIZE_IN_BYTES; // PAGE_SIZE_IN_BYTES
+	uint64_t *pdpt_uint = ((uint64_t *)&paging_pdpt) + pdpt_index;
+	uint64_t *pd_uint = (uint64_t *)&paging_pd + pd_index;
+
+	//kdebug_peek_at( pdpt_uint );
+
+	if( test_bit(*pdpt_uint, PTE_BIT_PRESENT) == 0 ) {
+		klog( "pdpt is not present.\n" );
+		set_bit(*pdpt_uint, PTE_BIT_PRESENT);
+	} else {
+		*pd_uint = (uint32_t)phys_addr | 0x83;
+	}
 
 	debugf( "virt_addr:          0x%08X\n", virt_addr );
 	debugf( "phys_addr:          0x%08X\n", phys_addr );
-	debugf( "pdpt_index:         0x%08X\n", pdpt_index );
-	debugf( "pd_index:           0x%08X\n", pd_index );
-	debugf( "pt_addr_physical:   0x%08X\n", pt_addr_physical );
-	debugf( "spt:                0x%08X\n", second_page_table );
-	debugf( "pt_addr >> 11:      0x%08X\n", pt_addr_physical >> 11 );
-	debugf( "PDPT contents:      0x%08X\n", *pdpt );
-	debugf( "PD contents:        0x%08X\n", *pd );
+	debugf( "  pdpt_index:         0x%08X\n", pdpt_index );
+	debugf( "  pd_index:           0x%08X\n", pd_index );
+	debugf( "  paging_pdpt:        0x%08X\n", &paging_pdpt );
+	debugf( "  PDPT addr:          0x%08X\n", pdpt_uint );
+	debugf( "  paging_pd:          0x%08X\n", &paging_pd );
+	debugf( "  PD addr:            0x%08X\n", pd_uint );
+	debugf( "  PDPT present:       %d\n", test_bit(*pdpt_uint, PTE_BIT_PRESENT) );
+	debugf( "  PD contents:        0x%08X\n", *pd_uint );
 	
-	asm volatile("invlpg (%0)" ::"r" (pd) : "memory");
+	asm volatile("invlpg (%0)" ::"r" (pd_uint) : "memory");
+	asm_refresh_cr3(); 	
+
+	debugf( "  Mem contnets:       0x%08X\n", *virt_addr);
 	#else
 	page_directory_entry * pd;
 	page_directory_entry * pt;
@@ -364,7 +386,7 @@ uint32_t * page_allocate( uint32_t num ) {
 	return return_pointer;
 }
 
-#define memtest_dump( v ) klog( #v " mem dump: 0x%04X %04X",( ( uint32_t )( v ) >> 16 ), ( uint32_t )( v )&0xFFFF)
+#define memtest_dump( v ) klog( #v " mem dump: 0x%04X %04X\n",( ( uint32_t )( v ) >> 16 ), ( uint32_t )( v )&0xFFFF)
 
 void memory_test( void ) {
 	log_entry_enter();
@@ -384,18 +406,18 @@ void memory_test( void ) {
 	*/
 	
 	p2 = kmalloc( 0x256 );
-	klog( "kmalloc(0x256) into p2" );
+	klog( "kmalloc(0x256) into p2\n" );
 	//memtest_dump( p2 );
 
-	klog( "kmalloc(0x512) into p3" );
+	klog( "kmalloc(0x512) into p3\n" );
 	p3 = kmalloc( 0x512 );
 	//memtest_dump( p3 );
 
-	klog( "kmalloc(0x11000) into p4" );
+	klog( "kmalloc(0x11000) into p4\n" );
 	p4 = kmalloc( 0x11000 );
 	//memtest_dump( p4 );
 
-	klog( "kmalloc(0x11000) into p5" );
+	klog( "kmalloc(0x11000) into p5\n" );
 	p5 = kmalloc( 0x11000 );
 	//memtest_dump( p5 );
 
