@@ -14,6 +14,7 @@ uint32_t bg_color;
 bool 	 render_background;
 uint32_t *bg_mask;
 bool	 font_smoothing_active;
+uint8_t  *fb_buffer;
 
 vga_information vga_info;
 
@@ -53,6 +54,22 @@ void vga_initalize( void ) {
 
 	klog( "VGA Mapped %d pages.\n", i );
 
+	vga_info.buffer = kmalloc( sizeof(uint8_t) * 1280 * 720 * 4 );
+
+	klog( "fb_buffer: 	    0x%08X\n", vga_info.buffer );
+	klog( "fb_buffer end:   0x%08X\n", ((uint32_t)vga_info.buffer + (1280*720*4)) );
+
+	*vga_info.buffer = 0xBA;
+	klog( "*fb_buffer:      0x%X\n", *vga_info.buffer );
+
+	*(vga_info.buffer + (1280*720*4) ) = 0xDA;
+	klog( "*fb_buffer end:  0x%X\n", *(vga_info.buffer + (1280*720*4) ));
+
+	//If we didn't pagefault, yay! paging is really working then...
+	
+	memset( vga_info.buffer, 0, 1280*720*4 );
+
+
 	//dump_active_pt();
 
 	vesa_info = (vesa_info_block *)(mb->vbe_control_info + KERNEL_VIRT_LOAD_BASE);
@@ -78,13 +95,18 @@ void vga_initalize( void ) {
 
 	bg_mask = kmalloc( sizeof(int) * 14 * 7 );
 
-	fillrect( vga_info.fbuffer, 0x00262A30, 0, 0, 1280, 720 );
+	fillrect( vga_info.buffer, 0x00262A30, 0, 0, 1280, 720 );
+	vga_draw_screen();
 
 	//draw_string( "Hello, world!", 5, 5, fg_color, bg_color );
 
 	//putpixel( vga_info.fbuffer, 10, 10, 0x00FF0000 );
 
 	klog( "exit\n" );
+}
+
+inline void vga_draw_screen( void ) {
+	memcpy( vga_info.fbuffer, vga_info.buffer, 1280*720*4 );
 }
 
 inline void fillrect( uint8_t * buffer, uint32_t color, unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
@@ -105,6 +127,10 @@ inline void fillrect( uint8_t * buffer, uint32_t color, unsigned int x, unsigned
 	}
 } 
 
+void put_pixel( unsigned int x, unsigned int y, int color ) {
+	putpixel( vga_info.buffer, x, y, color );
+}
+
 inline void putpixel( uint8_t * buffer, unsigned int x, unsigned int y, int color) {
 	uint32_t where = (x * vga_info.pixel_width) + (y * vga_info.width * vga_info.pixel_width);
 	buffer[where] = color & 255;              // BLUE
@@ -123,19 +149,23 @@ void draw_string( char * string, unsigned int x, unsigned int y, unsigned int fg
 }
 
 void draw_rect( rect r, unsigned int color ) {
-	fillrect( vga_info.fbuffer, color, r.x, r.y, r.w, r.h );
+	fillrect( vga_info.buffer, color, r.x, r.y, r.w, r.h );
 }
 
 inline void move_rect( rect dest, rect src ) {
+	moverect( vga_info.buffer, dest, src );
+}
+
+inline void moverect( uint8_t *buff, rect dest, rect src ) {
 	unsigned int i = 0;
-	unsigned char * mem_dest;
-	unsigned char * mem_src;
+	uint8_t * mem_dest;
+	uint8_t * mem_src;
 	unsigned int mem_size;
 
 	for( i = 0; i < src.h; i++ ) {
-		mem_dest = vga_info.fbuffer + (dest.x * vga_info.pixel_width) + ((dest.y + i) * vga_info.pitch );
-		mem_src = vga_info.fbuffer + (src.x * vga_info.pixel_width) + ((src.y + i) * vga_info.pitch );
-		mem_size = 3 * (vga_info.pixel_width * src.w);
+		mem_dest = buff + (dest.x * vga_info.pixel_width) + ((dest.y + i) * vga_info.pitch );
+		mem_src = buff + (src.x * vga_info.pixel_width) + ((src.y + i) * vga_info.pitch );
+		mem_size = (vga_info.pixel_width * src.w);
 
 
 		for(; mem_size != 0; mem_size--) *mem_dest++ = *mem_src++;
@@ -160,7 +190,7 @@ void vga_move_line( unsigned int dest_y, unsigned int src_y ) {
 }
 
 void vga_put_char( unsigned char c, unsigned int x, unsigned int y ) {
-	draw_char( vga_info.fbuffer, screen_border + (x * char_width), screen_border + (y * char_height), vga_info.fg_color, vga_info.bg_color, c );
+	draw_char( vga_info.buffer, screen_border + (x * char_width), screen_border + (y * char_height), vga_info.fg_color, vga_info.bg_color, c );
 }
 
 

@@ -32,7 +32,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	//dump_active_pt();
 	vga_initalize();
 	
-	console_init( "default-console", 3, 3, 7 * 80, 14 * 25, 0x00282C34, 0x00FFFFFF );
+	console_init( "default-console", 3, 3, 7 * 120, 14 * 50, 0x00282C34, 0x00AAAAAA );
 	console_draw();
 
 	printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m\n" );
@@ -52,6 +52,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	observer_test();
 	
+	multiboot_echo_to_serial();
 
 	debugf( "Serial console active.\n" );
 	debugf( "\nVersionV: " );
@@ -92,6 +93,9 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 					break;
 				case '4':
 					callback_test_run();
+					break;
+				case '5':
+					console_scroll_forever_test();
 					break;
 			}
 

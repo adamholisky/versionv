@@ -227,7 +227,7 @@ void dump_active_pt( void ) {
  * @return uint32_t* Returns the virtual address
  */
 uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
-	uint32_t pt_addr_physical = NULL;
+	uint32_t pt_addr_physical = 0;
 	
 	#undef PAGING_PAE
 	#ifdef PAGING_PAE

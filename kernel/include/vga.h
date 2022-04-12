@@ -96,6 +96,7 @@ typedef struct {
 
 typedef struct {
 	uint8_t * fbuffer;
+	uint8_t * buffer;
 	uint32_t pitch;
 	uint32_t width;
 	uint32_t height;
@@ -111,13 +112,16 @@ typedef struct {
 
 void vga_initalize( void );
 void fillrect( uint8_t * buffer, uint32_t color, unsigned int x, unsigned int y, unsigned int w, unsigned int h);
+void put_pixel( unsigned int x, unsigned int y, int color );
 void putpixel( uint8_t * buffer, unsigned int x, unsigned int y, int color);
 void draw_string( char * string, unsigned int x, unsigned int y, unsigned int fg_color, unsigned int bg_color );
 void draw_rect( rect r, unsigned int color );
 void move_rect( rect dest, rect src );
+void moverect( uint8_t *buff, rect dest, rect src );
 void vga_move_line( unsigned int dest_y, unsigned int src_y );
 void vga_put_char( unsigned char c, unsigned int x, unsigned int y );
 void draw_char( uint8_t * buffer, unsigned int x, unsigned int y, uint32_t fg, uint32_t bg, unsigned int font_char );
+void vga_draw_screen( void );
 vga_information * vga_get_info( void );
 
 static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) 

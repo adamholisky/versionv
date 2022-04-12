@@ -151,6 +151,11 @@ void term_put_char( char c ) {
 	}
 
 	if( send_to_screen ) {
+		if( is_gui_active ) {
+			console_put_char( c );
+			return;
+		}
+
 		if( c != '\n' ) {
 			term_put_char_at( c, term_current_color, term_current_column, term_current_row );
 
@@ -179,16 +184,16 @@ void term_put_char( char c ) {
 					}
 
 					if( is_gui_active ) {
-						console_move_row( y, y + 1 );
+						//console_move_row( y, y + 1 );
 					}
 				}
 
 				for( x = 0; x < VGA_WIDTH; x++ ) {
 					const size_t index = ( VGA_HEIGHT - 1 ) * VGA_WIDTH + x;
 					term_buffer[index] = vga_entry( ' ', term_current_color );
-					if( is_gui_active ) {
+					/* if( is_gui_active ) {
 						console_put_char_at( ' ', x, VGA_HEIGHT - 1 );
-					}
+					} */
 				}
 			}
 		}
@@ -303,9 +308,11 @@ void console_draw( void ) {
 
 	for( y = 0; y < main_console->height; y++ ) {
 		for( x = 0; x < main_console->width; x++ ) {
-			draw_char( vga->fbuffer, main_console->box.x + (x * vga->char_width), main_console->box.y + (y * vga->char_height), main_console->fg_color, main_console->bg_color, main_console->buffer[ (y * main_console->width) + x ] );
+			draw_char( vga->buffer, main_console->box.x + (x * vga->char_width), main_console->box.y + (y * vga->char_height), main_console->fg_color, main_console->bg_color, main_console->buffer[ (y * main_console->width) + x ] );
 		}
 	}
+
+	vga_draw_screen();
 }
 
 void console_put_char_at( char c, unsigned int x, unsigned int y ) {
@@ -313,6 +320,7 @@ void console_put_char_at( char c, unsigned int x, unsigned int y ) {
 	//klog( "%c %d %d\n", c, x, y );
 
 	main_console->buffer[ x + (main_console->width * y) ] = c;
+	draw_char( vga->buffer, main_console->box.x + (x * vga->char_width), main_console->box.y + (y * vga->char_height), main_console->fg_color, main_console->bg_color, c );
 	draw_char( vga->fbuffer, main_console->box.x + (x * vga->char_width), main_console->box.y + (y * vga->char_height), main_console->fg_color, main_console->bg_color, c );
 }
 
@@ -356,6 +364,8 @@ void console_put_char( char c ) {
 				for( x = 0; x < main_console->width; x++ ) {
 					main_console->buffer[ (y * main_console->width) + x ] = main_console->buffer[ ((y + 1) * main_console->width) + x ];
 				}
+
+				//console_move_row( y, y + 1 );
 			}
 
 			for( x = 0; x < main_console->width; x++ ) {
@@ -371,6 +381,31 @@ void console_put_char( char c ) {
 	}
 }
 
-void console_move_row( unsigned int dest, unsigned int src ) {
-	vga_move_line( dest, src );
+void console_move_row( unsigned int _dest, unsigned int _src ) {
+	rect src;
+	rect dest;
+
+	src.x = main_console->box.x;
+	src.y = main_console->box.y + (_src * 17);
+	src.w = main_console->box.w;
+	src.h = 17;
+
+	dest.x = main_console->box.x;
+	dest.y = main_console->box.y + (_dest * 17);
+	dest.w = main_console->box.w;
+	dest.h = 17;
+
+	move_rect( dest, src );
+
+	console_draw();
+}
+
+void console_scroll_forever_test( void ) {
+	for( int i = 0; i < INT_MAX; i++ ) {
+		if( i % 2 ) {
+			printf( "odd\n" );
+		} else {
+			printf( "even %d %d %d %d %d %d\n", i, i, i, i, i ,i );
+		}
+	}
 }

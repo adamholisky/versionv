@@ -114,6 +114,12 @@ void k_log( uint32_t system_id, uint32_t level, char * message, ... ) {
 	printf( "\n" );
 
 	debug_out_off();
+
+	printf( "[%s] ", sys_text[ system_id ] );
+	va_start( args, message );
+	vprintf_( message, args ); 
+	va_end( args );
+	printf( "\n" );
 }
 
 void kpanic( char * message, ... ) {
