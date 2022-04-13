@@ -95,19 +95,30 @@ int32_t task_add( task *t ) {
 
 	//debugf( "tasks[i].context._esp: %08X\n", tasks[i].context._esp );
 
-	tasks[i].code_page_table = kmalloc( sizeof( page_directory_entry ) * 1024 );
-	memset( tasks[i].code_page_table, 0, sizeof( page_directory_entry ) * 1024 );
+	tasks[i].code_page_table = kmalloc( sizeof( page_directory_entry ) * PAGE_NUM_TABLES );
+	memset( tasks[i].code_page_table, 0, sizeof( page_directory_entry ) * PAGE_NUM_TABLES );
 
+	#ifdef PAGING_PAE
+	memset( tasks[i].code_page_table, 0, 8 * PAGE_NUM_TABLES );
+
+	uint64_t *pt = (uint64_t *)tasks[i].code_page_table;
+	*pt = ((uint64_t)get_physical_memory_base() + (uint64_t)tasks[i].code_start_virt - KERNEL_VIRT_HEAP_BASE) + 0x83;
+	*pt = 0x00000000FFFFFFFF & *pt;
+
+	klog( "task cpt: 0x%lX\n", tasks[i].code_page_table);
+	klog( "task pt: 0x%lx\n", pt );
+
+	klog( "task *pt: 0x%lx\n", *pt );
+
+	#else
 	tasks[i].code_page_table[0].rw = 1;
 	tasks[i].code_page_table[0].present = 1;
 	tasks[i].code_page_table[0].address = ((uint32_t)get_physical_memory_base() + (uint32_t)tasks[i].code_start_virt - KERNEL_VIRT_HEAP_BASE)>>11;
-	
-	//klog( "pte address created: 0x%08X\n", (uint32_t)get_physical_memory_base() + (uint32_t)tasks[i].code_start_virt - KERNEL_VIRT_HEAP_BASE );
-	//klog( "full: 0x%08X\n", ((uint32_t)get_physical_memory_base() + (uint32_t)tasks[i].code_start_virt - KERNEL_VIRT_HEAP_BASE)>>11 );
 
 	tasks[i].code_page_table[1].rw = 1;
 	tasks[i].code_page_table[1].present = 1;
-	tasks[i].code_page_table[1].address = ((uint32_t)get_physical_memory_base() + (uint32_t)tasks[i].code_start_virt + 0x1000 - KERNEL_VIRT_HEAP_BASE)>>11;
+	tasks[i].code_page_table[1].address = ((uint32_t)get_physical_memory_base() + (uint32_t)tasks[i].code_start_virt + PAGE_SIZE_IN_BYTES - KERNEL_VIRT_HEAP_BASE)>>11;
+	#endif
 
 	return i;
 }

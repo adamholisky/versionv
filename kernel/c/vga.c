@@ -30,6 +30,7 @@ void vga_initalize( void ) {
 
 	klog( "fb_addr: 0x%08X\n", fb_addr );
 
+
 	vga_info.pitch = mb->framebuffer_pitch;
 	vga_info.width = mb->framebuffer_width;
 	vga_info.height = mb->framebuffer_height;
@@ -38,13 +39,20 @@ void vga_initalize( void ) {
 	vga_info.fbuffer = (uint8_t *)0xE0000000;
 	font_smoothing_active = true;
 
+	klog( "pitch:   0x%X (%d)\n", vga_info.pitch, vga_info.pitch );
+	klog( "width:   %d\n", vga_info.width );
+	klog( "height:  %d\n", vga_info.height );
+
 	int i;
 	uint32_t virt = 0;
 	uint32_t phys = 0;
 	
-	for( i = 0; i < (vga_info.pitch * vga_info.height)/4096; i++ ) {
-		virt = 0xE0000000 + (i * 0x1000);
-		phys = fb_addr + (i * 0x1000);
+	uint32_t pages_needed = ((vga_info.pitch * vga_info.height)/PAGE_SIZE_IN_BYTES);
+	(vga_info.pitch * vga_info.height)-(pages_needed * PAGE_SIZE_IN_BYTES) != 0 ? pages_needed++ : 0;
+
+	for( i = 0; i < pages_needed; i++ ) {
+		virt = 0xE0000000 + (i * PAGE_SIZE_IN_BYTES);
+		phys = fb_addr + (i * PAGE_SIZE_IN_BYTES);
 		page_map( (uint32_t *)virt, (uint32_t *)phys );
 
 		//klog( "VGA Mapped: 0x%08X -> 0x%08X\n", virt, phys );
@@ -70,7 +78,7 @@ void vga_initalize( void ) {
 	memset( vga_info.buffer, 0, 1280*720*4 );
 
 
-	//dump_active_pt();
+	dump_active_pt();
 
 	vesa_info = (vesa_info_block *)(mb->vbe_control_info + KERNEL_VIRT_LOAD_BASE);
 	klog( "VESA control: %c%c%c%c\n", vesa_info->VbeSignature[0], vesa_info->VbeSignature[1], vesa_info->VbeSignature[2], vesa_info->VbeSignature[3]);
@@ -96,6 +104,7 @@ void vga_initalize( void ) {
 	bg_mask = kmalloc( sizeof(int) * 14 * 7 );
 
 	fillrect( vga_info.buffer, 0x00262A30, 0, 0, 1280, 720 );
+	klog( "Drawing first screen.\n" );
 	vga_draw_screen();
 
 	//draw_string( "Hello, world!", 5, 5, fg_color, bg_color );

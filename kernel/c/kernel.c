@@ -25,6 +25,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	initalize_serial();
 	multiboot_echo_to_serial();
 	memory_initalize();
+	kdebug_initalize();
 	elf_initalize( (uint32_t)kernel_main );
 	interrupts_initalize();
 	observer_initalize();
@@ -52,7 +53,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	observer_test();
 	
-	multiboot_echo_to_serial();
+	//multiboot_echo_to_serial();
 
 	debugf( "Serial console active.\n" );
 	debugf( "\nVersionV: " );

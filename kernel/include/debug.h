@@ -61,7 +61,9 @@ typedef struct {
     uint32_t eip;
 } stackframe;
 
+void kdebug_initalize( void );
 void kdebug_add_symbol( char * name, uint32_t addr, uint32_t size );
+uint32_t kdebug_get_total_symbols( void );
 kdebug_symbol * kdebug_get_symbol( char * name );
 kdebug_symbol * kdebug_get_symbol_array( void );
 uint32_t kdebug_get_symbol_addr( char * name );

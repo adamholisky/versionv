@@ -30,4 +30,5 @@ void console_draw( void );
 void console_put_char_at( char c, unsigned int x, unsigned int y );
 void console_put_char( char c );
 void console_move_row( unsigned int dest, unsigned int src );
+void console_scroll_forever_test( void );
 #endif

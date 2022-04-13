@@ -4,18 +4,28 @@
 #ifdef PAGING_4K
 	#define page_size_in_bytes 0x00001000
 	#define PAGE_SIZE_IN_BYTES 0x00001000
+	#define PAGE_DIR_SIZE_IN_BYTES 0x00400000
+	#define PAGE_NUM_TABLES 1024
+	#define PAGE_NUM_DIRS 1024
 	#define SBRK_NUM_PAGES 16
 #elif PAGING_4M
 	#define page_size_in_bytes 0x00400000
 	#define PAGE_SIZE_IN_BYTES 0x00400000
+	#define PAGE_DIR_SIZE_IN_BYTES 0x00400000
 	#define SBRK_NUM_PAGES 1
 #elif PAGING_PAE
 	#define page_size_in_bytes 0x00200000
 	#define PAGE_SIZE_IN_BYTES 0x00200000
-	#define SBRK_NUM_PAGES 1
+	#define PAGE_DIR_SIZE_IN_BYTES 0x40000000
+	#define PAGE_NUM_TABLES 512
+	#define PAGE_NUM_DIRS 4
+	#define SBRK_NUM_PAGES 2
 #else
 	#define page_size_in_bytes 0x00001000
 	#define PAGE_SIZE_IN_BYTES 0x00001000
+	#define PAGE_DIR_SIZE_IN_BYTES 0x00400000
+	#define PAGE_NUM_TABLES 1024
+	#define PAGE_NUM_DIRS 1024
 	#define SBRK_NUM_PAGES 16
 #endif
 

@@ -85,7 +85,7 @@ void memory_initalize( void ) {
 
 	page_allocate( 5 );
 
-	#define kdebug_memory
+	//#define kdebug_memory
 	#ifdef kdebug_memory
 
 	memory_test();
@@ -112,47 +112,81 @@ void memory_initalize( void ) {
 	debugf( "----\n" );
 
 	#endif
+	
+	void * process_address_space = kmalloc( PAGE_SIZE_IN_BYTES );
+	process_address_space = (void *)((uint32_t)process_address_space + PAGE_SIZE_IN_BYTES - 0x0040);
 
-	void * process_address_space = kmalloc( 0x1000 );
-	process_address_space = (void *)((uint32_t)process_address_space + 0x1000 - 0x0040);
+	memset( &process_pt, 0, 1024 );
 
-	page_directory_entry * pde = (page_directory_entry *)&boot_page_directory;
-	page_directory_entry * pte = (page_directory_entry *)&process_pt;
-
-	#ifdef kdebug_memory_pages
-	klog( "process_pt paddr:  0x%08X\n", ((uint32_t)process_pt - KERNEL_VIRT_LOAD_BASE) );
-	klog( "process paddr sp:  0x%08X\n", (uint32_t)physical_memory_base + (uint32_t)process_address_space - KERNEL_VIRT_HEAP_BASE );
-	klog( "process paddr>>11: 0x%08X\n", ((uint32_t)physical_memory_base + (uint32_t)process_address_space - KERNEL_VIRT_HEAP_BASE)>>11 );
+	#ifdef PAGING_PAE
+	uint64_t * pde = (uint64_t *)&paging_pdpt;
+	uint64_t * pte = (uint64_t *)&process_pt;
+	#else
+	uint32_t * pde = (uint32_t *)&paging_pd;
+	uint32_t * pte = (uint32_t *)&process_pt;
 	#endif
 
-	pte->present = 1;
+	klog( "pd 0x%08X  pt 0x%08X\n", pde, pte );
+	*pte = (((uint64_t)process_address_space + (uint64_t)physical_memory_base) - KERNEL_VIRT_HEAP_BASE + 0x83);
+	klog( "pas: 0x%lX\n", process_address_space );
+	klog( "pte: 0x%lX\n", *pte );
+	/* pte->present = 1;
 	pte->rw = 1;
-	pte->address = ((uint32_t)physical_memory_base + (uint32_t)process_address_space - KERNEL_VIRT_HEAP_BASE)>>11;
+	pte->address = ((uint32_t)physical_memory_base + (uint32_t)process_address_space - KERNEL_VIRT_HEAP_BASE)>>11; */
 
-	#ifdef kdebug_memory_pages
-	klog( "pte->address: 0x%08X\n", pte->address<<11 );
+	/* pde->present = 1;
+	pde->rw = 1;
+	pde->address = ((uint32_t)process_pt - KERNEL_VIRT_LOAD_BASE) >> 11; */
+
+	klog( "ppt: 0x%0lX\n", ((uint64_t)&process_pt - KERNEL_VIRT_LOAD_BASE) + 0x1);
+	#ifdef PAGING_PAE
+	*pde = ((uint64_t)&process_pt - KERNEL_VIRT_LOAD_BASE) + 0x1;
+	*pde = 0x00000000FFFFFFFF & *pde;
+	*pte = 0x00000000FFFFFFFF & *pte;
+	#else
+	*pde = ((uint32_t)&process_pt - KERNEL_VIRT_LOAD_BASE) + 0x3;
 	#endif
 
-	pde->present = 1;
-	pde->rw = 1;
-	pde->address = ((uint32_t)process_pt - KERNEL_VIRT_LOAD_BASE) >> 11;
+	uint64_t *pd = (uint64_t *)&paging_pdpt;
+	for( int u = 0; u < 4; u++, pd++ ) {
+		klog( "pd[%d]: 0x%lX\n", u, *pd );
+	}
 
-	//asm volatile("invlpg (%0)" ::"r" (pte) : "memory");
+	uint64_t *pt = (uint64_t *)&process_pt;
+	for( int y = 0; y < 512; y++, pt++ ) {
+		if( *pt != 0 ) {
+			klog( "pt[%d]: 0x%lX\n", y, *pt );
+		}
+	}
+	
+	asm volatile("invlpg (%0)" ::"r" (pte) : "memory");
 	asm_refresh_cr3();
+
+		dump_active_pt();
+
+
+	db2();
 
 	uint32_t * pmem = (uint32_t *)process_address_space;
 	*(pmem + 1) = 0x0666;
 
+	klog( "%X --> %x\n", (pmem + 1), *(pmem + 1 ));
+
+	db3();
+
 	void * zero_addr_space = 0x00000000;
 	uint32_t * zerozero = (uint32_t *)zero_addr_space;
+	*(zerozero + 2) = 0xBABABABA;
 
-	//#ifdef kdebug_memory_pages
+	db4();
+
 	klog( "00   uint32_t: %08X\n", *(zerozero + 1) );
 	klog( "pmem uint32_t: %08X\n", *(pmem + 1) );
-	//#endif
-	
-	//dump_active_pt();
 
+	if( *(zerozero + 1) != *(pmem + 1) ) {
+		kpanic( "0x0 and pmem are not equal!\n" );
+	}
+ 
 	log_entry_exit();
 }
 
@@ -175,7 +209,7 @@ uint32_t * get_physical_addr_from_virt( uint32_t * virt ) {
  * @param pte Pointer to the dage_directory_entry to copy into the main process PTE
  */
 void set_task_pde( page_directory_entry * pte ) {
-	page_directory_entry * pde = (page_directory_entry *)&boot_page_directory;
+	//page_directory_entry * pde = (page_directory_entry *)&boot_page_directory;
 
 /* 	pde->present = 1;
 	pde->rw = 1;
@@ -187,7 +221,7 @@ void set_task_pde( page_directory_entry * pte ) {
 	// debugf( "pde->addr: 0x%08X\n", pde->address << 11 );
 	// debugf( "pte->addr: 0x%08X\n", pte->address << 11 );
 
-	page_directory_entry * pt = (page_directory_entry *)((pde[0].address << 11) + KERNEL_VIRT_LOAD_BASE);
+	//page_directory_entry * pt = (page_directory_entry *)((pde[0].address << 11) + KERNEL_VIRT_LOAD_BASE);
 
 	asm_refresh_cr3();
 
@@ -211,15 +245,45 @@ void set_task_pde( page_directory_entry * pte ) {
 }
 
 void dump_active_pt( void ) {
-	page_directory_entry * pde = (page_directory_entry *)&boot_page_directory;
+	#ifdef PAGING_PAE
+	uint64_t * pde = (uint64_t *)&paging_pdpt;
+	#else
+	uint32_t * pde = (uint32_t *)&paging_pd;
+	#endif
 
-	for( int i = 0; i < 1024; i++ ) {
-		if( pde[i].present == 1 ) {
-			page_directory_entry *pt = (page_directory_entry *)((pde[i].address << 11) + KERNEL_VIRT_LOAD_BASE);
+	for( int i = 0; i < PAGE_NUM_DIRS; i++, pde++ ) {
+		//klog( "pde: 0x%08X\n", pde );
 
-			for( int j = 0; j < 1024; j++ ) {
-				if( pt[j].present == 1 ) {
-					klog( "pd[%d]->pt[%d] is present pointing to phys mem: 0x%08X\n", i, j, (pt[j].address << 11) );
+		if( test_bit(*pde, PTE_BIT_PRESENT) == 1 ) {
+			//klog( "present!\n" );
+			
+			#ifdef PAGING_PAE
+				uint64_t pt = (*pde & 0x000FFFFFFFFFF000) + KERNEL_VIRT_LOAD_BASE;
+			#else
+				uint32_t pt = (*pde & 0xFFFFF000) + KERNEL_VIRT_LOAD_BASE;
+			#endif
+
+			//klog( "pt: 0x%08X\n", pt );
+
+			#ifdef PAGING_PAE
+				uint64_t *page = (uint64_t *)pt;
+			#else
+				uint32_t *page = (uint32_t *)pt;
+			#endif
+
+			for( int j = 0; j < PAGE_NUM_TABLES; j++, page++ ) {
+				if( page == NULL ) {
+					klog( "Error: page is null. i = %d, j - %d\n", i, j );
+				}
+
+				#ifdef PAGING_PAE
+				uint64_t address = (*page & 0x000FFFFFFFF00000);
+				#else
+				uint32_t address = (*page & 0xFFFFF000);
+				#endif
+
+				if( test_bit(*page, PTE_BIT_PRESENT) == 1 ) {
+					klog( "pd[%d].page[%03d] present, virt 0x%08X --> phys mem: 0x%08X\n", i, j, (i * PAGE_DIR_SIZE_IN_BYTES) + (j * PAGE_SIZE_IN_BYTES), address );
 				} else {
 					//klog( "pd[%d]->pt[%d] is not present.\n", i, j );
 				}
@@ -238,7 +302,6 @@ void dump_active_pt( void ) {
 uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	uint32_t pt_addr_physical = 0;
 	
-	#define PAGING_PAE
 	#ifdef PAGING_PAE
 
 	uint32_t pdpt_index = (uint32_t)virt_addr / 0x40000000; // 0x40000000;
@@ -253,9 +316,10 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 		set_bit(*pdpt_uint, PTE_BIT_PRESENT);
 	} else {
 		*pd_uint = (uint32_t)phys_addr | 0x83;
+		*pd_uint = 0x00000000FFFFFFFF & *pd_uint;
 	}
 
-	debugf( "virt_addr:          0x%08X\n", virt_addr );
+	/* debugf( "virt_addr:          0x%08X\n", virt_addr );
 	debugf( "phys_addr:          0x%08X\n", phys_addr );
 	debugf( "  pdpt_index:         0x%08X\n", pdpt_index );
 	debugf( "  pd_index:           0x%08X\n", pd_index );
@@ -264,12 +328,12 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	debugf( "  paging_pd:          0x%08X\n", &paging_pd );
 	debugf( "  PD addr:            0x%08X\n", pd_uint );
 	debugf( "  PDPT present:       %d\n", test_bit(*pdpt_uint, PTE_BIT_PRESENT) );
-	debugf( "  PD contents:        0x%08X\n", *pd_uint );
+	debugf( "  PD contents:        0x%08X\n", *pd_uint ); */
 	
 	asm volatile("invlpg (%0)" ::"r" (pd_uint) : "memory");
 	asm_refresh_cr3(); 	
 
-	debugf( "  Mem contnets:       0x%08X\n", *virt_addr);
+	/* debugf( "  Mem contnets:       0x%08X\n", *virt_addr); */
 	#else
 	page_directory_entry * pd;
 	page_directory_entry * pt;

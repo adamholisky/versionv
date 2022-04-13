@@ -18,6 +18,10 @@ char * sys_text_arr[] = {
 							"ELF"
 						};
 
+void kdebug_initalize( void ) {
+	memset( &kernel_symbols, 0, sizeof(kdebug_symbol) * KDEBUG_MAX_SYMBOLS );
+}
+
 void kdebug_add_symbol( char * name, uint32_t addr, uint32_t size ) {
 	kernel_symbols[ kernel_symbol_top ].name = name;
 	kernel_symbols[ kernel_symbol_top ].addr = addr;
@@ -48,7 +52,8 @@ char * kdebug_get_function_at( uint32_t addr ) {
 kdebug_symbol * kdebug_get_symbol( char * name ) {
 	kdebug_symbol * ret = NULL;
 
-	for( int i = 0; i < KDEBUG_MAX_SYMBOLS; i++ ) {
+	for( int i = 0; i < kernel_symbol_top; i++ ) {
+		//klog( "%d", i );
 		if( kernel_symbols[i].name[0] == 0 ) continue;
 
 		if( strcmp( kernel_symbols[i].name, name ) == 0 ) {
@@ -57,6 +62,10 @@ kdebug_symbol * kdebug_get_symbol( char * name ) {
 	}
 
 	return ret;
+}
+
+uint32_t kdebug_get_total_symbols( void ) {
+	return kernel_symbol_top;
 }
 
 uint32_t kdebug_get_symbol_addr( char * name ) {

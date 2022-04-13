@@ -4,7 +4,7 @@
 #include "modules.h"
 #include "task.h"
 
-#undef kdebug_process_loader
+//#define kdebug_process_loader
 
 uint32_t num_modules;
 kmodule *modules;
@@ -20,7 +20,7 @@ void modules_initalize( void ) {
 	kdebug_symbol * syms = kdebug_get_symbol_array();
 	modules = kmalloc( sizeof(kmodule) * MODULES_MAX );
 
-	for( int i = 0; i < KDEBUG_MAX_SYMBOLS; i++ ) {
+	for( int i = 0; i < kdebug_get_total_symbols(); i++ ) {
 		postfix_start = NULL;
 		end_symbol = NULL;
 		module_obj_size = 0;
@@ -90,10 +90,10 @@ uint32_t load_module_elf_image( uint32_t *raw_data_start ) {
 	// Setup the process
 	task *module_task = kmalloc( sizeof( task ) );
 
-	module_task->code_start_virt = page_allocate( 4 );
+	module_task->code_start_virt = page_allocate( 1 );
 	module_task->code_start_phys = module_task->code_start_virt - (void *)KERNEL_VIRT_HEAP_BASE + (void *)get_physical_memory_base();
 	module_task->stack = page_allocate( 1 );
-	module_task->data_start_virt = page_allocate( 4 );
+	module_task->data_start_virt = page_allocate( 1 );
 	module_task->data_start_phys = module_task->data_start_virt - (void *)KERNEL_VIRT_HEAP_BASE + (void *)get_physical_memory_base();
 
 	#ifdef kdebug_process_loader

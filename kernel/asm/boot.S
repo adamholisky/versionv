@@ -234,6 +234,7 @@ stage5:
 
 .global asm_refresh_cr3
 asm_refresh_cr3:
+	xor %ecx, %ecx
 	movl %cr3, %ecx
 	movl %ecx, %cr3
 	ret
