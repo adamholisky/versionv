@@ -186,16 +186,13 @@ void observer_test( void ) {
 	event_message event_one;
 	event_message event_two;
 
-	dbA();
 	observer_register_subject( "keypress" );
 	observer_register_subject( "mouse_click" );
 
-	dbB();
 	observer_register( "observer_a", observer_a );
 	observer_register( "observer_b", observer_b );
 	observer_register( "observer_c", observer_c );
 
-	dbC();
 	observer_attach_to_subject( "keypress", "observer_a", 1 );
 	observer_attach_to_subject( "keypress", "observer_b", 1 );
 	observer_attach_to_subject( "mouse_click", "observer_c", 1 );
@@ -206,19 +203,18 @@ void observer_test( void ) {
 	event_two.data = observer_malloc( sizeof("Event Two Message") );
 	strcpy( event_two.data, "Event Two Message" );
 
-	dbD();
 	observer_notify( "keypress", &event_one );
 	observer_notify( "mouse_click", &event_two );
 }
 
 void observer_a( event_message * message ) {
-	klog( "%s: %s\n", message->subject_name, message->data );
+	//klog( "%s: %s\n", message->subject_name, message->data );
 }
 
 void observer_b( event_message * message ) {
-	klog( "%s: %s\n", message->subject_name, message->data );
+	//klog( "%s: %s\n", message->subject_name, message->data );
 }
 
 void observer_c( event_message * message ) {
-	klog( "%s: %s\n", message->subject_name, message->data );
+	//klog( "%s: %s\n", message->subject_name, message->data );
 }

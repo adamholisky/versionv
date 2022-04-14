@@ -118,67 +118,38 @@ void memory_initalize( void ) {
 
 	memset( &process_pt, 0, 1024 );
 
+	_Pragma("GCC diagnostic push")
+	_Pragma("GCC diagnostic ignored \"-Wpointer-to-int-cast\"")
 	#ifdef PAGING_PAE
-	uint64_t * pde = (uint64_t *)&paging_pdpt;
-	uint64_t * pte = (uint64_t *)&process_pt;
+		uint64_t * pde = (uint64_t *)&paging_pdpt;
+		uint64_t * pte = (uint64_t *)&process_pt;
+		*pte = (((uint64_t)process_address_space + (uint64_t)physical_memory_base) - KERNEL_VIRT_HEAP_BASE + 0x83);
 	#else
-	uint32_t * pde = (uint32_t *)&paging_pd;
-	uint32_t * pte = (uint32_t *)&process_pt;
+		uint32_t * pde = (uint32_t *)&paging_pd;
+		uint32_t * pte = (uint32_t *)&process_pt;
+		*pte = (((uint32_t)process_address_space + (uint32_t)physical_memory_base) - KERNEL_VIRT_HEAP_BASE + 0x3);
 	#endif
 
-	klog( "pd 0x%08X  pt 0x%08X\n", pde, pte );
-	*pte = (((uint64_t)process_address_space + (uint64_t)physical_memory_base) - KERNEL_VIRT_HEAP_BASE + 0x83);
-	klog( "pas: 0x%lX\n", process_address_space );
-	klog( "pte: 0x%lX\n", *pte );
-	/* pte->present = 1;
-	pte->rw = 1;
-	pte->address = ((uint32_t)physical_memory_base + (uint32_t)process_address_space - KERNEL_VIRT_HEAP_BASE)>>11; */
-
-	/* pde->present = 1;
-	pde->rw = 1;
-	pde->address = ((uint32_t)process_pt - KERNEL_VIRT_LOAD_BASE) >> 11; */
-
-	klog( "ppt: 0x%0lX\n", ((uint64_t)&process_pt - KERNEL_VIRT_LOAD_BASE) + 0x1);
 	#ifdef PAGING_PAE
-	*pde = ((uint64_t)&process_pt - KERNEL_VIRT_LOAD_BASE) + 0x1;
-	*pde = 0x00000000FFFFFFFF & *pde;
-	*pte = 0x00000000FFFFFFFF & *pte;
+		*pde = ((uint64_t)&process_pt - KERNEL_VIRT_LOAD_BASE) + 0x1;
+		*pde = 0x00000000FFFFFFFF & *pde;
+		*pte = 0x00000000FFFFFFFF & *pte;
 	#else
-	*pde = ((uint32_t)&process_pt - KERNEL_VIRT_LOAD_BASE) + 0x3;
+		*pde = ((uint32_t)&process_pt - KERNEL_VIRT_LOAD_BASE) + 0x3;
 	#endif
-
-	uint64_t *pd = (uint64_t *)&paging_pdpt;
-	for( int u = 0; u < 4; u++, pd++ ) {
-		klog( "pd[%d]: 0x%lX\n", u, *pd );
-	}
-
-	uint64_t *pt = (uint64_t *)&process_pt;
-	for( int y = 0; y < 512; y++, pt++ ) {
-		if( *pt != 0 ) {
-			klog( "pt[%d]: 0x%lX\n", y, *pt );
-		}
-	}
+	_Pragma("GCC diagnostic pop")
 	
 	asm volatile("invlpg (%0)" ::"r" (pte) : "memory");
 	asm_refresh_cr3();
-
-		dump_active_pt();
-
-
-	db2();
 
 	uint32_t * pmem = (uint32_t *)process_address_space;
 	*(pmem + 1) = 0x0666;
 
 	klog( "%X --> %x\n", (pmem + 1), *(pmem + 1 ));
 
-	db3();
-
 	void * zero_addr_space = 0x00000000;
 	uint32_t * zerozero = (uint32_t *)zero_addr_space;
 	*(zerozero + 2) = 0xBABABABA;
-
-	db4();
 
 	klog( "00   uint32_t: %08X\n", *(zerozero + 1) );
 	klog( "pmem uint32_t: %08X\n", *(pmem + 1) );
@@ -264,12 +235,14 @@ void dump_active_pt( void ) {
 			#endif
 
 			//klog( "pt: 0x%08X\n", pt );
-
+			_Pragma("GCC diagnostic push")
+			_Pragma("GCC diagnostic ignored \"-Wint-to-pointer-cast\"")
 			#ifdef PAGING_PAE
 				uint64_t *page = (uint64_t *)pt;
 			#else
 				uint32_t *page = (uint32_t *)pt;
 			#endif
+			_Pragma("GCC diagnostic pop")
 
 			for( int j = 0; j < PAGE_NUM_TABLES; j++, page++ ) {
 				if( page == NULL ) {

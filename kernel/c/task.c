@@ -101,14 +101,12 @@ int32_t task_add( task *t ) {
 	#ifdef PAGING_PAE
 	memset( tasks[i].code_page_table, 0, 8 * PAGE_NUM_TABLES );
 
+	_Pragma("GCC diagnostic push")
+	_Pragma("GCC diagnostic ignored \"-Wpointer-to-int-cast\"")
 	uint64_t *pt = (uint64_t *)tasks[i].code_page_table;
 	*pt = ((uint64_t)get_physical_memory_base() + (uint64_t)tasks[i].code_start_virt - KERNEL_VIRT_HEAP_BASE) + 0x83;
 	*pt = 0x00000000FFFFFFFF & *pt;
-
-	klog( "task cpt: 0x%lX\n", tasks[i].code_page_table);
-	klog( "task pt: 0x%lx\n", pt );
-
-	klog( "task *pt: 0x%lx\n", *pt );
+	_Pragma("GCC diagnostic pop")
 
 	#else
 	tasks[i].code_page_table[0].rw = 1;

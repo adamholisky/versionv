@@ -18,7 +18,8 @@ APPS := $(wildcard test_apps/*.c)
 CC = /usr/local/osdev/bin/i686-elf-gcc
 DEFINES = -DPAGING_PAE \
 		  -DGRAPHICS_ON \
-		  -DBITS_32
+		  -DBITS_32 \
+		  -DDF_COM4_ONLY
 CFLAGS = $(DEFINES) -ffreestanding -fno-omit-frame-pointer -O0 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
 ASM = /usr/local/osdev/bin/i686-elf-as
 AFLAGS = $(CFLAGS) -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
@@ -34,10 +35,11 @@ QEMU_COMMON = 	-drive format=raw,if=ide,file=$(ROOT_DIR)/vv_hd.img \
 				-serial stdio \
 				-serial null \
 				-serial file:$(ROOT_DIR)/serial_out.txt \
-				-D $(ROOT_DIR)/qemu_debug_log.txt -d int,cpu_reset -no-reboot
+				-no-reboot
 QEMU_DISPLAY_NONE =	-display none
 QEMU_DISPLAY_NORMAL = -vga std
 QEMU_DEBUG_COMMON = -S -gdb tcp::5894 
+QEMU_DEBUG_LOGGING = -D $(ROOT_DIR)/qemu_debug_log.txt -d int,cpu_reset 
 
 export
 

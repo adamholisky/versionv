@@ -61,9 +61,9 @@ void term_put_char( char c ) {
 	unsigned int y;
 	unsigned int max_row;
 	unsigned short fg, bg;
-	bool send_to_com4 = false;
-	bool send_to_com2 = false;
-	bool send_to_screen = false;
+	bool send_to_com4 = false;		// saved file out
+	bool send_to_com2 = false;		// emulator's errout
+	bool send_to_screen = false;	// OS text or graphics console	
 
 	if( is_debug_output == true ) {
 		send_to_com4 = true;
@@ -139,6 +139,9 @@ void term_put_char( char c ) {
 	} else {
 		send_to_screen = true;
 
+		#ifdef DF_COM4_ONLY
+		if( is_debug_output ) { send_to_screen = false; }
+		#endif
 		//update_cursor( term_current_row, term_current_column );
 	}
 
@@ -147,7 +150,9 @@ void term_put_char( char c ) {
 	}
 
 	if( send_to_com2 ) {
+		#ifndef DF_COM4_ONLY
 		serial_write_port( c, COM2 );
+		#endif
 	}
 
 	if( send_to_screen ) {
