@@ -48,7 +48,8 @@ public class SynchronousSocketListener {
 
 					if( cmd_parts[0].Equals("READ") ) {
 						msg = File.ReadAllBytes( cmd_parts[1] );
-						Console.WriteLine( "Sending: {0}", Encoding.ASCII.GetString( msg ) );
+						//Console.WriteLine( "Sending: {0}", Encoding.ASCII.GetString( msg ) );
+						Console.WriteLine( "Sent!" );
 					}
 
 					if( data.Equals("vv:close-connection") ) {

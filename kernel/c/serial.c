@@ -5,7 +5,7 @@
 #include "debug.h"
 
 uint32_t default_port;
-char serial_in_buffer[256];
+char serial_in_buffer[4096];
 uint32_t buffer_add_loc;
 uint32_t buffer_read_loc;
 void (*data_ready_callback)(int);
@@ -29,7 +29,7 @@ void initalize_serial(void)
 
 	default_port = COM1;
 
-	for( int i = 0; i < 256; i++ ) {
+	for( int i = 0; i < 4096; i++ ) {
 		serial_in_buffer[i] = '\0';
 	}
 

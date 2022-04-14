@@ -331,16 +331,11 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 		//debugf("!");
 	}
 
-	
-
-
 	// Set the page directory entry up correctly
 	pd = (page_directory_entry *)(&boot_page_directory + pd_index);
 
 	uint32_t phys_addr_shr = (uint32_t)phys_addr;
 	phys_addr_shr = phys_addr_shr >> 11;
-
-	
 
 	// TODO: Fix this shit, something is wrong with the packing or bit translations
 

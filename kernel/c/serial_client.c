@@ -1,5 +1,6 @@
 #include "kernel.h"
 #include "serial_client.h"
+#include <syscall.h>
 
 char * data;
 bool ssvv_read_is_waiting = false;
@@ -8,7 +9,8 @@ uint8_t * ssvv_read_buff;
 uint32_t ssvv_read_size;
 
 void serial_client_initalize( void ) {
-	data = kmalloc( 1024 );
+	data = kmalloc( 1024 * 10 );
+	klog( "data buffer: 0x%08X\n", data );
 	set_data_buffer( data );
 	set_data_ready_callback( handle_data_ready );
 }
@@ -89,4 +91,27 @@ void ssvv_read_file_test( void ) {
 	for( int i = 0; i < size; i++, buff++ ) {
 		debugf( "%c", *buff );
 	}
+}
+
+char * app_page = NULL;
+
+void ssvv_exec_test_app( void ) {
+	bool first_run = false;
+	uint32_t size;
+	uint32_t task_id;
+
+	if( app_page == NULL ) {
+		app_page = (char *)page_allocate( 1 );
+		first_run = true;
+	}
+
+	memset( app_page, 0, 0x200000 );
+
+	size = ssvv_read_file( "/usr/local/osdev/versions/v/modules/build/test_module.o", app_page );
+
+	task_id = load_module_elf_image( (uint32_t *)app_page );
+
+	task_initalize_and_run( task_id );
+
+	//sched_yield();
 }

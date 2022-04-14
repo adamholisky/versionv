@@ -39,6 +39,12 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m\n" );
 	debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m Serial Out\n" );
 
+/* 	uint32_t cpuid_return = 0;
+	uint32_t eax, unused;
+	__get_cpuid( 1, &eax, &unused, &unused, &cpuid_return );
+	klog( "CPUID edx feature output:\n" );
+	debugf_bit_array( cpuid_return ); */
+
 	serial_enable_interrupts();
 	task_initalize();
 	//process_initalize();
@@ -82,6 +88,9 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 				case 'q':
 					debugf( "\nGoodbye, Dave.\n" );
 					outportb( 0xF4, 0x00 );
+					break;
+				case 't':
+					ssvv_exec_test_app();
 					break;
 				case '1':
 					ssvv_send( "ls /usr/local/osdev/versions/v" );
