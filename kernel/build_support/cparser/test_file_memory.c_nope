@@ -1,6 +1,3 @@
-#include <kernel.h>
-#include "multiboot.h"
-
 //#define kdebug_memory_pages 1
 
 extern page_directory_entry * boot_page_directory;
@@ -35,8 +32,6 @@ page_directory_entry process_pt[1024] __attribute__ ((aligned (4096)));
 void memory_initalize( void ) {
 	log_entry_enter();
 
-	//
-
 	paging_level_active = PAGING_LEVEL;
 
 	uint32_t mem_start = 0;
@@ -48,7 +43,6 @@ void memory_initalize( void ) {
 	memset( (void *)another_page_table, 0, 1024 );
 	memset( (void *)graphics_page_table, 0, 1024 );
 
-	klog_var( paging_level_active, TYPE_NUMBER );
 	klog( "Paging level: %d\n", paging_level_active );
 	klog( "Page Size: 0x%08X\n", page_size_in_bytes );
 	

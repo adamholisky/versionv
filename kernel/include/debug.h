@@ -44,6 +44,10 @@ static const char * bit_array[16] = {
     [12] = "1100", [13] = "1101", [14] = "1110", [15] = "1111",
 };
 
+#define TYPE_STRING 0
+#define TYPE_NUMBER 1
+#define TYPE_ADDR 2
+
 typedef struct {
 	char * 		name;
 	uint32_t	addr;
@@ -83,10 +87,13 @@ void stack_trace_test_func_a( void );
 void stack_trace_test_func_b( void );
 void stack_trace_test_func_c( void );
 void stack_trace_test_func_d( void );
+void klog_func( char * func, uint32_t line, char * message, ... );
+void klog_variable_func( uint32_t type, char * name, void * var, char * func, uint32_t line );
 
 #define debug_out_on() set_debug_output( true )
 #define debug_out_off() set_debug_output( false )
 #define klog( ... ) debug_out_on(); printf( "[\x1b[0;34;49m%s:%d\x1b[0;00;00m] ", __FUNCTION__, __LINE__ ); printf( __VA_ARGS__ ); debug_out_off()
+#define klog_var(v, t) klog_variable_func( t, #v "", &v, __FUNCTION__, __LINE__ )
 #define debugf( ... ) debug_out_on(); printf( __VA_ARGS__ ); debug_out_off()
 #define log_entry_enter() klog( "Enter\n" )
 #define log_entry_exit() klog( "Exit\n" );

@@ -111,6 +111,47 @@ uint32_t reverse_uint32( uint32_t x ) {
     return x;
 }
 
+void klog_func( char * func, uint32_t line, char * message, ... ) {
+	va_list args;
+
+	debug_out_on();
+	printf( "[\x1b[0;34;49m%s:%d\x1b[0;00;00m] ", func, line ); 
+	va_start( args, message );
+	vprintf_( message, args ); 
+	va_end( args );
+	printf( "\n" );
+	debug_out_off();
+}
+
+static const char * var_map[1][1][1] = 
+	{ 
+		{0,"paging_level_active","uint32_t"}
+
+	};
+
+void klog_variable_func( uint32_t type, char * name, void * var, char * func, uint32_t line ) {
+	char var_display[25];
+	uint32_t var_num = 0;
+	char display[100];
+
+	switch( type ) {
+		case TYPE_NUMBER:
+			var_num = *(uint32_t *)var;
+			sprintf( var_display, ": 0x%08X (%d)", var_num, var_num );
+			break;
+		case TYPE_STRING:
+			strcpy( &var_display, (char *)var );
+			break;
+		case TYPE_ADDR:
+		default:
+			strcpy( &var_display, "" );
+	}
+
+	sprintf( display, "%s @ 0x%08X %s", name, var, var_display );
+
+	klog_func( func, line, display );
+}
+
 void k_log( uint32_t system_id, uint32_t level, char * message, ... ) {
 	va_list args;
 

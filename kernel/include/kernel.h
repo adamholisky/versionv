@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <globals.h>
 #include "bootstrap.h"
 #include <string.h>
 #include "terminal.h"

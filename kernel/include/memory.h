@@ -8,11 +8,13 @@
 	#define PAGE_NUM_TABLES 1024
 	#define PAGE_NUM_DIRS 1024
 	#define SBRK_NUM_PAGES 16
+	#define PAGING_LEVEL 1
 #elif PAGING_4M
 	#define page_size_in_bytes 0x00400000
 	#define PAGE_SIZE_IN_BYTES 0x00400000
 	#define PAGE_DIR_SIZE_IN_BYTES 0x00400000
 	#define SBRK_NUM_PAGES 1
+	#define PAGING_LEVEL 3
 #elif PAGING_PAE
 	#define page_size_in_bytes 0x00200000
 	#define PAGE_SIZE_IN_BYTES 0x00200000
@@ -20,6 +22,7 @@
 	#define PAGE_NUM_TABLES 512
 	#define PAGE_NUM_DIRS 4
 	#define SBRK_NUM_PAGES 2
+	#define PAGING_LEVEL 2
 #else
 	#define page_size_in_bytes 0x00001000
 	#define PAGE_SIZE_IN_BYTES 0x00001000
@@ -27,7 +30,12 @@
 	#define PAGE_NUM_TABLES 1024
 	#define PAGE_NUM_DIRS 1024
 	#define SBRK_NUM_PAGES 16
+	#define PAGING_LEVEL 1
 #endif
+
+#define PAGING_LEVEL_PAE 2
+#define PAGING_LEVEL_4K 1
+#define PAGING_LEVEL_4M 3
 
 #define KERNEL_VIRT_LOAD_BASE 0xC0000000
 #define KERNEL_VIRT_HEAP_BASE 0xD0000000
