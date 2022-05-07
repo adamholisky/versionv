@@ -48,7 +48,6 @@ void memory_initalize( void ) {
 	memset( (void *)another_page_table, 0, 1024 );
 	memset( (void *)graphics_page_table, 0, 1024 );
 
-	klog_var( paging_level_active, TYPE_NUMBER );
 	klog( "Paging level: %d\n", paging_level_active );
 	klog( "Page Size: 0x%08X\n", page_size_in_bytes );
 	

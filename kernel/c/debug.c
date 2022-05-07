@@ -123,7 +123,7 @@ void klog_func( char * func, uint32_t line, char * message, ... ) {
 	debug_out_off();
 }
 
-static const char * var_map[1][1][1] = 
+/* static const char * var_map[1][1][1] = 
 	{ 
 		{0,"paging_level_active","uint32_t"}
 
@@ -150,7 +150,7 @@ void klog_variable_func( uint32_t type, char * name, void * var, char * func, ui
 	sprintf( display, "%s @ 0x%08X %s", name, var, var_display );
 
 	klog_func( func, line, display );
-}
+} */
 
 void k_log( uint32_t system_id, uint32_t level, char * message, ... ) {
 	va_list args;

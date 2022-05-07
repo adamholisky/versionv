@@ -13,12 +13,16 @@
 #include "serial_client.h"
 #include "debug.h"
 #include "callback.h"
+#include "keyboard.h"
 #include "observer.h"
 
 #define END_IMMEDIATELY
+#define SERIAL_CONSOLE_ACTIVE false
 
 void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	int x = 0;
+	char c = ' ';
+	bool process_keypress;
 
 	multiboot_initalize( mb_magic, mb_info );
 	term_initalize();
@@ -58,20 +62,40 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	serial_client_initalize();
 
 	observer_test();
+
+	keyboard_initalize();
 	
 	//multiboot_echo_to_serial();
 
-	debugf( "Serial console active.\n" );
-	debugf( "\nVersionV: " );
+	if( SERIAL_CONSOLE_ACTIVE ) {
+		debugf( "Serial console active.\n" );
+		debugf( "\nVersionV: " );
+	} else {
+		printf( "\nVersionV: ");
+	}
 
-	bool show_carrot = false;
+	bool show_prompt = false;
 
 	while( true ) {
-		if( serial_buffer_is_ready() ) {
-			char c = serial_buffer_get_char();
+		c = ' ';
+		process_keypress = false;
 
-			debugf( "%c", c );
+		if( SERIAL_CONSOLE_ACTIVE ) {
+			if( serial_buffer_is_ready() ) {
+				c = serial_buffer_get_char();
+				process_keypress = true;
 
+				debugf( "%c", c );
+			}
+		} else {
+			if( c = keyboard_get_char() ) {
+				printf( "%c", c );
+
+				process_keypress = true;
+			}
+		}
+
+		if( process_keypress ) {
 			switch( c ) {
 				case 'a':
 					run_module_by_name( "alpha" );
@@ -109,17 +133,27 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 					break;
 			}
 
-			debugf( "\n" );
-			show_carrot = true;
+			show_prompt = true;
 		}
+
 		sched_yield();
 
-		if( show_carrot ) {
-			debugf( "VersionV: " );
-			show_carrot = false;
-		}
+		if( process_keypress ) {
+			if( SERIAL_CONSOLE_ACTIVE ) {
+				debugf( "\n" );
 
-		//debugf( "!" );
+				if( show_prompt ) {
+					debugf( "VersionV: " );
+					show_prompt = false;
+				}
+			} else {
+				printf( "\n" );
+				if( show_prompt ) {
+					printf( "VersionV: " );
+					show_prompt = false;
+				}
+			}
+		}
 	}
 
 	#ifdef END_IMMEDIATELY

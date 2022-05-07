@@ -2,6 +2,7 @@
 #include "interrupts.h"
 #include "task.h"
 #include "syscall.h"
+#include "keyboard.h"
 
 idtr            sIDTR;
 x86_interrupt   IDT[256];
@@ -257,6 +258,9 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 					//debugf( "!" );
 					timer_var = 0;
 				}
+				break;
+			case 0x21:
+				keyboard_interrupt_handler();
 				break;
 			case 0x23:
 				serial_interrupt_read_from_com2();
