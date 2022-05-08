@@ -4,10 +4,13 @@
 ROOT_DIR = $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 BUILD_LOG = $(ROOT_DIR)/build.log
 SHELL :=/bin/bash -O globstar
+VPATH = $(shell find ./kernel -type d -printf "kernel/%P:")
 SOURCES_C = $(shell ls kernel/**/*.c)
+SOURCES_CPP = $(shell ls kernel/**/*.cpp)
 SOURCES_ASM = $(shell ls kernel/**/*.s)
 SOURCES_ASMS = $(shell ls kernel/**/*.S)
 OBJECTS_C = $(patsubst %.c, build/%.o, $(shell ls kernel/**/*.c | xargs -n 1 basename))
+OBJECTS_CPP = $(patsubst %.cpp, build/%.o, $(shell ls kernel/**/*.cpp | xargs -n 1 basename))
 OBJECTS_ASM = $(patsubst %.s, build/%.o, $(shell ls kernel/**/*.s | xargs -n 1 basename))
 OBJECTS_ASMS = $(patsubst %.S, build/%.o, $(shell ls kernel/**/*.S | xargs -n 1 basename))
 OBJECTS_APPS = $(patsubst %.c, test_apps/build_objout/%.bin, $(shell ls test_apps/*.c | xargs -n 1 basename))
@@ -43,7 +46,7 @@ QEMU_DEBUG_LOGGING = -D $(ROOT_DIR)/qemu_debug_log.txt -d int,cpu_reset
 
 export
 
-all: install
+all: debug_dump install
 
 build/versionv.bin: build_test_apps $(SOURCES_C) $(SOURCES_ASM) $(SOURCES_ASMS) $(OBJECTS_C) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(APPS)
 	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(OBJECTS_APPS)
@@ -51,24 +54,58 @@ build/versionv.bin: build_test_apps $(SOURCES_C) $(SOURCES_ASM) $(SOURCES_ASMS) 
 	readelf -a build/versionv.bin > elfdump.txt
 	@>&2 printf "[Build] Done\n"
 
-build/%.o: kernel/*/%.c
+build/%.o: %.c
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
 	$(CC) $(CFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
-build/%.o: kernel/*/%.s
+#build/%.o: kernel/**/%.s
+build/%.o: %.s
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
 	$(ASM) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
-build/%.o: kernel/*/%.S
+build/%.o: %.S
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
 	$(CC) $(AFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
+# build/%.o: kernel/device/*/%.S
+# 	@>&2 printf "[Build] $<\n"
+# 	$(eval OBJNAME := $(shell basename $@))
+# 	$(CC) $(AFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
+
 build_test_apps:
 	@>&2 echo [Build] Test apps
 	make -C test_apps >> $(BUILD_LOG) 
+
+debug_dump:
+	@>&2 echo [Build] Makefile Debug Dump
+	@make debug_dump_stage2 >> $(BUILD_LOG)
+
+debug_dump_stage2:
+	@echo "Start Debug Dump"
+	@echo "----------"
+	@echo "vpath:" $(VPATH)
+	@echo "----------"
+	@echo "*.s:" $(SOURCES_ASM)
+	@echo " "
+	@echo "*.o:" $(OBJECTS_ASM)
+	@echo "----------"
+	@echo "*.S:" $(SOURCES_ASMS)
+	@echo " "
+	@echo "*.o:" $(OBJECTS_ASMS)
+	@echo "----------"
+	@echo "*.c:" $(SOURCES_C)
+	@echo " "
+	@echo "*.o:" $(OBJECTS_C)
+	@echo "----------"
+	@echo "*.cpp:" $(SOURCES_CPP)
+	@echo " "
+	@echo "*.o:" $(OBJECTS_CPP)
+	@echo "----------"
+	@echo "End Debug Dump"
+	@echo " "
 
 install:
 	@make install_stage2 >> $(BUILD_LOG)
@@ -76,9 +113,9 @@ install:
 
 install_stage2: build/versionv.bin
 	@>&2 echo [Install] Installing to vv_hd.img
-	mount hd_mount_dir >> $(BUILD_LOG)
-	cp build/versionv.bin -f hd_mount_dir/boot/versionv.bin >> $(BUILD_LOG)
-	umount hd_mount_dir >> $(BUILD_LOG)
+	mount hd_mount_dir
+	cp build/versionv.bin -f hd_mount_dir/boot/versionv.bin
+	umount hd_mount_dir 
 
 run: install
 	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL)
@@ -94,9 +131,12 @@ run_ng_debug: install
 
 clean:
 	@rm -rf build.log
-	@rm -rf build/*.o >> $(BUILD_LOG)
-	@rm -rf build/*.bin >> $(BUILD_LOG)
-	@rm -rf objdump.txt >> $(BUILD_LOG)
-	@rm -rf versionv.iso >> $(BUILD_LOG)
-	@make -C test_apps clean >> $(BUILD_LOG)
+	@make clean_stage_2 >> $(BUILD_LOG)
+
+clean_stage_2:
+	rm -rf build/*.o 
+	rm -rf build/*.bin 
+	rm -rf objdump.txt 
+	rm -rf versionv.iso
+	make -C test_apps clean
 	@>&2 echo [Clean] Done

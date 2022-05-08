@@ -58,7 +58,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	intel8254_initalize();
 	//ata_initalize();
 
-	//page_fault_test();
+	page_fault_test();
 	serial_client_initalize();
 
 	observer_test();
