@@ -48,13 +48,18 @@ export
 
 all: debug_dump install
 
-build/versionv.bin: build_test_apps $(SOURCES_C) $(SOURCES_ASM) $(SOURCES_ASMS) $(OBJECTS_C) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(APPS)
-	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(OBJECTS_APPS)
+build/versionv.bin: build_test_apps $(SOURCES_C) $(SOURCES_CPP) $(SOURCES_ASM) $(SOURCES_ASMS) $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(APPS)
+	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(OBJECTS_APPS)
 	objdump -x -D -S build/versionv.bin > objdump.txt
 	readelf -a build/versionv.bin > elfdump.txt
 	@>&2 printf "[Build] Done\n"
 
 build/%.o: %.c
+	@>&2 printf "[Build] $<\n"
+	$(eval OBJNAME := $(shell basename $@))
+	$(CC) $(CFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
+
+build/%.o: %.cpp
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
 	$(CC) $(CFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
