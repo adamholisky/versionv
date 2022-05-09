@@ -1,6 +1,10 @@
 #ifndef INTERRUPTS_INCLUDED
 #define INTERRUPTS_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define INT_0 0x8E00     // 1000111000000000 = present, ring0, int_gate
 #define INT_3 0xEE00     // 1110111000000000 = present, ring3, int_gate
 
@@ -203,5 +207,9 @@ void page_fault_test( void );
 extern uint32_t get_cr3( void );
 void serial_interrupt_read_from_com2( void );
 void serial_interrupt_read_from_com1( void );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

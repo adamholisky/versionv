@@ -18,6 +18,7 @@
 
 #define END_IMMEDIATELY
 #define SERIAL_CONSOLE_ACTIVE false
+#define TRIGGER_DIVIDE_BY_ZERO false
 
 void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	int x = 0;
@@ -64,7 +65,15 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	observer_test();
 
 	keyboard_initalize();
-	
+
+	if( TRIGGER_DIVIDE_BY_ZERO ) {
+		asm volatile( 
+			"movl 0, %eax \n\t"
+			"movl 0, %ecx \n\t"
+			"div %ecx \n\t"
+		);
+	}
+
 	//multiboot_echo_to_serial();
 
 	if( SERIAL_CONSOLE_ACTIVE ) {

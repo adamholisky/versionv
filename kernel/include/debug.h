@@ -1,6 +1,10 @@
 #if !defined(DEBUG_INCLUDED)
 #define DEBUG_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "printf.h"
 #include "serial.h"
 #include "terminal.h"
@@ -60,8 +64,8 @@ typedef struct {
     uint32_t    length;
 } profile_information;
 
-typedef struct {
-    struct stackframe * ebp;
+typedef struct _stackframe {
+    struct _stackframe * ebp;
     uint32_t eip;
 } stackframe;
 
@@ -120,5 +124,9 @@ void klog_variable_func( uint32_t type, char * name, void * var, char * func, ui
         bit_array[ 0xF & x ], \
         x ); \
         debugf( "       31   27   23   19   15   11   7    3\n" )
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

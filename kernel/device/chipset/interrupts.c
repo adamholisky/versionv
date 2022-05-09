@@ -100,7 +100,10 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 	x86_context * stack = *_stack;
 	uint32_t * uint32_stack_pointer = (uint32_t *)*_stack;
 	uint32_t fault_addr = 0;
+	uint32_t corrected_err = stack->err;
+	uint32_t corrected_eip = stack->eip;
 	page_fault_err *pf_err = NULL;
+	bool error_code_present = false;
 	bool allow_return = false;
 	//dbC();
 	//debugf( "interrupt_default_handler:\n    interrupt_num: 0x%X\n    route_code: 0x%0X\n", interrupt_num, route_code );
@@ -133,22 +136,28 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				break;
 			case EXCEPTION_DOUBLE_FAULT:
 				klog( "Exception: EXCEPTION_DOUBLE_FAULT\n");
+				error_code_present = true;
 				break;
 			case EXCEPTION_INVALID_TSS:
 				klog( "Exception: EXCEPTION_INVALID_TSS\n");
+				error_code_present = true;
 				break;
 			case EXCEPTION_SEGMENT_NOT_PRESENT:
 				klog( "Exception: EXCEPTION_SEGMENT_NOT_PRESENT\n");
+				error_code_present = true;
 				break;
 			case EXCEPTION_STACK_SEGMENT_FAULT :
 				klog( "Exception: EXCEPTION_STACK_SEGMENT_FAULT\n");
+				error_code_present = true;
 				break;
 			case EXCEPTION_GENERAL_PROTECTION_FAULT:
 				klog( "Exception: EXCEPTION_GENERAL_PROTECTION_FAULT\n");
+				error_code_present = true;
 				break;
 			case EXCEPTION_PAGE_FAULT:
 				debugf( "\n" );
 				klog( "Exception: EXCEPTION_PAGE_FAULT\n");
+				error_code_present = true;
 				klog( "    %s() @ 0x%08X\n", kdebug_get_function_at( stack->eip ), stack->eip );
 
 				//asm volatile("movL %%cr2,%0" :"=m"(fault_addr));
@@ -185,6 +194,7 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				break;
 			case EXCEPTION_ALIGNMENT_CHECK :
 				klog( "Exception: EXCEPTION_ALIGNMENT_CHECK\n");
+				error_code_present = true;
 				break;
 			case EXCEPTION_MACHINE_CHECK :
 				klog( "Exception: EXCEPTION_MACHINE_CHECK\n");
@@ -197,35 +207,46 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				break;
 			case EXCEPTION_CONTROL_PROTECTION :
 				klog( "Exception: EXCEPTION_CONTROL_PROTECTION\n");
+				error_code_present = true;
 				break;
 			case EXCEPTION_HV_INJECTION :
 				klog( "Exception: EXCEPTION_HV_INJECTION\n");
 				break;
 			case EXCEPTION_VMM_COMM :
 				klog( "Exception: EXCEPTION_VMM_COMM\n");
+				error_code_present = true;
 				break;
 			case EXCEPTION_SECURITY :
 				klog( "Exception: EXCEPTION_SECURITY\n");
+				error_code_present = true;
 				break;
             default:
                 klog( "Exception: Unhandled %02X.\n", interrupt_num );
         }
 
+		if( !error_code_present ) {
+			corrected_eip= stack->err;
+			corrected_err = 0;
+		}
+
 		klog( "    current_task: 0x%X\n", get_current_task_id() );
 		klog( "    eax:  0x%08X  ebx:  0x%08X  ecx:  0x%08X  edx:  0x%08X\n", stack->eax, stack->ebx, stack->ecx, stack->edx );
 		klog( "    esp:  0x%08X  ebp:  0x%08X  esi:  0x%08X  edi:  0x%08X\n", stack->esp, stack->ebp, stack->esi, stack->edi );
 		klog( "    ds:   0x%04X  es:   0x%04X  fs:   0x%04X  gs:   0x%04X\n", stack->ds, stack->es, stack->fs, stack->gs );
-		klog( "    esp:  0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", stack->_esp, stack->cs, stack->eflags, stack->err );
-		klog( "    eip:  0x%08X\n", stack->eip );
+		klog( "    esp:  0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", stack->_esp, stack->cs, stack->eflags, corrected_err);
+		klog( "    eip:  0x%08X\n", corrected_eip );
 		stackframe *frame;
-
-		asm ("movl %%ebp,%0" : "=r"(frame));
 
 		klog( "\n" );
 		klog( "    Stack Trace\n" );
 		klog( "    ----------------------\n" );
+		klog( "    % 2d:    0x%08X %s\n", 1, corrected_eip, kdebug_get_function_at(corrected_eip) );
+
+		asm ("movl %%ebp,%0" : "=r"(frame));
+		frame = (stackframe *)frame->ebp;
+
 		
-		for( int i = 0; (frame != NULL) && (i < STACKFRAME_MAX); i++ ) {
+		for( int i = 1; (frame != NULL) && (i < STACKFRAME_MAX); i++ ) {
 			klog( "    % 2d:    0x%08X %s\n", i+1, frame->eip, kdebug_get_function_at(frame->eip) );
 			//kdebug_peek_at( frame );
 			frame = (stackframe *)frame->ebp;

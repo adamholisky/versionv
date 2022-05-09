@@ -9,7 +9,7 @@ class KernelSymbol {
 
 class KernelSymbols {
 	private:
-		uint32_t kernel_symbol_top = 0;
+		uint32_t kernel_symbol_top;
 		KernelSymbol kernel_symbols[ DEBUG_SYMBOLS_MAX ];
 		
 	public:
@@ -21,4 +21,5 @@ class KernelSymbols {
 		uint32_t get_total_symbols( void );
 		uint32_t get_symbol_addr( char * name );
 		char * get_function_at( uint32_t addr );
+		void initalize( void );
 };

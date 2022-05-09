@@ -3,12 +3,18 @@
 #include <stdint.h>
 #include <string.h>
 #include <kernel_symbols.h>
+#include <debug.h>
+
+void KernelSymbols::initalize( void ) {
+	this->kernel_symbol_top = 0;
+}
 
 void KernelSymbols::add( char * name, uint32_t addr, uint32_t size ) {
-	kernel_symbols[ kernel_symbol_top ].name = name;
-	kernel_symbols[ kernel_symbol_top ].addr = addr;
-	kernel_symbols[ kernel_symbol_top ].size = size;
-	kernel_symbol_top++;
+	kernel_symbols[ this->kernel_symbol_top ].name = name;
+	kernel_symbols[ this->kernel_symbol_top ].addr = addr;
+	kernel_symbols[ this->kernel_symbol_top ].size = size;
+	this->kernel_symbol_top++;
+	debugf( "0x%03X: 0x%08X -> %s\n", this->kernel_symbol_top - 1, addr, name );
 }
 
 KernelSymbol * KernelSymbols::get_symbol_array( void ) {

@@ -11,8 +11,8 @@ kmodule *modules;
 
 void modules_initalize( void ) {
 	char *postfix_start;
-	char name_temp[25];
-	char end_name_temp[25];
+	char name_temp[50];
+	char end_name_temp[50];
 	kdebug_symbol *end_symbol;
 	uint32_t module_obj_size;
 
@@ -26,6 +26,8 @@ void modules_initalize( void ) {
 		module_obj_size = 0;
 
 		if( syms[i].name[0] == 0 ) continue; 
+
+		//klog( "name: %d %s\n", i, syms[i].name );
 
 		strcpy( name_temp, syms[i].name );
 
