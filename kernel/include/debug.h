@@ -93,6 +93,7 @@ void stack_trace_test_func_c( void );
 void stack_trace_test_func_d( void );
 void klog_func( char * func, uint32_t line, char * message, ... );
 void klog_variable_func( uint32_t type, char * name, void * var, char * func, uint32_t line );
+void ftp_test( void );
 
 #define debug_out_on() set_debug_output( true )
 #define debug_out_off() set_debug_output( false )

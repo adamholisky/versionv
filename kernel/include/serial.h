@@ -1,6 +1,10 @@
 #if !defined(SERIAL_INCLUDED)
 #define SERIAL_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -25,5 +29,11 @@ char serial_buffer_get_char( void );
 void set_data_ready_callback( void *f );
 void set_data_buffer( char *buff );
 void set_data_is_being_read( bool b );
+void serial_interrupt_handler( uint32_t _port );
+void serial_do_interrupt_read( uint32_t port );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

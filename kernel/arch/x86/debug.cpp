@@ -2,7 +2,9 @@
 #include "interrupts.h"
 #include "bootstrap.h"
 #include "string.h"
+#include <kmalloc.h>
 #include <kernel_symbols.h>
+#include <ftp.h>
 
 uint32_t kernel_symbol_top = 0;
 kdebug_symbol kernel_symbols[ KDEBUG_MAX_SYMBOLS ];
@@ -23,6 +25,19 @@ void kdebug_initalize( void ) {
 	memset( &kernel_symbols, 0, sizeof(kdebug_symbol) * KDEBUG_MAX_SYMBOLS );
 
 	symbols.initalize();
+}
+
+void ftp_test( void ) {
+	FTP ftp;
+
+	printf( "\n" );
+
+	ftp.init();
+	
+	klog( "Test start\n" );
+	ftp.test();
+	klog( "Test end\n" );
+
 }
 
 void kdebug_add_symbol( char * name, uint32_t addr, uint32_t size ) {
@@ -69,6 +84,8 @@ char * kdebug_peek_at( uint32_t addr ) {
 	}
 
 	printf( "\n" );
+
+	return "KDEBUG_RETURN";
 }
 
 // Modified from https://stackoverflow.com/questions/9144800/c-reverse-bits-in-unsigned-integer

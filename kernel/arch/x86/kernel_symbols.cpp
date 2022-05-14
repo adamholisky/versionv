@@ -14,7 +14,7 @@ void KernelSymbols::add( char * name, uint32_t addr, uint32_t size ) {
 	kernel_symbols[ this->kernel_symbol_top ].addr = addr;
 	kernel_symbols[ this->kernel_symbol_top ].size = size;
 	this->kernel_symbol_top++;
-	debugf( "0x%03X: 0x%08X -> %s\n", this->kernel_symbol_top - 1, addr, name );
+	//debugf( "0x%03X: 0x%08X -> %s\n", this->kernel_symbol_top - 1, addr, name );
 }
 
 KernelSymbol * KernelSymbols::get_symbol_array( void ) {

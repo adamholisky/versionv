@@ -28,7 +28,11 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	multiboot_initalize( mb_magic, mb_info );
 	term_initalize();
 	initalize_serial();
-	multiboot_echo_to_serial();
+
+	printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m\n" );
+	debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m Serial Out\n" );
+
+	//multiboot_echo_to_serial();
 	memory_initalize();
 	kdebug_initalize();
 	elf_initalize( (uint32_t)kernel_main );
@@ -36,13 +40,12 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	observer_initalize();
 	memory_test();
 	//dump_active_pt();
-	vga_initalize();
-	
-	console_init( "default-console", 3, 3, 7 * 120, 14 * 50, 0x00282C34, 0x00AAAAAA );
-	console_draw();
 
-	printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m\n" );
-	debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m Serial Out\n" );
+	#ifdef DGRAPHICS_ON
+		vga_initalize();
+		console_init( "default-console", 3, 3, 7 * 120, 14 * 50, 0x00282C34, 0x00AAAAAA );
+		console_draw();
+	#endif
 
 /* 	uint32_t cpuid_return = 0;
 	uint32_t eax, unused;
@@ -59,7 +62,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	intel8254_initalize();
 	//ata_initalize();
 
-	page_fault_test();
+	//page_fault_test();
 	serial_client_initalize();
 
 	observer_test();
@@ -75,6 +78,10 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	}
 
 	//multiboot_echo_to_serial();
+
+	ftp_test();
+	debugf( "\nGoodbye, Dave.\n" );
+	outportb( 0xF4, 0x00 );
 
 	if( SERIAL_CONSOLE_ACTIVE ) {
 		debugf( "Serial console active.\n" );
@@ -117,6 +124,9 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 					break;
 				case 'p':
 					run_module_by_name( "ps" );
+					break;
+				case 'f':
+					ftp_test();
 					break;
 				case 'q':
 					debugf( "\nGoodbye, Dave.\n" );

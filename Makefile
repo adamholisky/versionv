@@ -20,10 +20,10 @@ APPS := $(wildcard test_apps/*.c)
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
 DEFINES = -DPAGING_PAE \
-		  -DGRAPHICS_ON \
+		  -DGRAPHICS_OFF \
 		  -DBITS_32 \
 		  #-DDF_COM4_ONLY
-CFLAGS = $(DEFINES) -ffreestanding -fno-omit-frame-pointer -O0 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
+CFLAGS = $(DEFINES) -Wno-write-strings -ffreestanding -fno-omit-frame-pointer -O0 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
 ASM = /usr/local/osdev/bin/i686-elf-as
 AFLAGS = $(CFLAGS) -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
 
@@ -34,15 +34,18 @@ QEMU_COMMON = 	-drive format=raw,if=ide,file=$(ROOT_DIR)/vv_hd.img \
 				-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
 				-nic user,ipv6=off,model=e1000,mac=52:54:98:76:54:32 \
 				-m 4G \
-				-serial tcp:192.168.0.100:10100,nodelay=on,reconnect=1 \
+				-serial tcp:192.168.0.100:21,nodelay=on,reconnect=0 \
 				-serial stdio \
-				-serial null \
+				-serial tcp::6699,nodelay=on,server=on,wait=no \
 				-serial file:$(ROOT_DIR)/serial_out.txt \
 				-no-reboot
 QEMU_DISPLAY_NONE =	-display none
 QEMU_DISPLAY_NORMAL = -vga std
 QEMU_DEBUG_COMMON = -S -gdb tcp::5894 
 QEMU_DEBUG_LOGGING = -D $(ROOT_DIR)/qemu_debug_log.txt -d int,cpu_reset 
+
+# -serial tcp:192.168.0.100:6699,nodelay=on,server=on,wait=no \
+# -serial null \
 
 export
 

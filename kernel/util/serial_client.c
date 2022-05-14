@@ -9,7 +9,8 @@ uint8_t * ssvv_read_buff;
 uint32_t ssvv_read_size;
 
 void serial_client_initalize( void ) {
-	data = kmalloc( 1024 * 10 );
+	data = kmalloc( 1024 * 5 );
+	memset( data, 0, 1024 * 5 );
 	klog( "data buffer: 0x%08X\n", data );
 	set_data_buffer( data );
 	set_data_ready_callback( handle_data_ready );
@@ -18,14 +19,18 @@ void serial_client_initalize( void ) {
 void handle_data_ready( uint32_t size ) {
 	set_data_is_being_read( true );
 
+	dbA();
 	if( ssvv_read_is_waiting ) {
+		dbA();
 		memcpy( ssvv_read_buff, data, size );
 		ssvv_read_size = size;
-
+		
+		memset( data, 0, 1024 * 5 );
 		ssvv_read_data_is_ready = true;
+		//dbB();
 	} else {
-		debugf( "\nsize: %d\n", size );
-		debugf( "%s", data );
+		//debugf( "\nsize: %d\n", size );
+		//debugf( "%s", data );
 	}
 
 	set_data_is_being_read( false );
@@ -36,6 +41,7 @@ uint32_t ssvv_read( uint8_t * buff ) {
 }
 
 void ssvv_send( char * cmd ) {
+	log_entry_enter();
 	int len = strlen( cmd );
 
 	//debugf( "\nlen: %d\n", len );
@@ -44,19 +50,23 @@ void ssvv_send( char * cmd ) {
 	}
 
 	serial_write_port( 26, COM1 );
+	log_entry_exit();
 }
 
 uint32_t ssvv_send_ask( char * cmd, uint8_t * buff, uint32_t size ) {
+	//log_entry_enter();
 	uint32_t _size;
 	int i = 0;
 
 	ssvv_read_buff = buff;
 	ssvv_read_is_waiting = true;
+
+	klog( "Sending: \"%s\"\n", cmd );
 	
 	ssvv_send( cmd );
 
 	while( ssvv_read_data_is_ready == false ) {
-		;
+		//db5();
 	}
 	
 	_size = ssvv_read_size;
@@ -65,6 +75,7 @@ uint32_t ssvv_send_ask( char * cmd, uint8_t * buff, uint32_t size ) {
 	ssvv_read_is_waiting = false;
 	ssvv_read_data_is_ready = false;
 
+	//log_entry_exit();
 	return _size;
 }
 

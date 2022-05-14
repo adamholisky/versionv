@@ -225,7 +225,7 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
         }
 
 		if( !error_code_present ) {
-			corrected_eip= stack->err;
+			corrected_eip = stack->err;
 			corrected_err = 0;
 		}
 
@@ -235,6 +235,10 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 		klog( "    ds:   0x%04X  es:   0x%04X  fs:   0x%04X  gs:   0x%04X\n", stack->ds, stack->es, stack->fs, stack->gs );
 		klog( "    esp:  0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", stack->_esp, stack->cs, stack->eflags, corrected_err);
 		klog( "    eip:  0x%08X\n", corrected_eip );
+
+		klog( "Shutdown via END_IMMEDIATELY.\n");
+			outportb( 0xF4, 0x00 );
+
 		stackframe *frame;
 
 		klog( "\n" );
@@ -448,5 +452,6 @@ void serial_interrupt_read_from_com2( void ) {
 }
 
 void serial_interrupt_read_from_com1( void ) {
-	serial_read_port( COM1 );
+	// serial_read_port( COM1 );
+	serial_interrupt_handler( COM1 );
 }
