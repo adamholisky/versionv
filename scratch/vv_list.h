@@ -1,6 +1,10 @@
 #ifndef VV_LIST_HEADER
 #define VV_LIST_HEADER
 
+#include <stdint.h>
+
+#define vv_malloc(x) malloc(x)
+
 typedef struct vv_node vv_node;
 typedef struct vv_list vv_list;
 

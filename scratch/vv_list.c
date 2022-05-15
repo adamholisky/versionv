@@ -1,8 +1,8 @@
-#include "kernel.h"
-#include "vv_dev_header_wrap.h"
+//#include "kernel.h"
+//#include "vv_dev_header_wrap.h"
 #include "vv_list.h"
 
-void my_list_iterator( vv_node * node );
+/* void my_list_iterator( vv_node * node );
 
 vv_dev_optional_main(vv_list) {
 	vv_list * my_list = vv_list_initalize();
@@ -41,7 +41,7 @@ vv_dev_optional_main(vv_list) {
 
 void my_list_iterator( vv_node * node ) {
 	vv_printf( "%s\n", (char *)(node->data) );
-}
+} */
 
 vv_list * vv_list_initalize( void ) {
 	vv_list * list = vv_malloc( sizeof( vv_list ) );
