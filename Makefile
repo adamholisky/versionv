@@ -79,11 +79,6 @@ build/%.o: %.S
 	$(eval OBJNAME := $(shell basename $@))
 	$(CC) $(AFLAGS) $(CFLAGS_END) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
-# build/%.o: kernel/device/*/%.S
-# 	@>&2 printf "[Build] $<\n"
-# 	$(eval OBJNAME := $(shell basename $@))
-# 	$(CC) $(AFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
-
 build_test_apps:
 	@>&2 echo [Build] Test apps
 	make -C test_apps >> $(BUILD_LOG) 
