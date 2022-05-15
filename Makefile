@@ -137,6 +137,9 @@ run_ng: install
 run_ng_debug: install
 	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NONE) $(QEMU_DEBUG_COMMON)
 
+gdb:
+	gdb -q --command=/usr/local/osdev/versions/v/kernel/build_support/main_debug.gdb 
+
 clean:
 	@rm -rf build.log
 	@make clean_stage_2 >> $(BUILD_LOG)
