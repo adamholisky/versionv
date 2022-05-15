@@ -10,7 +10,7 @@ ELF Header:
   Version:                           0x1
   Entry point address:               0x390
   Start of program headers:          52 (bytes into file)
-  Start of section headers:          5796 (bytes into file)
+  Start of section headers:          5828 (bytes into file)
   Flags:                             0x0
   Size of this header:               52 (bytes)
   Size of program headers:           32 (bytes)
@@ -34,17 +34,17 @@ Section Headers:
   [10] .got.plt          PROGBITS        00001494 000494 000028 04  WA  0   0  4
   [11] .comment          PROGBITS        00000000 0004bc 000012 01  MS  0   0  1
   [12] .debug_aranges    PROGBITS        00000000 0004ce 000040 00      0   0  1
-  [13] .debug_info       PROGBITS        00000000 00050e 000654 00      0   0  1
-  [14] .debug_abbrev     PROGBITS        00000000 000b62 0001c3 00      0   0  1
-  [15] .debug_line       PROGBITS        00000000 000d25 000154 00      0   0  1
-  [16] .debug_frame      PROGBITS        00000000 000e7c 00009c 00      0   0  4
-  [17] .debug_str        PROGBITS        00000000 000f18 00036e 01  MS  0   0  1
-  [18] .debug_line_str   PROGBITS        00000000 001286 000105 01  MS  0   0  1
-  [19] .debug_loclists   PROGBITS        00000000 00138b 000069 00      0   0  1
-  [20] .debug_rnglists   PROGBITS        00000000 0013f4 000020 00      0   0  1
-  [21] .symtab           SYMTAB          00000000 001414 0000f0 10     22   7  4
-  [22] .strtab           STRTAB          00000000 001504 0000b5 00      0   0  1
-  [23] .shstrtab         STRTAB          00000000 0015b9 0000ea 00      0   0  1
+  [13] .debug_info       PROGBITS        00000000 00050e 000660 00      0   0  1
+  [14] .debug_abbrev     PROGBITS        00000000 000b6e 0001c3 00      0   0  1
+  [15] .debug_line       PROGBITS        00000000 000d31 000159 00      0   0  1
+  [16] .debug_frame      PROGBITS        00000000 000e8c 00009c 00      0   0  4
+  [17] .debug_str        PROGBITS        00000000 000f28 000373 01  MS  0   0  1
+  [18] .debug_line_str   PROGBITS        00000000 00129b 00010f 01  MS  0   0  1
+  [19] .debug_loclists   PROGBITS        00000000 0013aa 000069 00      0   0  1
+  [20] .debug_rnglists   PROGBITS        00000000 001413 000020 00      0   0  1
+  [21] .symtab           SYMTAB          00000000 001434 0000f0 10     22   7  4
+  [22] .strtab           STRTAB          00000000 001524 0000b5 00      0   0  1
+  [23] .shstrtab         STRTAB          00000000 0015d9 0000ea 00      0   0  1
 Key to Flags:
   W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
   L (link order), O (extra OS processing required), G (group), T (TLS),

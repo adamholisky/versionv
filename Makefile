@@ -23,7 +23,8 @@ DEFINES = -DPAGING_PAE \
 		  -DGRAPHICS_OFF \
 		  -DBITS_32 \
 		  #-DDF_COM4_ONLY
-CFLAGS = $(DEFINES) -Wno-write-strings -ffreestanding -fno-omit-frame-pointer -O0 -nostdlib -static-libgcc -lgcc -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
+CFLAGS = $(DEFINES) -Wno-write-strings -ffreestanding -fno-omit-frame-pointer -O0 -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
+CFLAGS_END = -nostdlib -lgcc
 ASM = /usr/local/osdev/bin/i686-elf-as
 AFLAGS = $(CFLAGS) -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
 
@@ -52,7 +53,7 @@ export
 all: debug_dump install
 
 build/versionv.bin: build_test_apps $(SOURCES_C) $(SOURCES_CPP) $(SOURCES_ASM) $(SOURCES_ASMS) $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(APPS)
-	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(OBJECTS_APPS)
+	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) /usr/local/osdev/lib/gcc/i686-elf/11.2.0/libgcc.a libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(OBJECTS_APPS) $(CFLAGS_END)
 	objdump -x -D -S build/versionv.bin > objdump.txt
 	readelf -a build/versionv.bin > elfdump.txt
 	@>&2 printf "[Build] Done\n"
@@ -60,12 +61,12 @@ build/versionv.bin: build_test_apps $(SOURCES_C) $(SOURCES_CPP) $(SOURCES_ASM) $
 build/%.o: %.c
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
-	$(CC) $(CFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
+	$(CC) $(CFLAGS) $(CFLAGS_END) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
 build/%.o: %.cpp
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
-	$(CC) $(CFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
+	$(CC) $(CFLAGS) $(CFLAGS_END) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
 #build/%.o: kernel/**/%.s
 build/%.o: %.s
@@ -76,7 +77,7 @@ build/%.o: %.s
 build/%.o: %.S
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
-	$(CC) $(AFLAGS) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
+	$(CC) $(AFLAGS) $(CFLAGS_END) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
 # build/%.o: kernel/device/*/%.S
 # 	@>&2 printf "[Build] $<\n"

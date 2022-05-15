@@ -2,8 +2,10 @@
 #define VV_LIST_HEADER
 
 #include <stdint.h>
+#include <kmalloc.h>
 
-#define vv_malloc(x) malloc(x)
+#define vv_malloc(x) kmalloc(x)
+#define vv_free(x) kfree(x)
 
 typedef struct vv_node vv_node;
 typedef struct vv_list vv_list;

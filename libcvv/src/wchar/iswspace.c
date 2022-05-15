@@ -12,3 +12,21 @@ int iswspace(wint_t wc)
 									 0x200a, 0x2028, 0x2029, 0x205f, 0x3000, 0};
 	return wc && wcschr(spaces, (wchar_t)wc);
 }
+
+wchar_t *
+wcschr (const wchar_t * s,
+	wchar_t c)
+{
+  const wchar_t *p;
+
+  p = s;
+  do
+    {
+      if (*p == c)
+	{
+	  /* LINTED interface specification */
+	  return (wchar_t *) p;
+	}
+    } while (*p++);
+  return NULL;
+}

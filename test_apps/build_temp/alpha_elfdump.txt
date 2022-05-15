@@ -10,7 +10,7 @@ ELF Header:
   Version:                           0x1
   Entry point address:               0x2c0
   Start of program headers:          52 (bytes into file)
-  Start of section headers:          3852 (bytes into file)
+  Start of section headers:          3884 (bytes into file)
   Flags:                             0x0
   Size of this header:               52 (bytes)
   Size of program headers:           32 (bytes)
@@ -34,16 +34,16 @@ Section Headers:
   [10] .got.plt          PROGBITS        00001454 000454 000020 04  WA  0   0  4
   [11] .comment          PROGBITS        00000000 000474 000012 01  MS  0   0  1
   [12] .debug_aranges    PROGBITS        00000000 000486 000048 00      0   0  1
-  [13] .debug_info       PROGBITS        00000000 0004ce 000257 00      0   0  1
-  [14] .debug_abbrev     PROGBITS        00000000 000725 000148 00      0   0  1
-  [15] .debug_line       PROGBITS        00000000 00086d 000119 00      0   0  1
-  [16] .debug_frame      PROGBITS        00000000 000988 0000b8 00      0   0  4
-  [17] .debug_str        PROGBITS        00000000 000a40 00014b 01  MS  0   0  1
-  [18] .debug_line_str   PROGBITS        00000000 000b8b 0000ce 01  MS  0   0  1
-  [19] .debug_rnglists   PROGBITS        00000000 000c59 000019 00      0   0  1
-  [20] .symtab           SYMTAB          00000000 000c74 000100 10     21   9  4
-  [21] .strtab           STRTAB          00000000 000d74 0000be 00      0   0  1
-  [22] .shstrtab         STRTAB          00000000 000e32 0000da 00      0   0  1
+  [13] .debug_info       PROGBITS        00000000 0004ce 000263 00      0   0  1
+  [14] .debug_abbrev     PROGBITS        00000000 000731 000148 00      0   0  1
+  [15] .debug_line       PROGBITS        00000000 000879 00011e 00      0   0  1
+  [16] .debug_frame      PROGBITS        00000000 000998 0000b8 00      0   0  4
+  [17] .debug_str        PROGBITS        00000000 000a50 000150 01  MS  0   0  1
+  [18] .debug_line_str   PROGBITS        00000000 000ba0 0000d8 01  MS  0   0  1
+  [19] .debug_rnglists   PROGBITS        00000000 000c78 000019 00      0   0  1
+  [20] .symtab           SYMTAB          00000000 000c94 000100 10     21   9  4
+  [21] .strtab           STRTAB          00000000 000d94 0000be 00      0   0  1
+  [22] .shstrtab         STRTAB          00000000 000e52 0000da 00      0   0  1
 Key to Flags:
   W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
   L (link order), O (extra OS processing required), G (group), T (TLS),

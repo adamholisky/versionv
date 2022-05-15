@@ -1,6 +1,9 @@
 
 #ifndef INCLUDE_KMALLOC
 #define INCLUDE_KMALLOC
+
+#include <stdlib.h>
+#include <stdint.h>
 /** This function is supposed to lock the memory data structures. It
  * could be as simple as disabling interrupts or acquiring a spinlock.
  * It's up to you to decide. 

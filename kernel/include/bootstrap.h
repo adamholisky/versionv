@@ -8,7 +8,6 @@
 
 uint64_t __udivmoddi4(uint64_t num, uint64_t den, uint64_t *rem_p);
 
-int atoi(const char* str);
 unsigned long hex2int(char *a, unsigned int len);
 
 #define	isalnum(c)			(isalpha(c) || isdigit(c))
