@@ -19,8 +19,9 @@ extern "C" {
 #include "task.h"
 #include "modules_bootstrap.h"
 #include "debug.h"
+#include <multiboot.h>
 
-void kernel_main( );
+void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info );
 
 #ifdef __cplusplus
 }

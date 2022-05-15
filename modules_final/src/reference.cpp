@@ -1,14 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void init( void ) {
+extern "C" void module_init( void ) {
 	printf( "In Module: Init\n" );
 }
 
-void exit( void ) {
+extern "C" void module_exit( void ) {
 	printf( "In Module: Exit\n" );
 }
 
-void main( int argc, char *argv[] ) {
+int main( int argc, char *argv[] ) {
 	printf( "In Module: Main\n" );
+
+	return 0;
 }

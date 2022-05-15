@@ -15,6 +15,7 @@
 #include "callback.h"
 #include "keyboard.h"
 #include "observer.h"
+#include <ftp.h>
 
 #define END_IMMEDIATELY
 #define SERIAL_CONSOLE_ACTIVE false
@@ -35,7 +36,9 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	//multiboot_echo_to_serial();
 	memory_initalize();
 	kdebug_initalize();
-	elf_initalize( (uint32_t)kernel_main );
+
+	uint32_t km = reinterpret_cast<uint32_t>(kernel_main);
+	elf_initalize( km );
 	interrupts_initalize();
 	observer_initalize();
 	memory_test();
@@ -79,7 +82,16 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	//multiboot_echo_to_serial();
 
-	ftp_test();
+	//ftp_test();
+
+	FTP ftp;
+
+	ftp.init();
+	
+	klog( "Test start\n" );
+	//ftp.test();
+	klog( "Test end\n" );
+
 	debugf( "\nGoodbye, Dave.\n" );
 	outportb( 0xF4, 0x00 );
 
