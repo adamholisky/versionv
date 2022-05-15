@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include "debug.h"
 #include "syscall.h"
-#include "modules.h"
+#include "modules_bootstrap.h"
 #include "task.h"
 
 void main( void ) {

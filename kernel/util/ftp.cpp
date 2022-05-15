@@ -15,8 +15,8 @@ void FTP::test( void ) {
 	this->pwd();
 	debugf( "%s\n------------------------------\n", this->dir );
 
-	this->list();
-	debugf( "%s\n", this->data_buffer );
+	/* this->list();
+	debugf( "%s\n", this->data_buffer ); */
 	
 	this->get_file( "Makefile" );
 	debugf( "Makefile (%d):\n", strlen( this->data_buffer ) );

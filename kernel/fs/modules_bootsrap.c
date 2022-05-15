@@ -1,7 +1,7 @@
 #include "kernel.h"
 #include "debug.h"
 #include "elf.h"
-#include "modules.h"
+#include "modules_bootstrap.h"
 #include "task.h"
 
 //#define kdebug_process_loader
