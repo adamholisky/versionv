@@ -19,6 +19,10 @@
  *  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef MULTIBOOT_HEADER
 #define MULTIBOOT_HEADER 1
 
@@ -278,5 +282,9 @@ struct multiboot_apm_info
 void multiboot_initalize( unsigned long _mb_magic, multiboot_info_t *mbh );
 multiboot_info_t * get_multiboot_header( void );
 void multiboot_echo_to_serial( void );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ! MULTIBOOT_HEADER */

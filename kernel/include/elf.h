@@ -1,5 +1,9 @@
 #if !defined(ELF_INCLUDED)
 #define ELF_INCLUDED
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 
 #define Elf32_Half uint16_t
@@ -120,5 +124,9 @@ Elf32_Shdr * elf_find_sym_strtab(uint32_t* mem, Elf32_Ehdr* elf_header);
 Elf32_Shdr * elf_find_dynstr_tab(uint32_t* mem, Elf32_Ehdr* elf_header);
 uint16_t elf_get_sym_value_from_index(uint32_t* mem, Elf32_Ehdr* elf_header, uint32_t index);
 Elf32_Shdr * elf_find_symtab(uint32_t* mem, Elf32_Ehdr* elf_header);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

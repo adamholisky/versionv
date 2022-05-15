@@ -1,3 +1,10 @@
+#if !defined(TAMZEN_INCLUDED)
+#define TAMZEN_INCLUDED
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static unsigned long cursor_bitmap[] = {
    0x8000,
    0xC000,
@@ -64014,3 +64021,9 @@ static unsigned long _tamzen_offset[] = {
   2716,	/* (0xe0b2) */
   2730,	/* (0xe0b3) */
 };
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

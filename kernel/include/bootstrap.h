@@ -1,6 +1,10 @@
 #if !defined(BOOTSTRAP_INCLUDED)
 #define BOOTSTRAP_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -65,5 +69,9 @@ static inline uint32_t in_port_long( uint16_t port ) {
 #define clear_bit(x,b) x ~ 1<<b 
 #define flip_bit(x,b) x ^ 1<<b
 #define test_bit(x,b) x & 1<<b
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

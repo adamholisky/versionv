@@ -1,6 +1,10 @@
 #if !defined(TASK_INCLUDED)
 #define TASK_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "bootstrap.h"
 #include "interrupts.h"
 #include "memory.h"
@@ -76,5 +80,9 @@ void task_exit( void );
 void task_end_from_wrapper( void );
 void set_next_active_task( int32_t task_id );
 void set_current_task_id( int32_t task_id );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

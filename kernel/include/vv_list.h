@@ -1,6 +1,10 @@
 #ifndef VV_LIST_HEADER
 #define VV_LIST_HEADER
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <kmalloc.h>
 
@@ -28,5 +32,9 @@ void vv_list_remove( vv_list * list, vv_node * node );
 void vv_list_iterate( vv_list * list, void (*func)(vv_node *) );
 
 void main_vv_list( void );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

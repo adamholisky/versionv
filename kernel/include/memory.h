@@ -1,6 +1,11 @@
 #if !defined(MEMORY_INCLUDED)
 #define MEMORY_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #ifdef PAGING_4K
 	#define page_size_in_bytes 0x00001000
 	#define PAGE_SIZE_IN_BYTES 0x00001000
@@ -74,5 +79,16 @@ void dump_active_pt( void );
 uint32_t * get_physical_addr_from_virt( uint32_t * virt );
 
 #endif // __ASSEMBLER__
+
+#ifdef __cpluscplus
+inline void *operator new(size_t, void *p)     throw() { return p; }
+inline void *operator new[](size_t, void *p)   throw() { return p; }
+inline void  operator delete  (void *, void *) throw() { };
+inline void  operator delete[](void *, void *) throw() { };
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // MEMORY_INCLUDED

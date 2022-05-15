@@ -1,21 +1,36 @@
 #if !defined(MODULES_INCLUDED)
 #define MODULES_INCLUDED
 
-#define MODULES_MAX 25
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef struct {
-	uint32_t	task_id;
-	uint32_t	elf_object_start_addr;
-	uint32_t	elf_object_size;
-	
-	char		name[25];
+#include <stdint.h>
 
-	void		*entry;
-} kmodule;
+typedef void (*module_init_func)( void );
+typedef void (*module_exit_func)( void );
+typedef void (*module_main_func)( int argc, char *argv[] );
 
-void modules_initalize( void );
-void load_module( kmodule *mod );
-uint32_t load_module_elf_image( uint32_t *raw_data_start );
-void run_module_by_name( char * name );
+class Module {
+	private:
+		uint32_t	task_id;
+		uint32_t	elf_object_start_addr;
+		uint32_t	elf_object_size;
+		
+		char		name[25];
+
+		module_init_func init;
+		module_exit_func exit;
+		module_main_func main;
+	public:
+		void load( uint32_t *module_start );
+		void call_init( void );
+		void call_exit( void );
+		void call_main( void );
+};
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

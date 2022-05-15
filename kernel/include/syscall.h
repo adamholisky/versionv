@@ -1,6 +1,10 @@
 #if !defined(SYSCALL_INCLUDED)
 #define SYSCALL_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "interrupts.h"
 
 #define SYSCALL_READ	0
@@ -64,5 +68,9 @@ uint32_t syscall_activate_task( int32_t task_id );
 				:"r"(SYSCALL_ACTTASK), "r"(n), "i"(0x99) \
 				:"%eax" \
 			)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

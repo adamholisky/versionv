@@ -1,6 +1,10 @@
 #if !defined(PCI_INCLUDED)
 #define PCI_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
     uint16_t 	vendor_id;
     uint16_t 	device_id;
@@ -45,5 +49,9 @@ void pci_initalize( void );
 uint16_t pci_config_read( uint8_t bus, uint8_t slot, uint8_t function, uint8_t offset );
 void pci_read_header( pci_header *header, uint8_t bus, uint8_t device, uint8_t function );
 pci_header * pci_get_header_by_device_id( uint32_t _device_id );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

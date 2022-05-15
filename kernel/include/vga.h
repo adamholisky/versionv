@@ -1,6 +1,10 @@
 #ifndef VGA_INCLUDED
 #define VGA_INCLUDED
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum vga_color
 {
 	VGA_COLOR_BLACK = 0,
@@ -133,5 +137,9 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color)
 {
 	return (uint16_t) uc | (uint16_t) color << 8;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

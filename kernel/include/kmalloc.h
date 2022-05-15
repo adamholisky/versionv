@@ -1,6 +1,9 @@
-
 #ifndef INCLUDE_KMALLOC
 #define INCLUDE_KMALLOC
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -48,4 +51,9 @@ void     kfree(void *);					///< The standard function.
 void memory_test( void );
 void * __attribute__((weak)) memset(void * dest, int c, size_t n);
 void liballoc_dump( void );
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

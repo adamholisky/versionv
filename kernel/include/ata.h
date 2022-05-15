@@ -1,6 +1,10 @@
 #ifndef ATA_HEADER_INCLUDE
 #define ATA_HEADER_INCLUDE
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void ata_initalize( void );
 
 #define ata_primary 			0x00
@@ -71,5 +75,9 @@ void ata_initalize( void );
 // extern "C" void ata_secondary_irq( void );
 
 int ata_identify( uint8_t drive, uint8_t drive_one_or_two );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

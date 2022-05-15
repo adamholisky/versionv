@@ -1,3 +1,10 @@
+#if !defined(KERNEL_SYMBOLS_INCLUDED)
+#define KERNEL_SYMBOLS_INCLUDED
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define DEBUG_SYMBOLS_MAX 1024
 
 class KernelSymbol {
@@ -23,3 +30,9 @@ class KernelSymbols {
 		char * get_function_at( uint32_t addr );
 		void initalize( void );
 };
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

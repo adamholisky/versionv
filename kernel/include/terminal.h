@@ -1,10 +1,14 @@
+#if !defined(TERMINAL_INCLUDED)
+#define TERMINAL_INCLUDED
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "vga.h"
 #include "printf.h"
-
-#if !defined(TERMINAL_INCLUDED)
-#define TERMINAL_INCLUDED
 
 typedef struct {
     uint32_t	current_row;
@@ -31,4 +35,9 @@ void console_put_char_at( char c, unsigned int x, unsigned int y );
 void console_put_char( char c );
 void console_move_row( unsigned int dest, unsigned int src );
 void console_scroll_forever_test( void );
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

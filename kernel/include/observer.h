@@ -1,6 +1,10 @@
 #ifndef OBSERVER_HEADER
 #define OBSERVER_HEADER
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define observer_malloc(x) kmalloc(x) // We're doing this so eventually everything here can go into shared memory, not kernel space
 
 #define MAX_OBSERVERS 100
@@ -40,5 +44,9 @@ void observer_test( void );
 void observer_a( event_message * message );
 void observer_b( event_message * message );
 void observer_c( event_message * message );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

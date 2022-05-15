@@ -1,5 +1,10 @@
 #if !defined(KEYBOARD_INCLUDED)
 #define KEYBOARD_INCLUDED
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <observer.h>
 
 #define keyboard_get_char() keyboard_get_char_nonblocking()
@@ -21,5 +26,9 @@ void keyboard_event_handler( event_message * message );
 char keyboard_get_char_nonblocking( void );
 char keyboard_get_char_blocking( void );
 char keyboard_get_char_stage2( bool blocking );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

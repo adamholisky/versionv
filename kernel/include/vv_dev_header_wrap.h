@@ -1,6 +1,9 @@
 #ifndef VV_DEV_HEADER_WRAP
 #define VV_DEV_HEADER_WRAP
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #include "kernel.h"
 
@@ -11,5 +14,9 @@
 #define vv_printf( ... ) debugf( __VA_ARGS__ )
 
 #define hide_from_kernel
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
