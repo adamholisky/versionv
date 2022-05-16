@@ -74,6 +74,8 @@ void task_set_inactive( int32_t task_id );
 void task_set_modhack( int32_t task_id );
 task * get_tasks( void );
 void task_initalize_and_run( int32_t task_id );
+x86_context * change_to_partial_task_context( int32_t task_id, x86_context *old_context );
+void restore_from_partial_task_context( int32_t previous_task_id, int32_t current_task_id, x86_context *previous_task_context );
 char * task_type_to_string( int32_t type );
 char * task_status_to_string( int32_t status );
 void task_exit( void );

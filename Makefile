@@ -66,7 +66,7 @@ build/%.o: %.c
 build/%.o: %.cpp
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
-	$(CC) $(CFLAGS) $(CFLAGS_END) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
+	$(CC) $(CFLAGS) $(CFLAGS_END) -fpermissive -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
 #build/%.o: kernel/**/%.s
 build/%.o: %.s

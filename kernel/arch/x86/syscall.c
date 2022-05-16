@@ -39,6 +39,9 @@ uint32_t syscall_handler( x86_context ** _stack ) {
 			//debugf( "[SYSCALL] sched_yield\n" );
 			syscall_sched_yield( _stack );
 			break;
+		case SYSCALL_PARTIAL_CONTEXT_SWITCH:
+			syscall_partial_context_switch( _stack, (x86_context *)stack->edi );
+			break;
 		case SYSCALL_SBRK:
 			syscall_sbrk( stack->edi );
 			break;

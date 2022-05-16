@@ -38,8 +38,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	memory_initalize();
 	kdebug_initalize();
 
-	uint32_t km = reinterpret_cast<uint32_t>(kernel_main);
-	elf_initalize( km );
+	elf_initalize( reinterpret_cast<uint32_t>(kernel_main) );
 	interrupts_initalize();
 	observer_initalize();
 	memory_test();
@@ -96,9 +95,12 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	m.load( (uint32_t *)ftp.data_buffer );
 
 	klog( "Starting run of 0x%x.\n", m.task_id );
-	task_initalize_and_run( m.task_id );
-	sched_yield();
-	klog( "Post run.\n" );
+	/* task_initalize_and_run( m.task_id );
+	sched_yield(); */
+	m.call_init();
+	m.call_main();
+	m.call_exit();
+	klog( "Post run, back in 0x%x.\n", get_current_task_id() );
 
 	debugf( "\nGoodbye, Dave.\n" );
 	outportb( 0xF4, 0x00 );
@@ -234,10 +236,13 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 }
 
 int register_io_device( char *name, void (*read_func)(), void (*write_func)() ) {
+	// TBD
 
+	return 0;
 }
 
 uint32_t write( int file, void *buff, uint32_t count ) {
-
+	// TBD 
+	
+	return 0;
 }
-

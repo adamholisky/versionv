@@ -253,6 +253,83 @@ void task_initalize_and_run( int32_t task_id ) {
 	tasks[task_id].stack_eip = tasks[task_id].context.eip;
 }
 
+x86_context * change_to_partial_task_context( int32_t task_id, x86_context *old_context ) {
+	int32_t current_task_id = -1;
+	task *t = (tasks + task_id);
+
+	asm volatile (
+		"movl %%eax, %0 \n"
+		"movl %%ebx, %%eax \n"
+		"movl %%eax, %1 \n"
+		"movl %%ecx, %%eax \n"
+		"movl %%eax, %2 \n"
+		"movl %%edx, %%eax \n"
+		"movl %%eax, %3 \n"
+		"movl %%ebp, %%eax \n"
+		"movl %%eax, %4 \n"
+		"movl %%esp, %%eax \n"
+		"movl %%eax, %5 \n"
+		"movl %%edi, %%eax \n"
+		"movl %%eax, %6 \n"
+		"movl %%esi, %%eax \n"
+		"movl %%eax, %7 \n"
+		: "=g"(old_context->eax), 
+		  "=g"(old_context->ebx),
+		  "=g"(old_context->ecx),
+		  "=g"(old_context->edx),
+		  "=g"(old_context->ebp),
+		  "=g"(old_context->esp),
+		  "=g"(old_context->edi),
+		  "=g"(old_context->esi)
+		: 
+		: "memory"
+	);
+
+	set_current_task_id( t->id );
+	set_task_pde( t->code_page_table );
+
+	return old_context;	
+}
+
+void restore_from_partial_task_context( int32_t previous_task_id, int32_t current_task_id, x86_context *previous_task_context ) {
+	set_current_task_id( previous_task_id );
+	set_task_pde( get_current_task()->code_page_table );
+	
+	asm volatile (
+		"movl %1, %%eax \n"
+		"movl %%eax, %%ebx \n"
+
+		"movl %2, %%eax \n"
+		"movl %%eax, %%ecx \n"
+
+		"movl %3, %%eax \n"
+		"movl %%eax, %%edx \n"
+
+		"movl %4, %%eax \n"
+		"movl %%eax, %%ebp \n"
+
+		"movl %5, %%eax \n"
+		"movl %%eax, %%esp \n"
+
+		"movl %6, %%eax \n"
+		"movl %%eax, %%edi \n"
+
+		"movl %7, %%eax \n"
+		"movl %%eax, %%esi \n"
+
+		"movl %0, %%eax \n"
+		: 
+		: "g"(previous_task_context->eax), 
+		  "g"(previous_task_context->ebx),
+		  "g"(previous_task_context->ecx),
+		  "g"(previous_task_context->edx),
+		  "g"(previous_task_context->ebp),
+		  "g"(previous_task_context->esp),
+		  "g"(previous_task_context->edi),
+		  "g"(previous_task_context->esi)
+	);
+}
+
 char * task_type_to_string( int32_t type ) {
 	switch( type ) {
 		case TASK_TYPE_INVALID:

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include <kmalloc.h>
 #include <elf.h>
@@ -6,18 +7,39 @@
 #include <debug.h>
 #include <modules.h>
 
-#define kdebug_module 
+//#define kdebug_module 
 
 void Module::call_init( void ) {
+	x86_context * old_context = (x86_context *)kmalloc( sizeof(x86_context) );
+	int32_t old_task_id = get_current_task_id();
+
+	change_to_partial_task_context( this->task_id, old_context );
 	this->init();
+	restore_from_partial_task_context( old_task_id, this->task_id, old_context );
+
+	kfree( (void *)old_context );
 }
 
 void Module::call_exit( void ) {
+	x86_context * old_context = (x86_context *)kmalloc( sizeof(x86_context) );
+	int32_t old_task_id = get_current_task_id();
+
+	change_to_partial_task_context( this->task_id, old_context );
 	this->exit();
+	restore_from_partial_task_context( old_task_id, this->task_id, old_context );
+
+	kfree( (void *)old_context );
 }
 
 void Module::call_main( void ) {
+	x86_context * old_context = (x86_context *)kmalloc( sizeof(x86_context) );
+	int32_t old_task_id = get_current_task_id();
+
+	change_to_partial_task_context( this->task_id, old_context );
 	this->main( 0, NULL );
+	restore_from_partial_task_context( old_task_id, this->task_id, old_context );
+
+	kfree( (void *)old_context );
 }
 
 void Module::setup_pages( void ) {
@@ -169,6 +191,20 @@ void Module::load( uint32_t *raw_data_start ) {
 
 	this->task_id = task_add( module_task );
 	task_set_modhack( this->task_id );
+
+	this->main = reinterpret_cast<module_main_func>(module_task->entry);
+
+	for( int sym_i = 0; sym_i < module_task->num_syms; sym_i++ ) {
+		if( strcmp( "module_init", (char *)(module_task->str_table + module_task->sym_table[sym_i].st_name) ) == 0 ) {
+			klog( "Found module_init() at 0x%08X\n", module_task->sym_table[sym_i].st_value );
+			this->init = (module_init_func)module_task->sym_table[sym_i].st_value;
+		}
+
+		if( strcmp( "module_exit", (char *)(module_task->str_table + module_task->sym_table[sym_i].st_name) ) == 0 ) {
+			klog( "Found module_exit() at 0x%08X\n", module_task->sym_table[sym_i].st_value );
+			this->exit = (module_exit_func)module_task->sym_table[sym_i].st_value;
+		}
+	}
 
 	//klog( "task_id: %x\n", this->task_id );
 }

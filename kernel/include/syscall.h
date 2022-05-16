@@ -16,6 +16,7 @@ extern "C" {
 #define SYSCALL_END		6
 #define SYSCALL_EXIT	7
 #define SYSCALL_ACTTASK	8
+#define SYSCALL_PARTIAL_CONTEXT_SWITCH 9
 
 
 #define SYSCALL_RT_SUCCESS 0
@@ -38,6 +39,9 @@ uint32_t syscall_read( int fd, void * buff, uint32_t size );
 
 uint32_t sched_yield( void );
 uint32_t syscall_sched_yield( x86_context ** _stack );
+
+uint32_t partial_context_switch( x86_context * new_context );
+uint32_t syscall_partial_context_switch( x86_context ** _stack, x86_context * new_context );
 
 uint32_t sbrk( int inc );
 uint32_t syscall_sbrk( int inc );
