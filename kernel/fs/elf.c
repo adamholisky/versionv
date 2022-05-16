@@ -10,7 +10,7 @@
 #include "memory.h"
 
 void elf_initalize( uint32_t kmain ) {
-    log_entry_enter();
+    //log_entry_enter();
 
 	Elf32_Shdr *section_headers;
 	Elf32_Sym *symbol_table;
@@ -49,7 +49,7 @@ void elf_initalize( uint32_t kmain ) {
 		kdebug_add_symbol( (char *)(name_addr + symbol_table[i].st_name), symbol_table[i].st_value, symbol_table[i].st_size );
 	}
 
-	klog( "0x%08X is in function: %s\n", kmain + 0x10, kdebug_get_function_at( kmain + 0x10 ));
+    /* 	klog( "0x%08X is in function: %s\n", kmain + 0x10, kdebug_get_function_at( kmain + 0x10 )); */
 
     log_entry_exit();
 }

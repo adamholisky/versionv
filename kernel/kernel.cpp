@@ -41,7 +41,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	elf_initalize( reinterpret_cast<uint32_t>(kernel_main) );
 	interrupts_initalize();
 	observer_initalize();
-	memory_test();
+	//memory_test();
 	//dump_active_pt();
 
 	#ifdef DGRAPHICS_ON
@@ -243,6 +243,6 @@ int register_io_device( char *name, void (*read_func)(), void (*write_func)() ) 
 
 uint32_t write( int file, void *buff, uint32_t count ) {
 	// TBD 
-	
+
 	return 0;
 }

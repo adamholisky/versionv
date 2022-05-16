@@ -97,7 +97,7 @@ void ftp_test( void );
 
 #define debug_out_on() set_debug_output( true )
 #define debug_out_off() set_debug_output( false )
-#define klog( ... ) debug_out_on(); printf( "[\x1b[0;34;49m%s:%d\x1b[0;00;00m] ", __FUNCTION__, __LINE__ ); printf( __VA_ARGS__ ); debug_out_off()
+#define klog( ... ) debug_out_on(); printf( "[\x1b[0;34;49m%s:%d\x1b[0;00;00m] ", __PRETTY_FUNCTION__, __LINE__ ); printf( __VA_ARGS__ ); debug_out_off()
 /* #define klog_var(v, t) klog_variable_func( t, #v "", &v, __FUNCTION__, __LINE__ )*/
 #define debugf( ... ) debug_out_on(); printf( __VA_ARGS__ ); debug_out_off()
 #define log_entry_enter() klog( "Enter\n" )

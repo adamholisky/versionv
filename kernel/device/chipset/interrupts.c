@@ -21,7 +21,7 @@ uint32_t 		*page_fault_mem;
 extern uint32_t get_cr2( void );
 
 void interrupts_initalize( void ) {
-	log_entry_enter();
+	//log_entry_enter();
     remap_pic( 0x20, 0x28 );
 
     add_interrupt(0, interrupt_0, 0);
@@ -85,11 +85,11 @@ void interrupts_initalize( void ) {
 
     asm( "sti" );
 
-	klog( "Enabled" );
+	klog( "Enabled\n" );
 
 	page_fault_mem = kmalloc( 4 );
 
-	asm( "int %0" : : "i"(0x30) );
+	//asm( "int %0" : : "i"(0x30) );
 	log_entry_exit();
 }
 

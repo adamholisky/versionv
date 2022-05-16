@@ -7,7 +7,7 @@ uint32_t	pci_devices_top;
 #undef kdebug_pci
 
 void pci_initalize( void ) {
-	log_entry_enter();
+	//log_entry_enter();
 	uint16_t vendor;
 	uint8_t bus;
 	uint8_t device;

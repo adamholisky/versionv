@@ -11,7 +11,7 @@ uint32_t ssvv_read_size;
 void serial_client_initalize( void ) {
 	data = kmalloc( 1024 * 5 );
 	memset( data, 0, 1024 * 5 );
-	klog( "data buffer: 0x%08X\n", data );
+	//klog( "data buffer: 0x%08X\n", data );
 	set_data_buffer( data );
 	set_data_ready_callback( handle_data_ready );
 }

@@ -33,7 +33,7 @@ page_directory_entry process_pt[1024] __attribute__ ((aligned (4096)));
  */
 
 void memory_initalize( void ) {
-	log_entry_enter();
+	//log_entry_enter();
 
 	//
 
@@ -74,9 +74,9 @@ void memory_initalize( void ) {
 
 	#ifdef PAGING_PAE
 		
-		klog( "alloc start: %08X\n", alloc_start );
+		/* klog( "alloc start: %08X\n", alloc_start );
 		klog( "alloc start mod: %08X\n", alloc_start % 0x200000);
-		klog( "alloc addition: %08X\n", 0x200000 - (alloc_start % 0x200000) );
+		klog( "alloc addition: %08X\n", 0x200000 - (alloc_start % 0x200000) ) */;
 		alloc_start = alloc_start + 0x200000 - (alloc_start % 0x200000);
 	#endif
 
@@ -93,7 +93,7 @@ void memory_initalize( void ) {
 	//#define kdebug_memory
 	#ifdef kdebug_memory
 
-	memory_test();
+	//memory_test();
 
 	#endif
 
@@ -150,14 +150,14 @@ void memory_initalize( void ) {
 	uint32_t * pmem = (uint32_t *)process_address_space;
 	*(pmem + 1) = 0x0666;
 
-	klog( "%X --> %x\n", (pmem + 1), *(pmem + 1 ));
+	/* klog( "%X --> %x\n", (pmem + 1), *(pmem + 1 )); */
 
 	void * zero_addr_space = 0x00000000;
 	uint32_t * zerozero = (uint32_t *)zero_addr_space;
 	*(zerozero + 2) = 0xBABABABA;
 
-	klog( "00   uint32_t: %08X\n", *(zerozero + 1) );
-	klog( "pmem uint32_t: %08X\n", *(pmem + 1) );
+/* 	klog( "00   uint32_t: %08X\n", *(zerozero + 1) );
+	klog( "pmem uint32_t: %08X\n", *(pmem + 1) ); */
 
 	if( *(zerozero + 1) != *(pmem + 1) ) {
 		kpanic( "0x0 and pmem are not equal!\n" );

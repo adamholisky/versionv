@@ -11,7 +11,7 @@ uint32_t task_switch_counter;
 task tasks[ TASK_MAX ];
 
 void task_initalize( void ) {
-	log_entry_enter();
+	//log_entry_enter();
 
 	int i;
 
@@ -33,7 +33,7 @@ void task_initalize( void ) {
 	tasks[ TASK_ID_KERNEL ].data_start_virt = (void *)KERNEL_VIRT_HEAP_BASE;
 	strcpy( tasks[ TASK_ID_KERNEL ].name, "kernel_main" );
 
-	log_entry_exit();
+	//log_entry_exit();
 }
 
 int32_t task_add( task *t ) {
