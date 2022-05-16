@@ -16,6 +16,7 @@
 #include "keyboard.h"
 #include "observer.h"
 #include <ftp.h>
+#include <modules.h>
 
 #define END_IMMEDIATELY
 #define SERIAL_CONSOLE_ACTIVE false
@@ -87,10 +88,17 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	FTP ftp;
 
 	ftp.init();
+	ftp.login( "vv", "vv" );
+	ftp.cwd( "/usr/local/osdev/versions/v/modules_final/build" );
+	ftp.get_file( "reference.vvs" );
 	
-	klog( "Test start\n" );
-	//ftp.test();
-	klog( "Test end\n" );
+	Module m;
+	m.load( (uint32_t *)ftp.data_buffer );
+
+	klog( "Starting run of 0x%x.\n", m.task_id );
+	task_initalize_and_run( m.task_id );
+	sched_yield();
+	klog( "Post run.\n" );
 
 	debugf( "\nGoodbye, Dave.\n" );
 	outportb( 0xF4, 0x00 );

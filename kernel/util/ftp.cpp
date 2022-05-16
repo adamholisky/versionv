@@ -5,9 +5,6 @@
 #include <serial_client.h>
 
 void FTP::test( void ) {
-	this->serial_hack = true;
-
-	this->receive_string(); // Ident from initial connection in qemu
 	this->login( "vv", "vv" );
 
 	this->cwd( "/usr/local/osdev/versions/v" );
@@ -27,8 +24,12 @@ void FTP::test( void ) {
 }
 
 void FTP::init( void ) {
+	this->serial_hack = true;
+
 	this->buffer = (char *)kmalloc( 1024 );
 	this->data_buffer = (char *)kmalloc( FTP_DATA_BUFFER_SIZE );
+
+	this->receive_string();
 }
 
 void FTP::login( char * user, char * pass ) {

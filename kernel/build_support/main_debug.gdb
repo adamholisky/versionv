@@ -38,8 +38,8 @@ end
 #break interrupts.c:107 if interrupt_num == 0x30
 #break interrupts.c:107 if interrupt_num == 0x31 
 #break *0x0010aaaa
-break debug.cpp:30
-break debug.cpp:39
-break kernel.c:83
+#break debug.cpp:30
+#break debug.cpp:39
+break *0x00000160
 
 target remote localhost:5894

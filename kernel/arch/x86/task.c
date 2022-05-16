@@ -118,6 +118,7 @@ int32_t task_add( task *t ) {
 	tasks[i].code_page_table[1].address = ((uint32_t)get_physical_memory_base() + (uint32_t)tasks[i].code_start_virt + PAGE_SIZE_IN_BYTES - KERNEL_VIRT_HEAP_BASE)>>11;
 	#endif
 
+	//klog( "TID Returing: %d\n", i );
 	return i;
 }
 
