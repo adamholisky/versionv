@@ -138,6 +138,8 @@ void keyboard_interrupt_handler(void) {
 		else if (scancode > 0)
 		{
 			e.data = kmalloc( sizeof( keyboard_event ) );
+			e.subject_name = kmalloc( 25 );
+
 			k = (keyboard_event *)e.data;
 
 			current_scancode = scancode;
@@ -156,6 +158,9 @@ void keyboard_interrupt_handler(void) {
 			}
 
 			observer_notify( "keyboard", &e );
+
+			kfree( e.subject_name );
+			kfree( e.data );
 		}
 	}
 }

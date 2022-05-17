@@ -53,7 +53,7 @@ void FTP::login( char * user, char * pass ) {
 	this->assert_response( FTP_RESPONSE_LOGIN_SUCCESS );
 }
 
-void FTP::pwd( void ) {
+char* FTP::pwd( void ) {
 	char temp[256];
 
 	// https://www.rfc-editor.org/rfc/rfc775.html
@@ -65,6 +65,8 @@ void FTP::pwd( void ) {
 	*(strchr( temp, '"' )) = '\0';
 
 	strcpy( this->dir, temp );
+
+	return this->dir;
 }
 
 void FTP::cwd( char * dir ) {
@@ -82,6 +84,16 @@ void FTP::list( void ) {
 	this->send_port( 6699 );
 
 	this->send_command( "LIST" );
+	this->assert_response( FTP_RESPONSE_DATA_START );
+	this->assert_response( FTP_RESPONSE_DATA_END );
+
+	this->receive_data();
+}
+
+void FTP::nlst( void ) {
+	this->send_port( 6699 );
+
+	this->send_command( "NLST" );
 	this->assert_response( FTP_RESPONSE_DATA_START );
 	this->assert_response( FTP_RESPONSE_DATA_END );
 

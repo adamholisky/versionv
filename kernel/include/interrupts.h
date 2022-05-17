@@ -81,23 +81,23 @@ typedef struct {
 } __attribute__ ((packed)) idtr;
 
 typedef struct {
-	uint16_t	gs;
+	uint16_t	gs; // 0
 	uint16_t	gs_padding;
-	uint16_t	fs;
+	uint16_t	fs; // 4 8
 	uint16_t	fs_padding;
-	uint16_t	es;
+	uint16_t	es; // 8 10
 	uint16_t	es_padding;
-	uint16_t	ds;
+	uint16_t	ds; // c 18
 	uint16_t	ds_padding;
 	
-	uint32_t	edi;
-	uint32_t	esi;
-	uint32_t	ebp;
-	uint32_t	esp;
-	uint32_t	ebx;
-	uint32_t	edx;
-	uint32_t	ecx;
-	uint32_t	eax;
+	uint32_t	edi; // 10 20
+	uint32_t	esi; // 14 28
+	uint32_t	ebp; // 18 30
+	uint32_t	esp; // 1c 38
+	uint32_t	ebx; // 20 40
+	uint32_t	edx; // 24 48
+	uint32_t	ecx; // 28 50
+	uint32_t	eax; // 2C 58
 
 	uint32_t	_esp;
 	

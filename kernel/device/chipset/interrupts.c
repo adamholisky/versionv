@@ -236,9 +236,6 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 		klog( "    esp:  0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", stack->_esp, stack->cs, stack->eflags, corrected_err);
 		klog( "    eip:  0x%08X\n", corrected_eip );
 
-		klog( "Shutdown via END_IMMEDIATELY.\n");
-			outportb( 0xF4, 0x00 );
-
 		stackframe *frame;
 
 		klog( "\n" );

@@ -17,9 +17,10 @@
 #include "observer.h"
 #include <ftp.h>
 #include <modules.h>
+#include <vshell.h>
 
 #define END_IMMEDIATELY
-#define SERIAL_CONSOLE_ACTIVE false
+#define SERIAL_CONSOLE_ACTIVE true
 #define TRIGGER_DIVIDE_BY_ZERO false
 
 void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
@@ -81,26 +82,20 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	}
 
 	//multiboot_echo_to_serial();
+	FTP host_ftp;
 
-	//ftp_test();
-
-	FTP ftp;
-
-	ftp.init();
-	ftp.login( "vv", "vv" );
-	ftp.cwd( "/usr/local/osdev/versions/v/modules_final/build" );
-	ftp.get_file( "reference.vvs" );
+	host_ftp.init();
+	host_ftp.login( "vv", "vv" );
+	host_ftp.cwd( "/usr/local/osdev/versions/v/modules_final/build" );
+	host_ftp.get_file( "reference.vvs" );
 	
 	Module m;
-	m.load( (uint32_t *)ftp.data_buffer );
-
-	klog( "Starting run of 0x%x.\n", m.task_id );
-	/* task_initalize_and_run( m.task_id );
-	sched_yield(); */
-	m.call_init();
+	m.load( (uint32_t *)host_ftp.data_buffer );
 	m.call_main();
-	m.call_exit();
-	klog( "Post run, back in 0x%x.\n", get_current_task_id() );
+
+	VShell v;
+	v.init( &host_ftp );
+	v.run();
 
 	debugf( "\nGoodbye, Dave.\n" );
 	outportb( 0xF4, 0x00 );
@@ -156,15 +151,6 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 					break;
 				case 't':
 					ssvv_exec_test_app();
-					break;
-				case '1':
-					ssvv_send( "ls /usr/local/osdev/versions/v" );
-					break;
-				case '2':
-					ssvv_send( "vv:close-connection" );
-					break;
-				case '3':
-					ssvv_read_file_test();
 					break;
 				case '4':
 					callback_test_run();

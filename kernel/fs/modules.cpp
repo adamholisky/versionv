@@ -105,15 +105,6 @@ void Module::load( uint32_t *raw_data_start ) {
 
     elf_load_program_headers(elf_header, (uint8_t *)process_space, (uint8_t *)raw_data_start);
 
-	/* I have no idea why I did this or what 0x1288 means...
-	#ifdef kdebug_process_loader
-	for (int k = 0x1288; k < 0x12a0; k = k + 4) {
-        debugf("0x%03X: %02X %02X %02X %02X\n", k, (uint8_t) * ((uint8_t*)process_space + k), (uint8_t) * ((uint8_t*)process_space + k + 1), (uint8_t) * ((uint8_t*)process_space + k + 2), (uint8_t) * ((uint8_t*)process_space + k + 3));
-    }
-	#endif 
-	*/
-
-
 	// Locate the GOT PLT
 	Elf32_Shdr* got_plt = elf_find_got_plt((uint32_t*)raw_data_start, elf_header);
     if (got_plt != NULL) {

@@ -250,4 +250,51 @@ get_cr2:
 	movl %cr2, %eax
 	ret;
 
+.global save_context
+save_context:
+	push %eax
+
+	addl $8, %esp
+	movl (%esp), %eax
+
+	movl %ecx, 0x28(%eax)
+	movl -0x4(%esp), %ecx
+	movl %ecx, 0x2c(%eax)
+	movl 0x28(%eax), %ecx
+	
+	movl %edx, 0x24(%eax)
+	movl %ebx, 0x20(%eax)
+	movl %esp, 0x1c(%eax)
+	movl %ebp, 0x18(%eax)
+	movl %esi, 0x14(%eax)
+	movl %edi, 0x10(%eax)
+
+	subl $8, %esp
+	pop %eax
+
+	ret
+
+.global restore_context
+restore_context:
+	addl $4, %esp
+	movl (%esp), %eax
+	movl -0x4(%esp), %ebx
+
+	movl 0x1c(%eax), %esp
+	movl %ebx, -0x8(%esp)
+
+	movl 0x28(%eax), %ecx
+	movl 0x24(%eax), %edx
+	movl 0x20(%eax), %ebx
+	movl 0x18(%eax), %ebp
+	movl 0x14(%eax), %esi
+	movl 0x10(%eax), %edi
+	
+	movl 0x2c(%eax), %eax
+
+	subl $4, %esp
+	
+	ret
+
+
 .size _asm_kernel_start, . - _asm_kernel_start

@@ -10,6 +10,9 @@ uint32_t task_switch_counter;
 
 task tasks[ TASK_MAX ];
 
+extern void save_context( x86_context *old_context );
+extern void restore_context( x86_context *old_context);
+
 void task_initalize( void ) {
 	//log_entry_enter();
 
@@ -257,7 +260,7 @@ x86_context * change_to_partial_task_context( int32_t task_id, x86_context *old_
 	int32_t current_task_id = -1;
 	task *t = (tasks + task_id);
 
-	asm volatile (
+	/* asm volatile (
 		"movl %%eax, %0 \n"
 		"movl %%ebx, %%eax \n"
 		"movl %%eax, %1 \n"
@@ -282,8 +285,12 @@ x86_context * change_to_partial_task_context( int32_t task_id, x86_context *old_
 		  "=g"(old_context->edi),
 		  "=g"(old_context->esi)
 		: 
-		: "memory"
-	);
+		: "eax", "memory"
+	); */
+
+	save_context( old_context );
+
+	debugf( "esp: 0x%08X\nedi: 0x%08X\n", old_context->esp, old_context->edi );
 
 	set_current_task_id( t->id );
 	set_task_pde( t->code_page_table );
@@ -292,42 +299,20 @@ x86_context * change_to_partial_task_context( int32_t task_id, x86_context *old_
 }
 
 void restore_from_partial_task_context( int32_t previous_task_id, int32_t current_task_id, x86_context *previous_task_context ) {
+	uint32_t r_esp, r_edi;
+
 	set_current_task_id( previous_task_id );
 	set_task_pde( get_current_task()->code_page_table );
 	
+	restore_context( previous_task_context );
+
 	asm volatile (
-		"movl %1, %%eax \n"
-		"movl %%eax, %%ebx \n"
-
-		"movl %2, %%eax \n"
-		"movl %%eax, %%ecx \n"
-
-		"movl %3, %%eax \n"
-		"movl %%eax, %%edx \n"
-
-		"movl %4, %%eax \n"
-		"movl %%eax, %%ebp \n"
-
-		"movl %5, %%eax \n"
-		"movl %%eax, %%esp \n"
-
-		"movl %6, %%eax \n"
-		"movl %%eax, %%edi \n"
-
-		"movl %7, %%eax \n"
-		"movl %%eax, %%esi \n"
-
-		"movl %0, %%eax \n"
-		: 
-		: "g"(previous_task_context->eax), 
-		  "g"(previous_task_context->ebx),
-		  "g"(previous_task_context->ecx),
-		  "g"(previous_task_context->edx),
-		  "g"(previous_task_context->ebp),
-		  "g"(previous_task_context->esp),
-		  "g"(previous_task_context->edi),
-		  "g"(previous_task_context->esi)
+		"movl %%esp, %0 \n"
+		"movl %%edi, %1 \n"
+		: "=g"(r_esp), "=g"(r_edi)
 	);
+
+	debugf( "esp: 0x%08X\nedi: 0x%08X\n", r_esp, r_edi );
 }
 
 char * task_type_to_string( int32_t type ) {

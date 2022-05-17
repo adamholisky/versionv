@@ -5,6 +5,8 @@
 #include <kernel_symbols.h>
 #include <debug.h>
 
+char no_symbol[] = "Cannot find symbol";
+
 void KernelSymbols::initalize( void ) {
 	this->kernel_symbol_top = 0;
 }
@@ -22,7 +24,7 @@ KernelSymbol * KernelSymbols::get_symbol_array( void ) {
 }
 
 char * KernelSymbols::get_function_at( uint32_t addr ) {
-	char * ret_val = (char *)KernelSymbols::kdebug_symbol_cannot_find;
+	char * ret_val = no_symbol;
 
 	for( int i = 0; i<DEBUG_SYMBOLS_MAX; i++ ) {
 		if( this->kernel_symbols[i].size == 0 ) continue; 
