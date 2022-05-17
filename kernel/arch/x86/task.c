@@ -260,37 +260,9 @@ x86_context * change_to_partial_task_context( int32_t task_id, x86_context *old_
 	int32_t current_task_id = -1;
 	task *t = (tasks + task_id);
 
-	/* asm volatile (
-		"movl %%eax, %0 \n"
-		"movl %%ebx, %%eax \n"
-		"movl %%eax, %1 \n"
-		"movl %%ecx, %%eax \n"
-		"movl %%eax, %2 \n"
-		"movl %%edx, %%eax \n"
-		"movl %%eax, %3 \n"
-		"movl %%ebp, %%eax \n"
-		"movl %%eax, %4 \n"
-		"movl %%esp, %%eax \n"
-		"movl %%eax, %5 \n"
-		"movl %%edi, %%eax \n"
-		"movl %%eax, %6 \n"
-		"movl %%esi, %%eax \n"
-		"movl %%eax, %7 \n"
-		: "=g"(old_context->eax), 
-		  "=g"(old_context->ebx),
-		  "=g"(old_context->ecx),
-		  "=g"(old_context->edx),
-		  "=g"(old_context->ebp),
-		  "=g"(old_context->esp),
-		  "=g"(old_context->edi),
-		  "=g"(old_context->esi)
-		: 
-		: "eax", "memory"
-	); */
-
 	save_context( old_context );
 
-	debugf( "esp: 0x%08X\nedi: 0x%08X\n", old_context->esp, old_context->edi );
+	//debugf( "esp: 0x%08X\nedi: 0x%08X\n", old_context->esp, old_context->edi );
 
 	set_current_task_id( t->id );
 	set_task_pde( t->code_page_table );
@@ -312,7 +284,7 @@ void restore_from_partial_task_context( int32_t previous_task_id, int32_t curren
 		: "=g"(r_esp), "=g"(r_edi)
 	);
 
-	debugf( "esp: 0x%08X\nedi: 0x%08X\n", r_esp, r_edi );
+	//debugf( "esp: 0x%08X\nedi: 0x%08X\n", r_esp, r_edi );
 }
 
 char * task_type_to_string( int32_t type ) {

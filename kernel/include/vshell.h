@@ -25,6 +25,7 @@ class VShell {
 		char *get_jailed_path( void );
 		bool cd( char *path );
 		bool file_exists( char *path, char *file );
+		void cat( char *file );
 };
 
 #ifdef __cplusplus

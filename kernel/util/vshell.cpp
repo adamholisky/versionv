@@ -9,7 +9,7 @@
 #include <ftp.h>
 #include <kernel.h>
 
-#define SERIAL_CONSOLE_ACTIVE true
+#define SERIAL_CONSOLE_ACTIVE false
 
 void VShell::init( FTP *f ) {
 	this->ftp = f;
@@ -19,24 +19,47 @@ void VShell::init( FTP *f ) {
 }
 
 void VShell::ls( void ) {
+	char *list;
+	char item_name[50];
+	int i = 0;
+
 	ftp->nlst();
-	debugf( "%s\n", ftp->data_buffer );
+	list = ftp->data_buffer;
+	memset( item_name, 0, 50 );
+
+	while( *list != 0 ) {
+		// Get each line
+		while( *list != '\n' ) {
+			item_name[i]= *list;
+			i++;
+			list++;
+
+			// Terminating char at end of each file name is 0xD?
+			if( item_name[i - 1] == 13 ) {
+				item_name[i - 1] = 0;
+			}
+		}
+
+		printf( "%s   ", item_name );
+
+		list++;
+		memset( item_name, 0, 50 );
+		i = 0;
+	}
+
+	printf( "\n" );
 }
 
 void VShell::run( void ) {
-	ls();
+	cd( "/" );
 
-	cd( "/home/vv" );
-	cd( "adam" );
-	cd( "what" );
+	//debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m>", wd );
 
-	debugf( "VersionV:%s>", wd );
-
-	while( false ) {
+	while( true ) {
 		if( SERIAL_CONSOLE_ACTIVE ) {
-			debugf( "VersionV:%s>", wd );
+			debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );
 		} else {
-			printf( "VersionV:%s>", wd );
+			printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );
 		}
 
 		get_line();
@@ -44,7 +67,7 @@ void VShell::run( void ) {
 		if( SERIAL_CONSOLE_ACTIVE ) {
 			debugf( "\n" );
 		} else {
-			printf( "\n" );
+			//printf( "\n" );
 		}
 
 		process_line();
@@ -86,10 +109,20 @@ void VShell::get_line( void ) {
 }
 
 void VShell::process_line( void ) {
-	if( strcmp( line, "c" ) == 0 ) {
+	bool check_file_cmd = true;
+
+	if( strcmp( line, "tests" ) == 0 ) {
+		printf( "Running tests...\n" );
+		printf( "VersionV:tests> cd /home/vv\n" );
 		cd( "/home/vv" );
-		cd( "adam" );
-		cd( "etwhat" );
+		printf( "\nVersionV:tests> cd this/does/not/exist\n" );
+		cd( "this/does/not/exist" );
+		printf( "\nVersionV:tests> ls\n" );
+		ls();
+		printf( "\nVersionV:tests> cat hello.txt\n" );
+		cat( "hello.txt" );
+
+		check_file_cmd = false;
 	}
 
 	if( strcmp( line, "q" ) == 0 ) {
@@ -98,12 +131,25 @@ void VShell::process_line( void ) {
 
 	if( strcmp( line, "ls" ) == 0 ) {
 		ls();
+
+		check_file_cmd = false;
+	}
+
+	if( check_file_cmd ) {
+		if( file_exists( wd, line ) ) {
+			printf( "Executing %s\n", line );
+		}
 	}
 }
 
 void VShell::shutdown( void ) {
 	debugf( "\nGoodbye, Dave.\n" );
 	outportb( 0xF4, 0x00 );
+}
+
+void VShell::cat( char *file ) {
+	ftp->get_file( file );
+	printf( "%s\n", ftp->data_buffer );
 }
 
 bool VShell::cd( char *path ) {
@@ -113,7 +159,7 @@ bool VShell::cd( char *path ) {
 	bool absolute = false;
 	int front_adjustment = 0;
 
-	debugf( "cd %s\n", path );
+	//debugf( "cd %s\n", path );
 
 	// Apply jailing env to our local path root
 	strcpy( p, jail_env );
@@ -122,18 +168,11 @@ bool VShell::cd( char *path ) {
 	// TODO: Look into this more, seems too easy
 	if( path[0] == '/' ) {
 		absolute = true;
-		front_adjustment = 1;
 		strcpy( p_no_jail, "/" );
-		//strcat( p, (path + 1) ); // ignore the first /
-		//strcat( p, "/" );
 	} else {
 		strcat( p, wd );
 		strcpy( p_no_jail, wd );
-		//strcat( p, path );
-		//strcat( p, path );
 	}
-
-	debugf( "Full path for this CD: \"%s%s\"\n", p, (path + front_adjustment) );
 
 	token = strtok( path, "/" );
 
@@ -150,7 +189,7 @@ bool VShell::cd( char *path ) {
 			strcat( p_no_jail, token );
 			strcat( p_no_jail, "/" );
 		} else {
-			debugf( "cd: %s: no such file name or directory.\n", path );
+			printf( "cd: %s: no such file name or directory.\n", path );
 			return false;
 		}
 		
@@ -161,7 +200,7 @@ bool VShell::cd( char *path ) {
 
 	strcpy( wd, p_no_jail );
 
-	debugf( "Successfully CD'd into %s!\n", wd );
+	//debugf( "Successfully CD'd into %s!\n", wd );
 
 	return true;
 }

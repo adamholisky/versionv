@@ -78,7 +78,7 @@ void vga_initalize( void ) {
 	memset( vga_info.buffer, 0, 1280*720*4 );
 
 
-	dump_active_pt();
+	//dump_active_pt();
 
 	vesa_info = (vesa_info_block *)(mb->vbe_control_info + KERNEL_VIRT_LOAD_BASE);
 	klog( "VESA control: %c%c%c%c\n", vesa_info->VbeSignature[0], vesa_info->VbeSignature[1], vesa_info->VbeSignature[2], vesa_info->VbeSignature[3]);

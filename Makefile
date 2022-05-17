@@ -20,7 +20,7 @@ APPS := $(wildcard test_apps/*.c)
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
 DEFINES = -DPAGING_PAE \
-		  -DGRAPHICS_OFF \
+		  -DGRAPHICS_ON \
 		  -DBITS_32 \
 		  #-DDF_COM4_ONLY
 CFLAGS = $(DEFINES) -Wno-write-strings -ffreestanding -fno-omit-frame-pointer -O0 -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include

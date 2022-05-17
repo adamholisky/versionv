@@ -20,7 +20,7 @@
 #include <vshell.h>
 
 #define END_IMMEDIATELY
-#define SERIAL_CONSOLE_ACTIVE true
+#define SERIAL_CONSOLE_ACTIVE false
 #define TRIGGER_DIVIDE_BY_ZERO false
 
 void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
@@ -45,11 +45,11 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	//memory_test();
 	//dump_active_pt();
 
-	#ifdef DGRAPHICS_ON
+	//#ifdef DGRAPHICS_ON
 		vga_initalize();
 		console_init( "default-console", 3, 3, 7 * 120, 14 * 50, 0x00282C34, 0x00AAAAAA );
 		console_draw();
-	#endif
+	//#endif
 
 /* 	uint32_t cpuid_return = 0;
 	uint32_t eax, unused;
