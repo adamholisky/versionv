@@ -76,7 +76,6 @@ void multiboot_echo_to_serial( void ) {
     debugf( "framebuffer_bpp:       0x%02X\n", multiboot_header.framebuffer_bpp );
     debugf( "framebuffer_type:      0x%02X\n", multiboot_header.framebuffer_type );
 
-    printf( "\n%s\n", (char *)(multiboot_header.cmdline) );
     debugf( "\n" );
 
     #endif

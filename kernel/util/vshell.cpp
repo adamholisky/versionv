@@ -68,19 +68,9 @@ void VShell::run( void ) {
 	//debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m>", wd );
 
 	while( true ) {
-		if( SERIAL_CONSOLE_ACTIVE ) {
-			debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );
-		} else {
-			printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );
-		}
+		printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );
 
 		get_line();
-
-		if( SERIAL_CONSOLE_ACTIVE ) {
-			debugf( "\n" );
-		} else {
-			//printf( "\n" );
-		}
 
 		process_line();
 	}
@@ -94,19 +84,14 @@ void VShell::get_line( void ) {
 	line_pos = 0;
 
 	while( process_keypress ) {
-		if( SERIAL_CONSOLE_ACTIVE ) {
-			if( serial_buffer_is_ready() ) {
-				c = serial_buffer_get_char();
-
-				debugf( "%c", c );
-			}
-		} else {
-			if( c = keyboard_get_char() ) {
+		if( c = keyboard_get_char() ) {
+			if( c != 13 ) {
 				printf( "%c", c );
 			}
 		}
 
-		if( c == '\n' ) {
+		if( c == '\n' || c == 13 ) {
+			printf( "\n" );
 			process_keypress = false;
 		} else {
 			line[line_pos] = c;

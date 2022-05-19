@@ -9,6 +9,7 @@
 #include "memory.h"
 #include <debug.h>
 #include <kmalloc.h>
+#include <globals.h>
 
 unsigned int term_current_row;
 unsigned int term_current_column;
@@ -63,11 +64,23 @@ void term_put_char( char c ) {
 	unsigned short fg, bg;
 	bool send_to_com4 = false;		// saved file out
 	bool send_to_com2 = false;		// emulator's errout
-	bool send_to_screen = false;	// OS text or graphics console	
+	bool send_to_screen = true;	// OS text or graphics console	
 
-	if( is_debug_output == true ) {
-		send_to_com4 = true;
-		send_to_com2 = true;
+
+	if( GRAPHICS_ACTIVE == true ) {
+		if( is_debug_output == true ) {
+			send_to_com4 = true;
+			send_to_com2 = true;
+			send_to_screen = false;
+		}
+	} else {
+		send_to_screen = false;
+
+		if( is_debug_output == true ) {
+			send_to_com4 = true;
+		} else {
+			send_to_com2 = true;
+		}
 	}
 
 	if( c == '\x1b' ) {
@@ -136,13 +149,6 @@ void term_put_char( char c ) {
 			capture_i++;
 			send_to_com4 = false;
 		}
-	} else {
-		send_to_screen = true;
-
-		#ifdef DF_COM4_ONLY
-		if( is_debug_output ) { send_to_screen = false; }
-		#endif
-		//update_cursor( term_current_row, term_current_column );
 	}
 
 	if( send_to_com4 ) {
@@ -150,9 +156,7 @@ void term_put_char( char c ) {
 	}
 
 	if( send_to_com2 ) {
-		#ifndef DF_COM4_ONLY
 		serial_write_port( c, COM2 );
-		#endif
 	}
 
 	if( send_to_screen ) {
@@ -267,7 +271,6 @@ console *main_console;
 
 void console_init( char * name, unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned int bg_color, unsigned int fg_color ) {
 	unsigned int _x, _y;
-	db1();
 
 	main_console = kmalloc( sizeof(console) );
 
@@ -290,8 +293,6 @@ void console_init( char * name, unsigned int x, unsigned int y, unsigned int wid
 	main_console->waiting_on_input = false;
 
 	//printf( "w h: %d %d\n", con->width, con->height );
-
-	db2();
 
 	main_console->buffer = (char *)kmalloc( sizeof(char) * main_console->width * main_console->height );
 

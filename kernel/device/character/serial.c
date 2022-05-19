@@ -1,9 +1,12 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <globals.h>
+#include <observer.h>
 #include "bootstrap.h"
 #include "serial.h"
 #include "debug.h"
+#include <keyboard.h>
+#include <kmalloc.h>
 
 uint32_t default_port;
 uint32_t buffer_add_loc;
@@ -147,8 +150,26 @@ void serial_interrupt_handler( uint32_t _port ) {
 		// If COM3 is ready, do it
 		serial_do_interrupt_read( port - 0x10 );
 	}
+}
 
-	//debugf( "\n\n. %d -- %c\n", data_buff_loc, c );
+void serial_clear_buffer( uint32_t port ) {
+	switch( port ) {
+		case COM1:
+			serial_in_com1_buffer[0] = 0;
+			serial_com1_buffer_read_loc = 0;
+			serial_com1_buffer_add_loc = 0;
+			break;
+		case COM2:
+			serial_in_com2_buffer[0] = 0;
+			serial_com2_buffer_read_loc = 0;
+			serial_com2_buffer_add_loc = 0;
+			break;
+		case COM3:
+			serial_in_com2_buffer[0] = 0;
+			serial_com2_buffer_read_loc = 0;
+			serial_com2_buffer_add_loc = 0;
+			break;
+	}
 }
 
 void serial_do_interrupt_read( uint32_t port ) {
@@ -214,4 +235,27 @@ void serial_do_interrupt_read( uint32_t port ) {
 			break;
 	}
 
+	// If graphics are not on, then read from serial port COM2 and generate a keyboard event
+	if( READY_FOR_INPUT == true ) {
+		if( GRAPHICS_ACTIVE == false ) {
+			if( port == COM2 ) {
+				event_message e;
+				keyboard_event *k;
+				e.data = kmalloc( sizeof( keyboard_event ) );
+				e.subject_name = kmalloc( 25 );
+
+				k = (keyboard_event *)e.data;
+
+				k->scanecode = c;
+				k->c = c;
+
+				observer_notify( "keyboard", &e );
+
+				kfree( e.subject_name );
+				kfree( e.data );
+
+				serial_com2_buffer_add_loc--;
+			}
+		}
+	}
 }

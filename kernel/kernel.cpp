@@ -41,12 +41,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	} else {
 		debugf( "CLI: Graphics off\n" );
 		GRAPHICS_ACTIVE = false;
+		DF_COM4_ONLY = true;
 	}
-
-	inportb(0x3DA);
-	outportb(0x3C0,0x10);
-	outportb(0x3C0,0x0C);
- 
 
 	multiboot_echo_to_serial();
 	memory_initalize();
@@ -85,6 +81,9 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	observer_test();
 
 	keyboard_initalize();
+
+	serial_clear_buffer( COM2 );
+	READY_FOR_INPUT = true;
 
 	if( TRIGGER_DIVIDE_BY_ZERO ) {
 		asm volatile( 

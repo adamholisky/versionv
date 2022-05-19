@@ -457,8 +457,8 @@ void page_fault_test( void ) {
 
 
 void serial_interrupt_read_from_com2( void ) {
-	serial_read_port( COM2 );
-	
+	serial_interrupt_handler( COM2 );
+
 	/* if( serial_buffer_is_ready() ) {
 		klog( "COM2: %c\n", serial_buffer_get_char() );
 	} */

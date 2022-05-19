@@ -3,6 +3,8 @@
 // Runtime Modification
 bool SERIAL_CONSOLE_ACTIVE = false;
 bool GRAPHICS_ACTIVE = false;
+bool DF_COM4_ONLY = false;
+bool READY_FOR_INPUT = false;
 
 // Memory
 uint8_t paging_level_active;

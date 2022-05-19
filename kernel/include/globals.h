@@ -9,6 +9,8 @@ extern "C" {
 
 extern bool SERIAL_CONSOLE_ACTIVE;
 extern bool GRAPHICS_ACTIVE;
+extern bool DF_COM4_ONLY;
+extern bool READY_FOR_INPUT;
 
 extern uint8_t paging_level_active;
 
