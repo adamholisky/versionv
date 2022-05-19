@@ -13,9 +13,6 @@ OBJECTS_C = $(patsubst %.c, build/%.o, $(shell ls kernel/**/*.c | xargs -n 1 bas
 OBJECTS_CPP = $(patsubst %.cpp, build/%.o, $(shell ls kernel/**/*.cpp | xargs -n 1 basename))
 OBJECTS_ASM = $(patsubst %.s, build/%.o, $(shell ls kernel/**/*.s | xargs -n 1 basename))
 OBJECTS_ASMS = $(patsubst %.S, build/%.o, $(shell ls kernel/**/*.S | xargs -n 1 basename))
-OBJECTS_APPS = $(patsubst %.c, test_apps/build_objout/%.bin, $(shell ls test_apps/*.c | xargs -n 1 basename))
-APPS := $(wildcard test_apps/*.c)
-
 
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
@@ -23,6 +20,7 @@ DEFINES = -DPAGING_PAE \
 		  -DGRAPHICS_ON \
 		  -DBITS_32 \
 		  #-DDF_COM4_ONLY
+#		  -DGRAPHICS_ON
 CFLAGS = $(DEFINES) -Wno-write-strings -ffreestanding -fno-omit-frame-pointer -O0 -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
 CFLAGS_END = -nostdlib -lgcc
 ASM = /usr/local/osdev/bin/i686-elf-as
@@ -52,8 +50,8 @@ export
 
 all: debug_dump install
 
-build/versionv.bin: build_test_apps $(SOURCES_C) $(SOURCES_CPP) $(SOURCES_ASM) $(SOURCES_ASMS) $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(APPS)
-	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) /usr/local/osdev/lib/gcc/i686-elf/11.2.0/libgcc.a libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(OBJECTS_APPS) $(CFLAGS_END)
+build/versionv.bin: $(SOURCES_C) $(SOURCES_CPP) $(SOURCES_ASM) $(SOURCES_ASMS) $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS)
+	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) /usr/local/osdev/lib/gcc/i686-elf/11.2.0/libgcc.a libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(CFLAGS_END)
 	objdump -x -D -S build/versionv.bin > objdump.txt
 	readelf -a build/versionv.bin > elfdump.txt
 	@>&2 printf "[Build] Done\n"
@@ -78,10 +76,6 @@ build/%.o: %.S
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
 	$(CC) $(AFLAGS) $(CFLAGS_END) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
-
-build_test_apps:
-	@>&2 echo [Build] Test apps
-	make -C test_apps >> $(BUILD_LOG) 
 
 debug_dump:
 	@>&2 echo [Build] Makefile Debug Dump
@@ -122,7 +116,7 @@ install_stage2: build/versionv.bin
 	umount hd_mount_dir 
 
 run: install
-	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL)
+	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL) 
 
 run_debug: install
 	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL) $(QEMU_DEBUG_COMMON)
@@ -145,5 +139,4 @@ clean_stage_2:
 	rm -rf build/*.bin 
 	rm -rf objdump.txt 
 	rm -rf versionv.iso
-	make -C test_apps clean
 	@>&2 echo [Clean] Done

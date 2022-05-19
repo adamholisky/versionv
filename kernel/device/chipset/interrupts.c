@@ -17,6 +17,9 @@ x86_context		new_post_x86_context;
 bool			use_new_post_x86_context = false;
 bool			handle_page_fault_test = false;
 uint32_t 		*page_fault_mem;
+bool			prevent_page_fault_loop = false;
+uint32_t		*prevent_pfl_page = NULL;
+char			*invalid_memory_address = "Invalid memory address.";
 
 extern uint32_t get_cr2( void );
 
@@ -186,6 +189,19 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 					page_map( addr, phys_addr );
 
 					allow_return = true;
+				} else {
+					if( prevent_page_fault_loop ) {
+						uint32_t *pfl_phys = get_physical_addr_from_virt( prevent_pfl_page );
+						page_map( (uint32_t *)fault_addr, pfl_phys );
+
+						allow_return = true;
+					} else {
+						prevent_page_fault_loop = true;
+						prevent_pfl_page = page_allocate(1);
+						uint32_t *pfl_page_phys = get_physical_addr_from_virt( prevent_pfl_page );
+						page_map( (uint32_t *)fault_addr, pfl_page_phys );
+						memcpy( prevent_pfl_page, invalid_memory_address, strlen( invalid_memory_address ) );
+					}					
 				}
 				
 				break;

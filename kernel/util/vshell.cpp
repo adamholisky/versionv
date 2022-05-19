@@ -10,12 +10,22 @@
 #include <kernel.h>
 
 #define SERIAL_CONSOLE_ACTIVE false
+#define bin_path "/usr/local/osdev/versions/v/os_root/bin/"
+#define usr_bin_path "/usr/local/osdev/versions/v/os_root/usr/bin/"
 
-void VShell::init( FTP *f ) {
+void VShell::init( FTP *f, Module *m ) {
 	this->ftp = f;
 	ftp->cwd( "/usr/local/osdev/versions/v/os_root/" );
 
 	strcpy( jail_env, "/usr/local/osdev/versions/v/os_root/" );
+
+	dir_bin = (char *)kmalloc( sizeof( bin_path ) );
+	strcpy( dir_bin, bin_path );
+
+	dir_usr_bin = (char *)kmalloc( sizeof( usr_bin_path ) );
+	strcpy( dir_usr_bin, usr_bin_path );
+
+	this->module = m;
 }
 
 void VShell::ls( void ) {
@@ -52,6 +62,8 @@ void VShell::ls( void ) {
 
 void VShell::run( void ) {
 	cd( "/" );
+
+	//load_and_run( "/usr/local/osdev/versions/v/os_root/bin/ps.vvs" );
 
 	//debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m>", wd );
 
@@ -110,36 +122,94 @@ void VShell::get_line( void ) {
 
 void VShell::process_line( void ) {
 	bool check_file_cmd = true;
+	char path[256];
+	char args[4][100];
+	char *c = line;
+	bool keep_processing = true;
+	int i = 0;
+	int j = 0;
 
-	if( strcmp( line, "tests" ) == 0 ) {
-		printf( "Running tests...\n" );
-		printf( "VersionV:tests> cd /home/vv\n" );
-		cd( "/home/vv" );
-		printf( "\nVersionV:tests> cd this/does/not/exist\n" );
-		cd( "this/does/not/exist" );
-		printf( "\nVersionV:tests> ls\n" );
-		ls();
-		printf( "\nVersionV:tests> cat hello.txt\n" );
-		cat( "hello.txt" );
+	memset( path, 0, 256 );
+	memset( args, 0, 4 * 100 );
 
-		check_file_cmd = false;
-	}
+	do {
+		if( *c != ' ' ) {
+			args[i][j] = *c; 
+			j++;
+		} else {
+			i++;
+			j = 0;
 
-	if( strcmp( line, "q" ) == 0 ) {
+			if( i > 3 ) {
+				keep_processing = false;
+			}
+		}
+
+		c++;
+	} while( keep_processing );
+	
+	/* 
+	for( i = 0; i < 4; i++ ) {
+		debugf( "args[%d] = \"%s\"\n", i, args[i] );
+	} 
+	*/
+
+	if( strcmp( args[0], "q" ) == 0 ) {
 		shutdown();
 	}
 
-	if( strcmp( line, "ls" ) == 0 ) {
+	if( strcmp( args[0], "ls" ) == 0 ) {
 		ls();
 
 		check_file_cmd = false;
 	}
 
+	if( strcmp( args[0], "cd" ) == 0 ) {
+		cd( args[1] );
+	}
+
 	if( check_file_cmd ) {
-		if( file_exists( wd, line ) ) {
-			printf( "Executing %s\n", line );
+		strcpy( path, line );
+		strcat( path, ".vvs" );
+
+		if( file_exists( wd, path ) ) {
+			strcpy( path, wd );
+		} else if( file_exists( dir_bin, path ) ) {
+			strcpy( path, dir_bin );
+		} else if( file_exists( dir_usr_bin, path  ) ) {
+			strcpy( path, dir_usr_bin );
+		} else {
+			printf( "%s not found.\n", line );
+			path[0] = 0;
+		}
+
+		if( path[0] != 0 ) {
+			strcat( path, line );
+			strcat( path, ".vvs" );
+
+			load_and_run( path );
 		}
 	}
+}
+
+void VShell::load_and_run( char* file_path ) {
+	uint32_t *program;
+	Module m;
+	uint32_t size;
+
+	klog( "file_path: %s\n", file_path );
+	ftp->get_file( file_path );
+	size = strlen( ftp->data_buffer );
+	program = (uint32_t *)kmalloc( 1024 * 100 );
+
+	klog( "program: 0x%08X, size: %d\n", program, size );
+
+	memcpy( program, ftp->data_buffer, strlen(ftp->data_buffer) );
+
+	m.load( (uint32_t *)ftp->data_buffer );
+	m.call_main();
+
+	kfree( program );
 }
 
 void VShell::shutdown( void ) {
@@ -224,6 +294,8 @@ bool VShell::file_exists( char *path, char *file ) {
 
 	char *list = (char *)list_of_dir;
 	int i = 0;
+
+	klog( "path = %s, file = %s\n", path, file );
 	
 	strcpy( current_dir, ftp->pwd() );
 	ftp->cwd( path );

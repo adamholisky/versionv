@@ -1,5 +1,9 @@
 #include <globals.h>
 
+// Runtime Modification
+bool SERIAL_CONSOLE_ACTIVE = false;
+bool GRAPHICS_ACTIVE = false;
+
 // Memory
 uint8_t paging_level_active;
 

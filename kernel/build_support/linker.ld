@@ -20,9 +20,6 @@ SECTIONS
 	.data ALIGN (4K) : AT (ADDR (.data) - 0xC0000000)
 	{
 		*(.data)
-		module_data_start = .;
-		INCLUDE test_apps/build_temp/apps_insert.ld
-		module_data_end = .;
 	}
 
 	.bss ALIGN (4K) : AT (ADDR (.bss) - 0xC0000000)

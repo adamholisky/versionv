@@ -7,7 +7,11 @@ extern "C" {
 
 #include <stdint.h>
 
+extern bool SERIAL_CONSOLE_ACTIVE;
+extern bool GRAPHICS_ACTIVE;
+
 extern uint8_t paging_level_active;
+
 extern char serial_in_com1_buffer[1024];
 extern char serial_in_com2_buffer[1024];
 extern char serial_in_com3_buffer[1024 * 20];

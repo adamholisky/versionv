@@ -20,7 +20,6 @@
 #include <vshell.h>
 
 #define END_IMMEDIATELY
-#define SERIAL_CONSOLE_ACTIVE false
 #define TRIGGER_DIVIDE_BY_ZERO false
 
 void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
@@ -35,7 +34,21 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m\n" );
 	debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m Serial Out\n" );
 
-	//multiboot_echo_to_serial();
+	// Handle CLI from multiboot header
+ 	if( strstr( (char *)mb_info->cmdline, "graphics_on" ) ) {
+		debugf( "CLI: Graphics on\n" );
+		GRAPHICS_ACTIVE = false;
+	} else {
+		debugf( "CLI: Graphics off\n" );
+		GRAPHICS_ACTIVE = false;
+	}
+
+	inportb(0x3DA);
+	outportb(0x3C0,0x10);
+	outportb(0x3C0,0x0C);
+ 
+
+	multiboot_echo_to_serial();
 	memory_initalize();
 	kdebug_initalize();
 
@@ -45,11 +58,11 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	//memory_test();
 	//dump_active_pt();
 
-	//#ifdef DGRAPHICS_ON
+	if( GRAPHICS_ACTIVE ) {
 		vga_initalize();
 		console_init( "default-console", 3, 3, 7 * 120, 14 * 50, 0x00282C34, 0x00AAAAAA );
 		console_draw();
-	//#endif
+	}
 
 /* 	uint32_t cpuid_return = 0;
 	uint32_t eax, unused;
@@ -60,7 +73,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	serial_enable_interrupts();
 	task_initalize();
 	//process_initalize();
-	modules_initalize();
+	//modules_initalize();
 
 	pci_initalize();
 	intel8254_initalize();
@@ -86,7 +99,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	host_ftp.init();
 	host_ftp.login( "vv", "vv" );
-	host_ftp.cwd( "/usr/local/osdev/versions/v/modules_final/build" );
+	host_ftp.cwd( "/usr/local/osdev/versions/v/modules/build" );
 	host_ftp.get_file( "reference.vvs" );
 	
 	Module m;
@@ -94,7 +107,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	m.call_main();
 
 	VShell v;
-	v.init( &host_ftp );
+	v.init( &host_ftp, &m );
 	v.run();
 
 	#ifdef END_IMMEDIATELY
