@@ -30,7 +30,7 @@ class VShell {
 		bool cd( char *path );
 		bool file_exists( char *path, char *file );
 		void cat( char *file );
-		void load_and_run( char* file_path );
+		void load_and_run( char* file_path, char *name );
 };
 
 #ifdef __cplusplus

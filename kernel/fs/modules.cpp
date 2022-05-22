@@ -31,7 +31,11 @@ void Module::call_exit( void ) {
 	kfree( (void *)old_context );
 }
 
-void Module::call_main( void ) {
+int Module::call_main( void ) {
+	if( !successfully_loaded ) {
+		return 1;
+	}
+	
 	x86_context * old_context = (x86_context *)kmalloc( sizeof(x86_context) );
 	int32_t old_task_id = get_current_task_id();
 
@@ -40,6 +44,8 @@ void Module::call_main( void ) {
 	restore_from_partial_task_context( old_task_id, this->task_id, old_context );
 
 	kfree( (void *)old_context );
+
+	return 0;
 }
 
 void Module::setup_pages( void ) {
@@ -62,7 +68,7 @@ void Module::setup_pages( void ) {
 	#endif
 }
 
-void Module::load( uint32_t *raw_data_start ) {
+bool Module::load( uint32_t *raw_data_start, char *name ) {
 	task *module_task = (task *)kmalloc( sizeof( task ) );
 	this->VIRT_HEAP_BASE = reinterpret_cast<uint32_t *>(KERNEL_VIRT_HEAP_BASE);
 	
@@ -121,18 +127,20 @@ void Module::load( uint32_t *raw_data_start ) {
     else {
         klog("Could not find .got.plt section\n");
     }
-
-	// Setup Entry Point
-	module_task->entry = (void *)elf_header->e_entry;
 		
 	// Abandon if we can't locate REL or GOT PLT
     if (rel_plt == NULL) {
 		klog( "rel_plt is null\n");
+		return false;
     }
 
     if (got_plt == NULL) {
        klog( "got_plt is null\n");
+	   return false;
     }
+
+	// Setup Entry Point
+	module_task->entry = (void *)elf_header->e_entry;
 
 	// Loop through the rel_plt and updating the corresponding GOT entry
 	for(int rel_num = 0; rel_num < (rel_plt->sh_size/4)/2; rel_num++) {
@@ -180,6 +188,8 @@ void Module::load( uint32_t *raw_data_start ) {
 
 	module_task->type = TASK_TYPE_MODULE;
 
+
+
 	this->task_id = task_add( module_task );
 	task_set_modhack( this->task_id );
 
@@ -197,5 +207,9 @@ void Module::load( uint32_t *raw_data_start ) {
 		}
 	}
 
-	//klog( "task_id: %x\n", this->task_id );
+	task_set_name( this->task_id, name );
+	
+	this->successfully_loaded = true;
+
+	return true;
 }

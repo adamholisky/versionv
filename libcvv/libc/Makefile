@@ -21,11 +21,9 @@ OBJDUMP = /usr/local/osdev/bin/i686-elf-objdump
 
 export
 
-all: build/vvlibc.o
+all: install
 
 build/vvlibc.o: $(SOURCES_ASM) $(OBJECTS_C) $(OBJECTS_ASM)
-	@echo $(SOURCES_C)
-
 	$(LD) -g -I$(ROOT_DIR)/include -nostdlib -r $(OBJECTS_C) $(OBJECTS_ASM) -o vvlibc.o
 	objdump -x -d vvlibc.o > vvlibc_objdump.txt
 
@@ -39,6 +37,7 @@ build/%.o: src/*/%.s
 
 
 install: build/vvlibc.o
+	cp -f vvlibc.o ../vvlibc.o
   	#cp build/versionv.bin -f hd_mount_dir/boot/versionv.bin >> $(BUILD_LOG)
 
 clean:
@@ -47,5 +46,3 @@ clean:
 	rm -rf build/*.o
 	rm -rf build/*.bin 
 	rm -rf vvlibc_objdump.txt
-
-# TODO:  objcopy --input binary --output elf32-i386 --binary i386 magic.txt magic_txt.o

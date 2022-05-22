@@ -151,6 +151,8 @@ void VShell::process_line( void ) {
 
 	if( strcmp( args[0], "cd" ) == 0 ) {
 		cd( args[1] );
+
+		check_file_cmd = false;
 	}
 
 	if( check_file_cmd ) {
@@ -172,12 +174,12 @@ void VShell::process_line( void ) {
 			strcat( path, line );
 			strcat( path, ".vvs" );
 
-			load_and_run( path );
+			load_and_run( path, line );
 		}
 	}
 }
 
-void VShell::load_and_run( char* file_path ) {
+void VShell::load_and_run( char* file_path, char *name ) {
 	uint32_t *program;
 	Module m;
 	uint32_t size;
@@ -191,7 +193,7 @@ void VShell::load_and_run( char* file_path ) {
 
 	memcpy( program, ftp->data_buffer, strlen(ftp->data_buffer) );
 
-	m.load( (uint32_t *)ftp->data_buffer );
+	m.load( (uint32_t *)ftp->data_buffer, name );
 	m.call_main();
 
 	kfree( program );

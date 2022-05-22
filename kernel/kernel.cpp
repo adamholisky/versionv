@@ -102,7 +102,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	host_ftp.get_file( "reference.vvs" );
 	
 	Module m;
-	m.load( (uint32_t *)host_ftp.data_buffer );
+	m.load( (uint32_t *)host_ftp.data_buffer, "reference.vvs" );
 	m.call_main();
 
 	VShell v;
@@ -145,16 +145,4 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	klog( "\n\nEnd of line." );
 
 	while( true ) { x = x - x + 1; }
-}
-
-int register_io_device( char *name, void (*read_func)(), void (*write_func)() ) {
-	// TBD
-
-	return 0;
-}
-
-uint32_t write( int file, void *buff, uint32_t count ) {
-	// TBD 
-
-	return 0;
 }

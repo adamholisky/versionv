@@ -21,10 +21,10 @@ DEFINES = -DPAGING_PAE \
 		  -DBITS_32 \
 		  #-DDF_COM4_ONLY
 #		  -DGRAPHICS_ON
-CFLAGS = $(DEFINES) -Wno-write-strings -ffreestanding -fno-omit-frame-pointer -O0 -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
+CFLAGS = $(DEFINES) -Wno-write-strings -ffreestanding -fno-omit-frame-pointer -O0 -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libcvv/libc/include
 CFLAGS_END = -nostdlib -lgcc
 ASM = /usr/local/osdev/bin/i686-elf-as
-AFLAGS = $(CFLAGS) -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libvv/include -I$(ROOT_DIR)/libcvv/include
+AFLAGS = $(CFLAGS)
 
 #Support program and flags
 OBJDUMP = /usr/local/osdev/bin/i686-elf-objdump
@@ -51,7 +51,7 @@ export
 all: debug_dump install
 
 build/versionv.bin: $(SOURCES_C) $(SOURCES_CPP) $(SOURCES_ASM) $(SOURCES_ASMS) $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS)
-	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) /usr/local/osdev/lib/gcc/i686-elf/11.2.0/libgcc.a libcvv/vvlibc.o $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(CFLAGS_END)
+	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) libcvv/libc/vvlibc.o $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(CFLAGS_END)
 	objdump -x -D -S build/versionv.bin > objdump.txt
 	readelf -a build/versionv.bin > elfdump.txt
 	@>&2 printf "[Build] Done\n"
