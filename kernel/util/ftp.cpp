@@ -23,7 +23,7 @@ void FTP::test( void ) {
 	}
 }
 
-void FTP::init( void ) {
+FTP::FTP( void ) {
 	this->serial_hack = true;
 
 	this->buffer = (char *)kmalloc( 1024 );

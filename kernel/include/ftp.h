@@ -31,9 +31,10 @@ class FTP {
 	public:
 		char* buffer;
 		char* data_buffer;
+		
+		FTP( void );
 
 		void test( void );
-		void init( void );
 		void login( char * user, char * pass );
 		char* pwd( void );
 		void cwd( char * dir );

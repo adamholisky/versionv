@@ -1,4 +1,5 @@
-#include "memory.h"
+#include <memory.h>
+.extern kernel_main
 
 .set MAGIC,    0x1BADB002 
 

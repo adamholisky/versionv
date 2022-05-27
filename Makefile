@@ -16,6 +16,7 @@ OBJECTS_ASMS = $(patsubst %.S, build/%.o, $(shell ls kernel/**/*.S | xargs -n 1 
 
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
+CPP = /usr/local/osdev/bin/i686-elf-g++
 DEFINES = -DPAGING_PAE \
 		  -DGRAPHICS_ON \
 		  -DBITS_32 \
@@ -64,7 +65,7 @@ build/%.o: %.c
 build/%.o: %.cpp
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))
-	$(CC) $(CFLAGS) $(CFLAGS_END) -fpermissive -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
+	$(CPP) $(CFLAGS) $(CFLAGS_END) -fno-exceptions -fno-rtti -fpermissive -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
 #build/%.o: kernel/**/%.s
 build/%.o: %.s

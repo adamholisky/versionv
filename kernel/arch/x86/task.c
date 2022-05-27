@@ -1,4 +1,6 @@
-#include "kernel.h"
+#include <kernel.h>
+#include <kernel_main.h>
+#include <string.h>
 #include "interrupts.h"
 #include "syscall.h"
 #include "elf.h"

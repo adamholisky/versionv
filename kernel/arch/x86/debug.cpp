@@ -27,19 +27,6 @@ void kdebug_initalize( void ) {
 	symbols.initalize();
 }
 
-void ftp_test( void ) {
-	FTP ftp;
-
-	printf( "\n" );
-
-	ftp.init();
-	
-	klog( "Test start\n" );
-	ftp.test();
-	klog( "Test end\n" );
-
-}
-
 void kdebug_add_symbol( char * name, uint32_t addr, uint32_t size ) {
 	symbols.add( name, addr, size );
 }
