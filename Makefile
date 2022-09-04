@@ -17,32 +17,35 @@ OBJECTS_ASMS = $(patsubst %.S, build/%.o, $(shell ls kernel/**/*.S | xargs -n 1 
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
 CPP = /usr/local/osdev/bin/i686-elf-g++
+ASM = /usr/local/osdev/bin/i686-elf-as
 DEFINES = -DPAGING_PAE \
-		  -DGRAPHICS_ON \
+		  -DGRAPHICS_OFF \
 		  -DBITS_32 \
 		  #-DDF_COM4_ONLY
 #		  -DGRAPHICS_ON
 CFLAGS = $(DEFINES) -Wno-write-strings -ffreestanding -fno-omit-frame-pointer -O0 -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libcvv/libc/include
 CFLAGS_END = -nostdlib -lgcc
-ASM = /usr/local/osdev/bin/i686-elf-as
 AFLAGS = $(CFLAGS)
 
 #Support program and flags
-OBJDUMP = /usr/local/osdev/bin/i686-elf-objdump
+OBJDUMP = /usr/bin/objdump
 QEMU = qemu-system-i386 
 QEMU_COMMON = 	-drive format=raw,if=ide,file=$(ROOT_DIR)/vv_hd.img \
 				-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
 				-nic user,ipv6=off,model=e1000,mac=52:54:98:76:54:32 \
 				-m 4G \
-				-serial tcp:192.168.0.100:21,nodelay=on,reconnect=0 \
+				-serial null \
 				-serial stdio \
-				-serial tcp::6699,nodelay=on,server=on,wait=no \
+				-serial null \
 				-serial file:$(ROOT_DIR)/serial_out.txt \
 				-no-reboot
 QEMU_DISPLAY_NONE =	-display none
 QEMU_DISPLAY_NORMAL = -vga std
 QEMU_DEBUG_COMMON = -S -gdb tcp::5894 
 QEMU_DEBUG_LOGGING = -D $(ROOT_DIR)/qemu_debug_log.txt -d int,cpu_reset 
+
+# tcp:192.168.0.100:21,nodelay=on,reconnect=0
+# tcp::6699,nodelay=on,server=on,wait=no
 
 # -serial tcp:192.168.0.100:6699,nodelay=on,server=on,wait=no \
 # -serial null \
@@ -110,11 +113,12 @@ install:
 	@make install_stage2 >> $(BUILD_LOG)
 	@>&2 printf "[Install] Done\n"
 
+#if included in fstab, use: mount hd_mount_dir
 install_stage2: build/versionv.bin
 	@>&2 echo [Install] Installing to vv_hd.img
-	mount hd_mount_dir
+	sudo mount -o loop,offset=1048576 vv_hd.img hd_mount_dir
 	cp build/versionv.bin -f hd_mount_dir/boot/versionv.bin
-	umount hd_mount_dir 
+	sudo umount hd_mount_dir 
 
 run: install
 	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL) 

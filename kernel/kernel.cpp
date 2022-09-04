@@ -43,6 +43,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 		DF_COM4_ONLY = true;
 	}
 
+	GRAPHICS_ACTIVE = true;
+
 	multiboot_echo_to_serial();
 	memory_initalize();
 	kdebug_initalize();
@@ -77,7 +79,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	test_func();
 	init_devices();
 
-	FTP *host_ftp = new FTP();
+	/* FTP *host_ftp = new FTP();
 
 	host_ftp->login( "vv", "vv" );
 	host_ftp->cwd( "/usr/local/osdev/versions/v/modules/build" );
@@ -86,10 +88,13 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	Module m;
 	m.load( (uint32_t *)host_ftp->data_buffer, "reference.vvs" );
 	m.call_main();
+	
 
 	VShell v;
 	v.init( host_ftp, &m );
 	v.run();
+
+	*/
 
 	klog( "\n\nEnd of line." );
 

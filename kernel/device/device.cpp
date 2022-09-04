@@ -39,9 +39,9 @@ void init_devices( void ) {
 	printf( "\nTerminal new\n" );
 	t = new TerminalDevice();
 
-	printf( "\nCasting\n" );
+/* 	printf( "\nCasting\n" );
 	d = s;
 	d->open();
 	d = t;
-	d->open();
+	d->open(); */
 }
