@@ -400,7 +400,8 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 
 	#endif
 
-	
+	klog( "Mapped: 0x%08X Virtual to 0x%08X Physical for 0x%X bytes.\n", virt_addr, phys_addr, PAGE_SIZE_IN_BYTES );
+
 	// return pointer to first byte
 	return virt_addr;
 }
@@ -422,6 +423,25 @@ uint32_t * page_allocate( uint32_t num ) {
 
 	return return_pointer;
 }
+
+uint32_t * page_allocate_and_map( uint32_t * phys_addr ) {
+	uint32_t * return_pointer = kernel_virtual_memory_top;
+
+	return_pointer = page_map( kernel_virtual_memory_top, phys_addr );
+
+	kernel_virtual_memory_top = (uint32_t *)((uint32_t)kernel_virtual_memory_top + page_size_in_bytes);
+
+	return return_pointer;
+}
+
+uint32_t * page_identity_map( uint32_t * phys_addr ) {
+	uint32_t * return_pointer = phys_addr;
+
+	return_pointer = page_map( phys_addr, phys_addr );
+
+	return return_pointer;
+}
+
 
 #define memtest_dump( v ) klog( #v " mem dump: 0x%04X %04X\n",( ( uint32_t )( v ) >> 16 ), ( uint32_t )( v )&0xFFFF)
 

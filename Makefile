@@ -28,7 +28,7 @@ CFLAGS_END = -nostdlib -lgcc
 AFLAGS = $(CFLAGS)
 
 #Support program and flags
-OBJDUMP = /usr/bin/objdump
+OBJDUMP = /usr/local/osdev/bin/i686-elf-objdump
 QEMU = qemu-system-i386 
 QEMU_COMMON = 	-drive format=raw,if=ide,file=$(ROOT_DIR)/vv_hd.img \
 				-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
@@ -56,7 +56,7 @@ all: debug_dump install
 
 build/versionv.bin: $(SOURCES_C) $(SOURCES_CPP) $(SOURCES_ASM) $(SOURCES_ASMS) $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS)
 	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) libcvv/libc/vvlibc.o $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(CFLAGS_END)
-	objdump -x -D -S build/versionv.bin > objdump.txt
+	$(OBJDUMP) -x -D -S build/versionv.bin > objdump.txt
 	readelf -a build/versionv.bin > elfdump.txt
 	@>&2 printf "[Build] Done\n"
 

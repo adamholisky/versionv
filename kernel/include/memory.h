@@ -73,6 +73,8 @@ typedef struct {
 void memory_initalize( void );
 uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr );
 uint32_t * page_allocate( uint32_t num );
+uint32_t * page_allocate_and_map( uint32_t * phys_addr );
+uint32_t * page_identity_map( uint32_t * phys_addr );
 void set_task_pde( page_directory_entry * pte );
 uint32_t * get_physical_memory_base( void );
 void dump_active_pt( void );

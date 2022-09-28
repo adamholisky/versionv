@@ -15,9 +15,13 @@
 #include <vshell.h>
 #include <string.h>
 #include <device.h>
+#include <uione.h>
+#include "intel8254.h"
 
 #define END_IMMEDIATELY
 #define TRIGGER_DIVIDE_BY_ZERO false
+
+extern void cpp_tests( void );
 
 void test_func( void );
 
@@ -43,7 +47,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 		DF_COM4_ONLY = true;
 	}
 
-	GRAPHICS_ACTIVE = true;
+	GRAPHICS_ACTIVE = false;
 
 	multiboot_echo_to_serial();
 	memory_initalize();
@@ -61,7 +65,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	serial_enable_interrupts();
 	task_initalize();
 	pci_initalize();
-	//intel8254_initalize();
+	intel8254_initalize();
 	//ata_initalize();
 	keyboard_initalize();
 
@@ -76,8 +80,14 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 		);
 	}
 
+	do_immediate_shutdown();
+
 	test_func();
 	init_devices();
+
+	cpp_tests();
+
+	//uione_test();
 
 	/* FTP *host_ftp = new FTP();
 
