@@ -23,7 +23,7 @@ DEFINES = -DPAGING_PAE \
 		  -DBITS_32 \
 		  #-DDF_COM4_ONLY
 #		  -DGRAPHICS_ON
-CFLAGS = $(DEFINES) -Wno-write-strings -ffreestanding -fno-omit-frame-pointer -O0 -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/libcvv/libc/include
+CFLAGS = $(DEFINES) -Wno-write-strings -ffreestanding -fno-omit-frame-pointer -O0 -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/../libcvv/libc/include
 CFLAGS_END = -nostdlib -lgcc
 AFLAGS = $(CFLAGS)
 
