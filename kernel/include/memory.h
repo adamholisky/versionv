@@ -79,6 +79,7 @@ void set_task_pde( page_directory_entry * pte );
 uint32_t * get_physical_memory_base( void );
 void dump_active_pt( void );
 uint32_t * get_physical_addr_from_virt( uint32_t * virt );
+uint32_t * mem_virt_to_phys( uint32_t * virt );
 
 #endif // __ASSEMBLER__
 

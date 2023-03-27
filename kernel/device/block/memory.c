@@ -1,7 +1,32 @@
 #include <kernel.h>
 #include "multiboot.h"
 
-//#define kdebug_memory_pages 1
+/*
+
+Memory Map Physical
+-----------------------------------
+| 0x0010 0000    Kernel Load
+| 0x0017 e000    _kernel_end symbol (example)
+| 0x0020 0000    Physical memory base (*1) kernel
+| 0x4000 0000    Physical memory base user
+-----------------------------------
+
+Memory Map Virtual
+-----------------------------------
+| 0x0000 0000    Free 
+| 0x4000 0000    Free 
+| 0x8000 0000    Free
+| 0xC000 0000    Kernel Load
+| 0xD000 0000    Kernel Heap Start
+| ...
+| 0xFFFF FFFF    End
+-----------------------------------
+
+*1: Calculated as nearst 0x20 0000 aligned memory from end of kernel load
+
+*/
+
+#define kdebug_memory_pages 1
 
 extern page_directory_entry * boot_page_directory;
 extern page_directory_entry * boot_page_table;
@@ -16,6 +41,8 @@ uint32_t * physical_memory_base = (uint32_t *)0xFFFFFFFF;
 uint32_t * phsyical_memory_top = (uint32_t *)0xFFFFFFFF;
 uint32_t * kernel_virtual_memory_base = (uint32_t *)KERNEL_VIRT_HEAP_BASE;
 uint32_t * kernel_virtual_memory_top = (uint32_t *)KERNEL_VIRT_HEAP_BASE;
+
+page_directory_entry * page_data;
 
 page_directory_entry second_page_table[1024] __attribute__ ((aligned (4096)));
 page_directory_entry graphics_page_table[1024] __attribute__ ((aligned (4096)));
@@ -88,7 +115,13 @@ void memory_initalize( void ) {
 	klog( "Virtual memory base:       0x%08X\n", kernel_virtual_memory_base );
 	klog( "Memory allocatable:        0x%08X\n", mem_size );
 
-	page_allocate( 5 );
+	page_data = (page_directory_entry *)page_allocate( 2 );
+
+	klog( "Page data starts at virt:  0x%08X\n", page_data );
+
+	dump_active_pt();
+
+	mem_virt_to_phys( page_data );
 
 	//#define kdebug_memory
 	#ifdef kdebug_memory
@@ -175,8 +208,39 @@ uint32_t * get_physical_memory_base( void ) {
 	return physical_memory_base;
 }
 
+// OLD -- don't use
+// TODO: Get rid of
 uint32_t * get_physical_addr_from_virt( uint32_t * virt ) {
 	return (uint32_t *)((uint32_t)physical_memory_base + (uint32_t)virt - KERNEL_VIRT_HEAP_BASE);
+}
+
+/**
+ * @brief Coverts virtual to phyiscal address based on mmu
+*/
+uint32_t * mem_virt_to_phys( uint32_t * virt ) {	
+	klog( "Translating 0x%08X to physical address...\n", virt );
+
+	uint32_t dir_index = (uint32_t)virt / PAGE_SIZE_IN_BYTES;
+	uint32_t table_index = dir_index % PAGE_NUM_TABLES;
+	dir_index = dir_index / PAGE_NUM_TABLES;
+	uint32_t mem_offset = (uint32_t)virt - (dir_index * PAGE_DIR_SIZE_IN_BYTES) - (table_index * PAGE_SIZE_IN_BYTES);
+
+	klog( "Dir Index:   0x%X\n", dir_index );
+	klog( "Table Index: 0x%X\n", table_index );
+	klog( "Mem Offset:  0x%X\n", mem_offset );
+
+	uint64_t * pae_pd = ((uint64_t *)&paging_pdpt) + dir_index;
+	klog ("Dir Present: 0x%X\n", test_bit(*pae_pd, PTE_BIT_PRESENT) );
+	klog ("Dir Address: 0x%X\n", (*pae_pd & 0x000FFFFFFFFFF000) );
+
+	uint64_t *pae_pt = (uint64_t *)( (*pae_pd & 0x000FFFFFFFFFF000) + KERNEL_VIRT_LOAD_BASE) + table_index;
+	klog( "PT Present:  0x%X\n",  test_bit(*pae_pt, PTE_BIT_PRESENT) );
+	klog( "PT RW:       0x%X\n",  *pae_pt );
+
+	klog( "Done:        physical = 0x%08X\n", mem_offset + (uint32_t)(*pae_pt & 0xFFFFFF00));
+	klog( "             virtual =  0x%X\n", virt );
+
+	return (uint32_t *)(mem_offset + (uint32_t)(*pae_pt & 0xFFFFFF00));
 }
 
 /**
