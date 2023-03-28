@@ -61,9 +61,6 @@ page_directory_entry process_pt[1024] __attribute__ ((aligned (4096)));
 
 void memory_initalize( void ) {
 	//log_entry_enter();
-
-	//
-
 	paging_level_active = PAGING_LEVEL;
 
 	uint32_t mem_start = 0;
@@ -96,16 +93,7 @@ void memory_initalize( void ) {
         }
     }
 
-	// Calculate the alloc start so it ends up on a 4k boundry
-	//alloc_start = (alloc_start % 0x1000) + alloc_start;
-
-	#ifdef PAGING_PAE
-		
-		/* klog( "alloc start: %08X\n", alloc_start );
-		klog( "alloc start mod: %08X\n", alloc_start % 0x200000);
-		klog( "alloc addition: %08X\n", 0x200000 - (alloc_start % 0x200000) ) */;
-		alloc_start = alloc_start + 0x200000 - (alloc_start % 0x200000);
-	#endif
+	alloc_start = alloc_start + 0x200000 - (alloc_start % 0x200000);
 
 	phsyical_memory_top = (uint32_t *)alloc_start;
 	physical_memory_base = (uint32_t *)alloc_start;
@@ -121,14 +109,9 @@ void memory_initalize( void ) {
 
 	dump_active_pt();
 
-	mem_virt_to_phys( page_data );
-
-	//#define kdebug_memory
-	#ifdef kdebug_memory
+	mem_virt_to_phys( mbh );
 
 	//memory_test();
-
-	#endif
 
 	#ifdef kdebug_memory_pages
 
@@ -158,43 +141,28 @@ void memory_initalize( void ) {
 
 	_Pragma("GCC diagnostic push")
 	_Pragma("GCC diagnostic ignored \"-Wpointer-to-int-cast\"")
-	#ifdef PAGING_PAE
-		uint64_t * pde = (uint64_t *)&paging_pdpt;
-		uint64_t * pte = (uint64_t *)&process_pt;
-		*pte = (((uint64_t)process_address_space + (uint64_t)physical_memory_base) - KERNEL_VIRT_HEAP_BASE + 0x83);
-	#else
-		uint32_t * pde = (uint32_t *)&paging_pd;
-		uint32_t * pte = (uint32_t *)&process_pt;
-		*pte = (((uint32_t)process_address_space + (uint32_t)physical_memory_base) - KERNEL_VIRT_HEAP_BASE + 0x3);
-	#endif
-
-	#ifdef PAGING_PAE
-		*pde = ((uint64_t)&process_pt - KERNEL_VIRT_LOAD_BASE) + 0x1;
-		*pde = 0x00000000FFFFFFFF & *pde;
-		*pte = 0x00000000FFFFFFFF & *pte;
-	#else
-		*pde = ((uint32_t)&process_pt - KERNEL_VIRT_LOAD_BASE) + 0x3;
-	#endif
+	uint64_t * pde = (uint64_t *)&paging_pdpt;
+	uint64_t * pte = (uint64_t *)&process_pt;
+	*pte = (((uint64_t)process_address_space + (uint64_t)physical_memory_base) - KERNEL_VIRT_HEAP_BASE + 0x83);
+	*pde = ((uint64_t)&process_pt - KERNEL_VIRT_LOAD_BASE) + 0x1;
+	*pde = 0x00000000FFFFFFFF & *pde;
+	*pte = 0x00000000FFFFFFFF & *pte;
 	_Pragma("GCC diagnostic pop")
 	
 	asm volatile("invlpg (%0)" ::"r" (pte) : "memory");
 	asm_refresh_cr3();
 
+	// Begin sanity check
 	uint32_t * pmem = (uint32_t *)process_address_space;
 	*(pmem + 1) = 0x0666;
-
-	/* klog( "%X --> %x\n", (pmem + 1), *(pmem + 1 )); */
-
 	void * zero_addr_space = 0x00000000;
 	uint32_t * zerozero = (uint32_t *)zero_addr_space;
 	*(zerozero + 2) = 0xBABABABA;
 
-/* 	klog( "00   uint32_t: %08X\n", *(zerozero + 1) );
-	klog( "pmem uint32_t: %08X\n", *(pmem + 1) ); */
-
 	if( *(zerozero + 1) != *(pmem + 1) ) {
 		kpanic( "0x0 and pmem are not equal!\n" );
 	}
+	// End sanity check
  
 	log_entry_exit();
 }
@@ -343,8 +311,6 @@ void dump_active_pt( void ) {
  */
 uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	uint32_t pt_addr_physical = 0;
-	
-	#ifdef PAGING_PAE
 
 	uint32_t pdpt_index = (uint32_t)virt_addr / 0x40000000; // 0x40000000;
 	uint32_t pd_index = ((uint32_t)virt_addr - (pdpt_index * 0x40000000)) / PAGE_SIZE_IN_BYTES; // PAGE_SIZE_IN_BYTES
@@ -376,84 +342,8 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	asm_refresh_cr3(); 	
 
 	/* debugf( "  Mem contnets:       0x%08X\n", *virt_addr); */
-	#else
-	page_directory_entry * pd;
-	page_directory_entry * pt;
-	uint32_t pd_index = 0;
-	uint32_t pt_index = 0;
-		// Find entry in BPD
-	pd_index = (uint32_t)virt_addr >> 22;
-	pt_index = ((uint32_t)virt_addr >> 12) & 0x03FF;
-
-	//klog( "Virt: 0x%08X\n", virt_addr );
-	// for now cheese it, allow the page fault test
-	if( (uint32_t)virt_addr > 0xFF000000 ) {
-		pt_addr_physical = (uint32_t)another_page_table - KERNEL_VIRT_LOAD_BASE;
-		pt = (page_directory_entry *)(another_page_table + pt_index);
-	} else if( (uint32_t)virt_addr >= 0xE0000000 ) {
-		pt_addr_physical = (uint32_t)graphics_page_table - KERNEL_VIRT_LOAD_BASE;
-		pt = (page_directory_entry *)(graphics_page_table + pt_index );
-		//debugf(".");
-	} else {
-		pt_addr_physical = ((uint32_t)second_page_table) - KERNEL_VIRT_LOAD_BASE;
-		pt = (page_directory_entry *)(second_page_table + pt_index);
-		//debugf("!");
-	}
-
-	// Set the page directory entry up correctly
-	pd = (page_directory_entry *)(&boot_page_directory + pd_index);
-
-	uint32_t phys_addr_shr = (uint32_t)phys_addr;
-	phys_addr_shr = phys_addr_shr >> 11;
-
-	// TODO: Fix this shit, something is wrong with the packing or bit translations
-
-	uint32_t *pd_uint = (uint32_t *)pd;
-	uint32_t *pt_uint = (uint32_t *)pt;
-
-	uint32_t phys_addr_full = (uint32_t)phys_addr;
-	phys_addr_full = phys_addr_full & 0xFFFFFF000;
-
-	//pt_addr_physical = pt_addr_physical & 0xFFFFFF000;
-
-	if( pd->present == 1 ) {
-		*pt_uint = (uint32_t)(phys_addr_full | 0x3 );
-	} else {
-		*pd_uint = (uint32_t)(pt_addr_physical | 0x3 );
-		*pt_uint = (uint32_t)(phys_addr_full | 0x3 );
-	}
-
-	/*
-	if( pd->present == 1 ) {
-		pt->present = 1;
-		pt->rw = 1;
-		pt->address = phys_addr_shr;
-	} else {
-		pd->present = 1;
-		pd->rw = 1;
-		pd->address = pt_addr_physical >> 11;
-
-		pt->present = 1;
-		pt->rw = 1;
-		pt->address = phys_addr_shr;
-	} */
 
 	#ifdef kdebug_memory_pages_more
-	klog( "virt_addr:        0x%08X\n", virt_addr );
-	klog( "    phys_addr:    0x%08X\n", phys_addr );
-	klog( "    pd: %d        pt: %d\n", pd_index, pt_index );
-	klog( "    physhr:       0x%08X\n", phys_addr_shr );
-	klog( "    full:         0x%08X\n", phys_addr_full | 0x3 );
-	klog( "    pt addr:      0x%08X\n", pt->address << 11 );
-	#endif
-
-	// Refresh the page directory in the cpu
-	asm volatile("invlpg (%0)" ::"r" (pt) : "memory");
-
-	#endif
-
-	#ifdef kdebug_memory_pages_more
-
 	debugf( "bpd_index:          0x%08X\n", pd_index );
 	debugf( "pt_index:           0x%08X\n", pt_index );
 	debugf( "pt_addr_physical:   0x%08X\n", pt_addr_physical );
@@ -461,7 +351,6 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	debugf( "pt_addr >> 11:      0x%08X\n", pt_addr_physical >> 11 );
 	debugf( "PD contents:        0x%08X\n", *pd );
 	debugf( "PT contents:        0x%08X\n", *pt );
-
 	#endif
 
 	klog( "Mapped: 0x%08X Virtual to 0x%08X Physical for 0x%X bytes.\n", virt_addr, phys_addr, PAGE_SIZE_IN_BYTES );
@@ -482,8 +371,6 @@ uint32_t * page_allocate( uint32_t num ) {
 		debugf( "kvm_top: 0x%08X    pmt: 0x%08X\n", kernel_virtual_memory_top, phsyical_memory_top );
 		#endif
 	}
-
-	//k_log( sys_memory, level_info, "%d page(s) allocated at 0x%08X", num, return_pointer );
 
 	return return_pointer;
 }
@@ -516,15 +403,6 @@ void memory_test( void ) {
 	void * p3;
 	void * p4;
 	void * p5;
-
-	//memtest_dump( kernel_virtual_memory_top );
-
-	/*
-	void * p;
-	p = liballoc_alloc( 4096 );
-	printf( "liballoc_alloc( 4096 ) page into p\n" );
-	memtest_dump( p );
-	*/
 	
 	p2 = kmalloc( 0x256 );
 	klog( "kmalloc(0x256) into p2\n" );

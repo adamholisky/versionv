@@ -134,7 +134,9 @@ pci_header * pci_get_header_by_device_id( uint32_t _device_id ) {
 uint32_t pci_read_dword( const uint16_t bus, const uint16_t dev, const uint16_t func, const uint32_t reg ) {
 	out_port_long( 0xCF8, 0x80000000L | ((uint32_t)bus << 16) |((uint32_t)dev << 11) |
 	((uint32_t)func << 8) | (reg & ~3) );
-	return in_port_long( 0xCFC + (reg & 3) );
+
+	return in_port_long( ( 0xCFC )  >> ((reg & 2) * 8) & 0xFFFF );
+	//return in_port_long( 0xCFC + (reg & 3) );
 }
 
 /* TODO: Rewrite */
