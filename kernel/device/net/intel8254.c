@@ -8,6 +8,10 @@ uint32_t * intel8254_io_port;
 extern uint8_t hack_8254_bus;
 extern uint8_t hack_8254_device;
 
+uint8_t mac_address[6];
+
+uint16_t read_eprom( uint32_t *addr, uint32_t offset );
+
 void intel8254_initalize( void ) {
 	log_entry_enter();
 	
@@ -19,6 +23,9 @@ void intel8254_initalize( void ) {
 	} else {
 		klog( "Found\n" );
 	}
+
+	klog( "hack_8254_bus: 0x%X\n", hack_8254_bus );
+	klog( "hack_8254_device: 0x%X\n", hack_8254_device );
 
 	pci_bist_register * bist = (pci_bist_register *)&(device->bist);
 
@@ -50,21 +57,11 @@ void intel8254_initalize( void ) {
 
 	uint16_t data = 0;
 
-	/* 	
-	static uint16_t net_i825xx_eeprom_read( i825xx_device_t *dev, uint8_t ADDR )
-	{
-		uint16_t DATA = 0;
-		uint32_t tmp = 0;
-		mmio_write32( i825xx_REG_EERD, (1) | ((uint32_t)(ADDR) << 8) );
-		
-		while( !((tmp = mmio_read32(i825xx_REG_EERD)) & (1 << 4)) )
-			wait_microsecond(1);
-			
-		DATA = (uint16_t)((tmp >> 16) & 0xFFFF);
-		return DATA;
-	} 
-
-	 */
+	for( int x = 0; x < 0x40; x = x+4 ) {
+		klog( "XXXX x: %X  : 0x%08X\n", x, pci_read_dword( hack_8254_bus, hack_8254_device, 0, x) );
+	}
+	
+	
 
 	
 	data = pci_read_dword( hack_8254_bus, hack_8254_device, 0, 0x4 );
@@ -75,23 +72,43 @@ void intel8254_initalize( void ) {
 	klog( "data: 0x%04X\n", data );
 	debugf_bit_array( data );
 
-	/* uint8_t *iobase = 0xFEB80000;
-	*iobase = 0x4000000; */
+	uint32_t *dev = page_allocate_and_map( 0xFEA00000 );
+	
+	uint32_t *addr_status = (uint32_t *)((uint32_t)dev + (0xFEB80000 - 0xFEA00000) + 0x8);
+	dbA();
 
-	//uint32_t *page = page_allocate( 1 );
-	//page_map( page, device->bar0 );
-
-	uint32_t *page = page_identity_map( device->bar0 );
-
-	//uint32_t *addr_eerd = page;
-	*page = 0x04000000;
-	uint32_t *addr_eerd = (uint32_t *)(device->bar0 + 0x0014);
-	klog( "addr_EERD: 0x%08X\n", addr_eerd );
-
-	uint32_t *addr_status = (uint32_t *)(device->bar0 + 0x0008);
 	klog( "status: 0x%08X\n", *addr_status );
-	//uint32_t *addr_eerd = device->bar0;
-	*addr_eerd = (1) | ((uint32_t)(0) << 8);
+	
+
+	uint16_t mac_address_temp = 0;
+	mac_address_temp = read_eprom( dev, 0 );
+	mac_address[0] = mac_address_temp & 0xFF;
+	mac_address[1] = (mac_address_temp >> 8) & 0xFF;
+
+	mac_address_temp = read_eprom( dev, 1 );
+	mac_address[2] = mac_address_temp & 0xFF;
+	mac_address[3] = (mac_address_temp >> 8) & 0xFF;
+
+	mac_address_temp = read_eprom( dev, 2 );
+	mac_address[4] = mac_address_temp & 0xFF;
+	mac_address[5] = (mac_address_temp >> 8) & 0xFF;
+
+	klog( "Mac Address: %02X::%02X::%02X::%02X::%02X::%02X\n", mac_address[0], mac_address[1], mac_address[2], mac_address[3], mac_address[4], mac_address[5] );
+
+	//klog( "Command:\n" );
+	//debugf_bit_array( device->command );
+	klog( "status: 0x%08X\n", pci_read_dword( hack_8254_bus, hack_8254_device, 0, 0x2 ) );
+	//debugf( "Capabilities:\n" );
+	//debugf_bit_array( device->capabilities_pointer );
+	#endif
+
+	log_entry_exit();
+}
+
+uint16_t read_eprom( uint32_t *addr, uint32_t offset ) {
+	uint32_t *addr_eerd = (uint32_t *)((uint32_t)addr + (0xFEB80000 - 0xFEA00000) + 0x0014);
+
+	*addr_eerd = (1) | ((uint32_t)(offset) << 8);
 
 	uint32_t tmp = 0;
 	while( !((tmp = *addr_eerd) & (1 << 4)) ) {
@@ -101,19 +118,7 @@ void intel8254_initalize( void ) {
 		);
 	}
 
-	klog( "Data Returned: %08X\n",  (uint16_t)((tmp >> 16) & 0xFFFF) );
+	//klog( "Data Returned: %04X\n",  (uint16_t)((tmp >> 16) & 0xFFFF) );
 
-
-	
-
-
-	//klog( "Command:\n" );
-	//debugf_bit_array( device->command );
-	//debugf( "Status:\n" );
-	//debugf_bit_array( device->status );
-	//debugf( "Capabilities:\n" );
-	//debugf_bit_array( device->capabilities_pointer );
-	#endif
-
-	log_entry_exit();
+	return (uint16_t)((tmp >> 16) & 0xFFFF);
 }

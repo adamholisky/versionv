@@ -19,7 +19,7 @@
 #include "intel8254.h"
 
 #define END_IMMEDIATELY
-#define TRIGGER_DIVIDE_BY_ZERO true
+#define TRIGGER_DIVIDE_BY_ZERO false
 
 extern void cpp_tests( void );
 
@@ -65,7 +65,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	serial_enable_interrupts();
 	task_initalize();
 	pci_initalize();
-	//intel8254_initalize();
+	intel8254_initalize();
 	//ata_initalize();
 	keyboard_initalize();
 
