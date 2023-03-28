@@ -42,7 +42,7 @@ uint32_t * phsyical_memory_top = (uint32_t *)0xFFFFFFFF;
 uint32_t * kernel_virtual_memory_base = (uint32_t *)KERNEL_VIRT_HEAP_BASE;
 uint32_t * kernel_virtual_memory_top = (uint32_t *)KERNEL_VIRT_HEAP_BASE;
 
-page_directory_entry * page_data;
+page_directory_entry * global_page_data;
 
 page_directory_entry second_page_table[1024] __attribute__ ((aligned (4096)));
 page_directory_entry graphics_page_table[1024] __attribute__ ((aligned (4096)));
@@ -103,9 +103,9 @@ void memory_initalize( void ) {
 	klog( "Virtual memory base:       0x%08X\n", kernel_virtual_memory_base );
 	klog( "Memory allocatable:        0x%08X\n", mem_size );
 
-	page_data = (page_directory_entry *)page_allocate( 2 );
+	global_page_data = (page_directory_entry *)page_allocate( 2 );
 
-	klog( "Page data starts at virt:  0x%08X\n", page_data );
+	klog( "Page data starts at virt:  0x%08X\n", global_page_data );
 
 	dump_active_pt();
 
@@ -165,6 +165,13 @@ void memory_initalize( void ) {
 	// End sanity check
  
 	log_entry_exit();
+}
+
+/**
+ * @brief Set up page structures given an area of memory large enough to hold everything
+*/
+bool create_paging_data( uint32_t *page_data ) {
+	memset( page_data, 0, sizeof( uint64_t ) );
 }
 
 /**
