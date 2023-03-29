@@ -28,13 +28,9 @@ Memory Map Virtual
 
 #define kdebug_memory_pages 1
 
-extern page_directory_entry * boot_page_directory;
-extern page_directory_entry * boot_page_table;
 extern uint32_t _kernel_end;
 extern void asm_refresh_cr3( void );
 extern void asm_invalidate_page( void * p );
-extern page_directory_entry * paging_pdpt;
-extern page_directory_entry * paging_pd;
 
 static const char * vv_magic_word = "VersionV";
 uint32_t * physical_memory_base = (uint32_t *)0xFFFFFFFF;
@@ -42,14 +38,9 @@ uint32_t * phsyical_memory_top = (uint32_t *)0xFFFFFFFF;
 uint32_t * kernel_virtual_memory_base = (uint32_t *)KERNEL_VIRT_HEAP_BASE;
 uint32_t * kernel_virtual_memory_top = (uint32_t *)KERNEL_VIRT_HEAP_BASE;
 
-page_directory_entry * global_page_data;
-
-page_directory_entry second_page_table[1024] __attribute__ ((aligned (4096)));
-page_directory_entry graphics_page_table[1024] __attribute__ ((aligned (4096)));
-page_directory_entry another_page_table[1024] __attribute__ ((aligned (4096)));
-
-page_directory_entry process_pd[1024] __attribute__ ((aligned (4096)));
-page_directory_entry process_pt[1024] __attribute__ ((aligned (4096)));
+uint64_t kernel_page_data_tables[512]  __attribute__ ((aligned (4096)));
+uint64_t global_page_data_directories[3]  __attribute__ ((aligned (4096)));
+uint64_t * global_page_data_tables __attribute__ ((aligned (4096)));
 
 //#define kdebug_memory
 //#define kdebug_memory_pages
@@ -68,9 +59,6 @@ void memory_initalize( void ) {
 	uint32_t alloc_start = (uint32_t)&_kernel_end - KERNEL_VIRT_LOAD_BASE;
 
 	multiboot_info_t *mbh = get_multiboot_header();
-
-	memset( (void *)another_page_table, 0, 1024 );
-	memset( (void *)graphics_page_table, 0, 1024 );
 
 	klog( "Paging level: %d\n", paging_level_active );
 	klog( "Page Size: 0x%08X\n", page_size_in_bytes );
@@ -103,9 +91,31 @@ void memory_initalize( void ) {
 	klog( "Virtual memory base:       0x%08X\n", kernel_virtual_memory_base );
 	klog( "Memory allocatable:        0x%08X\n", mem_size );
 
-	global_page_data = (page_directory_entry *)page_allocate( 2 );
+	// Set up kernel page tables
+	// These WILL NOT EVER CHANGE LOCATION
+	klog( "K Page Data Table loc:     0x%08X\n", &kernel_page_data_tables );
 
-	klog( "Page data starts at virt:  0x%08X\n", global_page_data );
+	// Set the contents of the kernel's initial table entry
+	memset( kernel_page_data_tables, 0, 512 );
+	kernel_page_data_tables[0] = 0x83;
+
+	asm_refresh_cr3();
+
+	/* 
+	for( int pt_dump = 0; pt_dump < 512; pt_dump++ ) {
+		if( kernel_page_data_tables[pt_dump] != 0 ) {
+			klog( "PTD %d: 0x%08X\n", pt_dump, kernel_page_data_tables[pt_dump] );
+		}
+	}
+
+	klog( "0: 0x%08X\n", global_page_data_directories[0] );
+	klog( "1: 0x%08X\n", global_page_data_directories[1] );
+	klog( "2: 0x%08X\n", global_page_data_directories[2] );
+	klog( "3: 0x%08X\n", global_page_data_directories[3] ); */
+
+	global_page_data_tables = (page_directory_entry *)page_allocate( 1 );
+
+	klog( "Page data starts at virt:  0x%08X\n", global_page_data_tables );
 
 	dump_active_pt();
 
@@ -115,36 +125,50 @@ void memory_initalize( void ) {
 
 	#ifdef kdebug_memory_pages
 
-	page_directory_entry * kernel_page = (page_directory_entry *)(&boot_page_directory + 768);
+	page_directory_entry * kernel_page = (page_directory_entry *)&kernel_page_data_tables[128];
 
 	debugf( "----\n" );
-	debugf( "pde: %X\n", sizeof( page_directory_entry ) );
-	debugf( "bpd: 0x%08X\n", (uint32_t)&boot_page_directory );
-	debugf( "bpt: 0x%08X\n", (uint32_t)&boot_page_table );
+	debugf( "pde size: %d\n", sizeof(page_directory_entry) );
+	debugf( "gpdd: 0x%X\n", (uint32_t)global_page_data_directories );
+	debugf( "gpdt: 0x%08X\n", (uint32_t)global_page_data_tables );
+	debugf( "kpdt: 0x%08X\n", (uint32_t)kernel_page_data_tables);
+	debugf( "kernel_page: 0x%08X\n", (uint32_t)kernel_page_data_tables[128] );
 	debugf( "kernel_page->present: %d\n", kernel_page->present ); 
 	debugf( "kernel_page->rw: %d\n", kernel_page->rw ); 
 	debugf( "kernel_page->privilege: %d\n", kernel_page->privilege );
 	debugf( "kernel_page->write_through: %d\n", kernel_page->write_through );
 	debugf( "kernel_page->cache_disabled: %d\n", kernel_page->cache_disabled );
 	debugf( "kernel_page->accessed: %d\n", kernel_page->accessed );
+	debugf( "kernel_page->dirty: %d\n", kernel_page->dirty );
 	debugf( "kernel_page->page_size: %d\n", kernel_page->page_size );
-	debugf( "kernel_page->ignored: %d\n", kernel_page->ignored );
-	debugf( "kernel_page->address: 0x%08X\n", kernel_page->address<<11 );
+	debugf( "kernel_page->global: %d\n", kernel_page->global );
+	debugf( "kernel_page->available: %d\n", kernel_page->available );
+	debugf( "kernel_page->pat: %d\n", kernel_page->pat );
+	debugf( "kernel_page->address: 0x%08X\n", (uint32_t)kernel_page->address<<21 );
+	debugf( "kernel_page->available_2: %d\n", kernel_page->available_2 );
+	debugf( "kernel_page->protection_key: %d\n", kernel_page->protection_key );
+	debugf( "kernel_page->execute_disable: %d\n", kernel_page->execute_disable );
 	debugf( "----\n" );
 
 	#endif
 	
-	void * process_address_space = kmalloc( PAGE_SIZE_IN_BYTES );
-	process_address_space = (void *)((uint32_t)process_address_space + PAGE_SIZE_IN_BYTES - 0x0040);
+	for( int pt_dump = 0; pt_dump < 512; pt_dump++ ) {
+		if( kernel_page_data_tables[pt_dump] != 0 ) {
+			klog( "PTD %d: 0x%08X\n", pt_dump, kernel_page_data_tables[pt_dump] );
+		}
+	}
 
-	memset( &process_pt, 0, 1024 );
+
+	void * process_address_space = kmalloc( PAGE_SIZE_IN_BYTES );
+
+	process_address_space = (void *)((uint32_t)process_address_space + PAGE_SIZE_IN_BYTES - 0x0040);
 
 	_Pragma("GCC diagnostic push")
 	_Pragma("GCC diagnostic ignored \"-Wpointer-to-int-cast\"")
-	uint64_t * pde = (uint64_t *)&paging_pdpt;
-	uint64_t * pte = (uint64_t *)&process_pt;
+	uint64_t * pde = (uint64_t *)&global_page_data_directories;
+	uint64_t * pte = (uint64_t *)&global_page_data_tables;
 	*pte = (((uint64_t)process_address_space + (uint64_t)physical_memory_base) - KERNEL_VIRT_HEAP_BASE + 0x83);
-	*pde = ((uint64_t)&process_pt - KERNEL_VIRT_LOAD_BASE) + 0x1;
+	*pde = ((uint64_t)&global_page_data_tables - KERNEL_VIRT_LOAD_BASE) + 0x1;
 	*pde = 0x00000000FFFFFFFF & *pde;
 	*pte = 0x00000000FFFFFFFF & *pte;
 	_Pragma("GCC diagnostic pop")
@@ -170,8 +194,8 @@ void memory_initalize( void ) {
 /**
  * @brief Set up page structures given an area of memory large enough to hold everything
 */
-bool create_paging_data( uint32_t *page_data ) {
-	memset( page_data, 0, sizeof( uint64_t ) );
+bool create_paging_data_tables( uint32_t *page_data ) {
+	memset( page_data, 0, sizeof( uint64_t ) * PAGE_NUM_TABLES * 3 );
 }
 
 /**
@@ -204,7 +228,7 @@ uint32_t * mem_virt_to_phys( uint32_t * virt ) {
 	klog( "Table Index: 0x%X\n", table_index );
 	klog( "Mem Offset:  0x%X\n", mem_offset );
 
-	uint64_t * pae_pd = ((uint64_t *)&paging_pdpt) + dir_index;
+	uint64_t * pae_pd = ((uint64_t *)&global_page_data_directories) + dir_index;
 	klog ("Dir Present: 0x%X\n", test_bit(*pae_pd, PTE_BIT_PRESENT) );
 	klog ("Dir Address: 0x%X\n", (*pae_pd & 0x000FFFFFFFFFF000) );
 
@@ -230,7 +254,7 @@ void set_task_pde( page_directory_entry * pte ) {
 	pde->rw = 1;
 	pde->address = ((uint32_t)process_pt - KERNEL_VIRT_LOAD_BASE) >> 11;
  */
-	memcpy( &process_pt, pte, sizeof( page_directory_entry ) * 1024 );
+	memcpy( &global_page_data_tables, pte, sizeof( uint64_t ) * 512 * 3 );
 
 	// debugf( "pte: 0x%08X\n", (uint32_t)pte );
 	// debugf( "pde->addr: 0x%08X\n", pde->address << 11 );
@@ -261,9 +285,9 @@ void set_task_pde( page_directory_entry * pte ) {
 
 void dump_active_pt( void ) {
 	#ifdef PAGING_PAE
-	uint64_t * pde = (uint64_t *)&paging_pdpt;
+	uint64_t * pde = (uint64_t *)&global_page_data_directories;
 	#else
-	uint32_t * pde = (uint32_t *)&paging_pd;
+	uint32_t * pde = (uint32_t *)0x0;
 	#endif
 
 	for( int i = 0; i < PAGE_NUM_DIRS; i++, pde++ ) {
@@ -321,8 +345,8 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 
 	uint32_t pdpt_index = (uint32_t)virt_addr / 0x40000000; // 0x40000000;
 	uint32_t pd_index = ((uint32_t)virt_addr - (pdpt_index * 0x40000000)) / PAGE_SIZE_IN_BYTES; // PAGE_SIZE_IN_BYTES
-	uint64_t *pdpt_uint = ((uint64_t *)&paging_pdpt) + pdpt_index;
-	uint64_t *pd_uint = (uint64_t *)&paging_pd + pd_index;
+	uint64_t *pdpt_uint = ((uint64_t *)&global_page_data_directories) + pdpt_index;
+	uint64_t *pd_uint = (uint64_t *)&kernel_page_data_tables + pd_index;
 
 	//kdebug_peek_at( pdpt_uint );
 

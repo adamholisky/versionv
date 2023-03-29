@@ -58,17 +58,27 @@ extern "C" {
 #ifndef __ASSEMBLER__
 
 typedef struct {
-	uint8_t		present : 1;
-	uint8_t		rw : 1;
-	uint8_t		privilege : 1;
-	uint8_t		write_through : 1;
-	uint8_t		cache_disabled : 1;
-	uint8_t		accessed : 1;
-	uint8_t		page_size : 1;
-	uint8_t		ignored : 1;
-	uint8_t		available : 3;
-	uint32_t	address : 20;
-} page_directory_entry;
+	uint8_t		present : 1; // 0
+	uint8_t		rw : 1; // 1
+	uint8_t		privilege : 1; // 2
+	uint8_t		write_through : 1; // 3
+
+	uint8_t		cache_disabled : 1; // 4
+	uint8_t		accessed : 1; // 5
+	uint8_t	    dirty : 1; // 6
+	uint8_t		page_size : 1; // 7
+	
+	uint8_t		global : 1; // 8
+	uint8_t		available : 3; // 9, 10, 11
+	
+	uint8_t     pat : 1; // 12
+	uint8_t     reserved : 8; // 13, 14, 15, 16, 17, 18, 19, 20
+	uint32_t	address : 29; // 21 - 50
+	uint8_t		reserved_2 : 1; // 51
+	uint8_t     available_2 : 7; // 52, 53, 54, 55, 56, 57, 58
+	uint8_t     protection_key : 4; // 59, 60, 61, 62
+	uint8_t	    execute_disable : 1;
+} __attribute__ ((packed)) page_directory_entry;
 
 void memory_initalize( void );
 uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr );
