@@ -101,19 +101,13 @@ void memory_initalize( void ) {
 
 	asm_refresh_cr3();
 
-	/* 
-	for( int pt_dump = 0; pt_dump < 512; pt_dump++ ) {
-		if( kernel_page_data_tables[pt_dump] != 0 ) {
-			klog( "PTD %d: 0x%08X\n", pt_dump, kernel_page_data_tables[pt_dump] );
-		}
-	}
+	global_page_data_tables = (page_directory_entry *)page_allocate( 1 );
 
+	#ifdef kdebug_memory_pages
 	klog( "0: 0x%08X\n", global_page_data_directories[0] );
 	klog( "1: 0x%08X\n", global_page_data_directories[1] );
 	klog( "2: 0x%08X\n", global_page_data_directories[2] );
-	klog( "3: 0x%08X\n", global_page_data_directories[3] ); */
-
-	global_page_data_tables = (page_directory_entry *)page_allocate( 1 );
+	klog( "3: 0x%08X\n", global_page_data_directories[3] );
 
 	klog( "Page data starts at virt:  0x%08X\n", global_page_data_tables );
 
@@ -121,42 +115,16 @@ void memory_initalize( void ) {
 
 	mem_virt_to_phys( mbh );
 
-	//memory_test();
+	echo_page( (page_directory_entry *)&kernel_page_data_tables[128] );
 
-	#ifdef kdebug_memory_pages
-
-	page_directory_entry * kernel_page = (page_directory_entry *)&kernel_page_data_tables[128];
-
-	debugf( "----\n" );
-	debugf( "pde size: %d\n", sizeof(page_directory_entry) );
-	debugf( "gpdd: 0x%X\n", (uint32_t)global_page_data_directories );
-	debugf( "gpdt: 0x%08X\n", (uint32_t)global_page_data_tables );
-	debugf( "kpdt: 0x%08X\n", (uint32_t)kernel_page_data_tables);
-	debugf( "kernel_page: 0x%08X\n", (uint32_t)kernel_page_data_tables[128] );
-	debugf( "kernel_page->present: %d\n", kernel_page->present ); 
-	debugf( "kernel_page->rw: %d\n", kernel_page->rw ); 
-	debugf( "kernel_page->privilege: %d\n", kernel_page->privilege );
-	debugf( "kernel_page->write_through: %d\n", kernel_page->write_through );
-	debugf( "kernel_page->cache_disabled: %d\n", kernel_page->cache_disabled );
-	debugf( "kernel_page->accessed: %d\n", kernel_page->accessed );
-	debugf( "kernel_page->dirty: %d\n", kernel_page->dirty );
-	debugf( "kernel_page->page_size: %d\n", kernel_page->page_size );
-	debugf( "kernel_page->global: %d\n", kernel_page->global );
-	debugf( "kernel_page->available: %d\n", kernel_page->available );
-	debugf( "kernel_page->pat: %d\n", kernel_page->pat );
-	debugf( "kernel_page->address: 0x%08X\n", (uint32_t)kernel_page->address<<21 );
-	debugf( "kernel_page->available_2: %d\n", kernel_page->available_2 );
-	debugf( "kernel_page->protection_key: %d\n", kernel_page->protection_key );
-	debugf( "kernel_page->execute_disable: %d\n", kernel_page->execute_disable );
-	debugf( "----\n" );
-
-	#endif
-	
 	for( int pt_dump = 0; pt_dump < 512; pt_dump++ ) {
 		if( kernel_page_data_tables[pt_dump] != 0 ) {
 			klog( "PTD %d: 0x%08X\n", pt_dump, kernel_page_data_tables[pt_dump] );
 		}
 	}
+	#endif
+	
+	
 
 
 	void * process_address_space = kmalloc( PAGE_SIZE_IN_BYTES );
@@ -424,6 +392,32 @@ uint32_t * page_identity_map( uint32_t * phys_addr ) {
 	return return_pointer;
 }
 
+void echo_page( page_directory_entry *page ) {
+	uint32_t page_as_int = *(uint32_t *)page;
+
+	debugf( "----\n" );
+	debugf( "pde size: %d\n", sizeof(page_directory_entry) );
+	debugf( "gpdd: 0x%X\n", (uint32_t)global_page_data_directories );
+	debugf( "gpdt: 0x%08X\n", (uint32_t)global_page_data_tables );
+	debugf( "kpdt: 0x%08X\n", (uint32_t)kernel_page_data_tables);
+	debugf( "page: 0x%08X\n", page_as_int );
+	debugf( "page->present: %d\n", page->present ); 
+	debugf( "page->rw: %d\n", page->rw ); 
+	debugf( "page->privilege: %d\n", page->privilege );
+	debugf( "page->write_through: %d\n", page->write_through );
+	debugf( "page->cache_disabled: %d\n", page->cache_disabled );
+	debugf( "page->accessed: %d\n", page->accessed );
+	debugf( "page->dirty: %d\n", page->dirty );
+	debugf( "page->page_size: %d\n", page->page_size );
+	debugf( "page->global: %d\n", page->global );
+	debugf( "page->available: %d\n", page->available );
+	debugf( "page->pat: %d\n", page->pat );
+	debugf( "page->address: 0x%08X\n", (uint32_t)page->address<<21 );
+	debugf( "page->available_2: %d\n", page->available_2 );
+	debugf( "page->protection_key: %d\n", page->protection_key );
+	debugf( "page->execute_disable: %d\n", page->execute_disable );
+	debugf( "----\n" );
+}
 
 #define memtest_dump( v ) klog( #v " mem dump: 0x%04X %04X\n",( ( uint32_t )( v ) >> 16 ), ( uint32_t )( v )&0xFFFF)
 
