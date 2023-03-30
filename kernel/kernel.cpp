@@ -16,6 +16,7 @@
 #include <string.h>
 #include <device.h>
 #include <uione.h>
+#include <kshell.h>
 #include "intel8254.h"
 
 #define END_IMMEDIATELY
@@ -71,6 +72,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	serial_clear_buffer( COM2 );
 	READY_FOR_INPUT = true;
+
+	kshell_run();
 
 	if( TRIGGER_DIVIDE_BY_ZERO ) {
 		asm volatile( 
