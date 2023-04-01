@@ -6,6 +6,8 @@
 #include <keyboard.h>
 #include <debug.h>
 #include <kmalloc.h>
+#include <kapps.h>
+#include <task.h>
 
 char line[256];
 char jail_env[256];
@@ -77,8 +79,16 @@ void kshell_process_line( void ) {
 	} 
 	*/
 
+	if( strcmp( args[0], "1" ) == 0 ) {
+		kshell_test_fork();
+	}
+
 	if( strcmp( args[0], "q" ) == 0 ) {
 		kshell_shutdown();
+	}
+
+	if( strcmp( args[0], "ps" ) == 0 ) {
+		kshell_ps();
 	}
 
 	/* if( strcmp( args[0], "ls" ) == 0 ) {
@@ -118,16 +128,54 @@ void kshell_process_line( void ) {
 }
 
 void kshell_run( void ) {
+
+	kshell_test_fork();
+
+	kshell_ps();
+
+	sched_yield();
+
+	kshell_ps();
+
 	while( true ) {
 		printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );
 
 		kshell_get_line();
 
 		kshell_process_line();
+
+		sched_yield();
 	}
 }
 
 void kshell_shutdown( void ) {
 	debugf( "\nGoodbye, Dave.\n" );
 	outportb( 0xF4, 0x00 );
+}
+
+void kshell_ps( void ) {
+	debugf( "Process Info\n" );
+
+	task *t = get_tasks();
+
+	debugf( "ID   S         Type        EIP           Name\n" );
+
+	for( int i = 0; i < TASK_MAX; i++ ) {
+		if( t[i].id != TASK_ID_INVALID ) {
+			x86_context *context = (x86_context *)t[i].context_at_interrupt;
+			uint32_t eip = context->eip;
+			debugf( "%d    %s  %s    0x%08X    %s\n", i, task_status_to_string( t[i].status ), task_type_to_string( t[i].type ), eip, t[i].name );
+			//kdebug_peek_at( context );
+		}
+	}
+}
+
+void kshell_test_fork( void  ) {
+	int pid = kfork();
+
+	if( pid == 0 ) {
+		printf( "Parent task.\n" );
+	} else {
+		printf( "Child task: %d\n", pid );
+	}
 }

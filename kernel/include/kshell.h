@@ -10,6 +10,8 @@ void kshell_process_line( void );
 void kshell_run( void );
 void kshell_shutdown( void );
 
+void kshell_test_fork( void );
+
 #ifdef __cplusplus
 }
 #endif

@@ -170,6 +170,8 @@ task * switch_next_task( void ) {
 		outportb( 0xF4, 0x00 );
 	} */
 
+	//debugf( "task current: %d\n", task_current );
+
 	return (tasks + task_current);
 }
 
@@ -323,4 +325,33 @@ void set_next_active_task( int32_t task_id ) {
 
 }
 
+/**
+ * fork the kernel process
+ * 
+ * return:
+ *  0 --  in child process
+ *  -1 -- failed
+ *  n --  parent process
+*/
+int kfork( void ) {
+	int ret_value = 0;
+	int parent_process_id = 0;
+	int child_id = 0;
 
+	parent_process_id = get_current_task_id();
+
+	task * t = get_current_task();
+	child_id = task_add( t );
+
+	kfork_point:
+	if( get_current_task_id() == parent_process_id ) {
+		ret_value = parent_process_id;
+
+		tasks[child_id].stack_eip = tasks[child_id].context.eip = &&kfork_point;
+		tasks[child_id].status = TASK_STATUS_INACTIVE;
+	}
+
+	printf( "0x%08X\n", tasks[child_id].stack_eip );
+
+	return ret_value;
+}
