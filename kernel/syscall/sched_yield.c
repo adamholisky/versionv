@@ -20,7 +20,10 @@ uint32_t syscall_sched_yield( x86_context ** _stack ) {
 	memcpy( &(t->context), (uint32_t *)stack, sizeof( x86_context ) );
 
 	klog( "pre switch id: %X\n", get_current_task_id() );
+	klog( "eip we should save:        %X\n", stack->eip );
 	klog( "saved eip to current task: %X\n", t->context.eip );
+
+	t->saved_esp = stack->_esp;
 
 	#ifdef kdebug_sched_yield
 	debugf( "pre switch:  *_stack: %08X  stack: %08X  eip: %08X\n", *_stack, stack, (*_stack)->eip );
@@ -51,13 +54,16 @@ uint32_t syscall_sched_yield( x86_context ** _stack ) {
 	klog( "id: %X\n", t_next->id );
 	klog( "_esp: %08X\n", t_next->context._esp );
 	klog( "eip: %X\n", t_next->context.eip );
-	stack->_esp = t_next->context._esp;
+	//stack->_esp = t_next->context._esp;
+	stack->_esp = t_next->saved_esp;
 	uint32_t * stack_post_unwind = t_next->context._esp;
 
 	*(stack_post_unwind) = 0xFEEEFAAA;
 	*(stack_post_unwind + 1) = t_next->context.eip;
 	*(stack_post_unwind + 2) = t_next->context.cs;
 	*(stack_post_unwind + 3) = t_next->context.eflags;
+	*(stack_post_unwind + 4) = t_next->context.useresp;
+	*(stack_post_unwind + 5) = t_next->context.ss;
 
 	db2();
 

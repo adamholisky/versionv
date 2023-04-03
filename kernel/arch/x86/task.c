@@ -99,6 +99,8 @@ int32_t task_add( task *t ) {
 	tasks[i].context.eflags = 0x202;
 	tasks[i].context.ss = 0x10;
 
+	tasks[i].saved_esp = tasks[i].context._esp;
+
 	// Load in the stack and set the context up so it handles the first schedule entry correctly
 	memcpy( tasks[i].stack_top - sizeof( x86_context ), &tasks[i].context, sizeof( x86_context ) );
 	tasks[i].context_at_interrupt = tasks[i].stack_top - sizeof( x86_context );

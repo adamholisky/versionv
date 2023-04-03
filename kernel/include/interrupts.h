@@ -108,7 +108,7 @@ typedef struct {
 	uint32_t	eflags;
 	uint32_t  	useresp;
 	uint32_t	ss;
-} x86_context;
+} __attribute__ ((packed)) x86_context;
 
 union x86flags {
 	uint32_t	all_flags;
