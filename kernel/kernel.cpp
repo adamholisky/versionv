@@ -65,6 +65,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	serial_enable_interrupts();
 	task_initalize();
+	
 	pci_initalize();
 	intel8254_initalize();
 	//ata_initalize();
@@ -73,6 +74,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	serial_clear_buffer( COM2 );
 	READY_FOR_INPUT = true;
 
+	task_check();
+	
 	kshell_run();
 
 	if( TRIGGER_DIVIDE_BY_ZERO ) {

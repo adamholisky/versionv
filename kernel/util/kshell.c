@@ -129,6 +129,8 @@ void kshell_process_line( void ) {
 
 void kshell_run( void ) {
 
+	setup_test_task();
+
 	kshell_test_fork();
 
 	kshell_ps();

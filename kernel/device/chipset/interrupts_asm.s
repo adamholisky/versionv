@@ -13,15 +13,15 @@ interrupt_\interrupt_number :
 				push %es
 				push %fs
 				push %gs
-					push %esp
-					push %esp
+					push %esp /* x86_context struct on the stack */
+					push %esp /* Route */
 						mov $0x10, %eax
 						mov %eax, %ds
 						mov %eax, %es
 						mov $0x2, %eax
 						push %eax
 							mov $\interrupt_number, %eax
-							push %eax
+							push %eax /* Int num */
 								cld
 								call interrupt_default_handler
 							pop %eax
@@ -33,8 +33,8 @@ interrupt_\interrupt_number :
 				pop %es
 				pop %ds
 			popal
-		/* pop %esp */
-	add $8, %esp
+		 pop %esp
+	add $4, %esp
     iret
 .endm
 

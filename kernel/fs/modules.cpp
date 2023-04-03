@@ -76,7 +76,7 @@ bool Module::load( uint32_t *raw_data_start, char *name ) {
 	this->setup_pages();
 	module_task->code_start_virt = this->code_start_virt;
 	module_task->code_start_phys = this->code_start_phys;
-	module_task->stack = this->stack;
+	//module_task->stack = this->stack;
 	module_task->data_start_virt = this->data_start_virt;
 	module_task->data_start_phys = this->data_start_phys;
 

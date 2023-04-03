@@ -38,6 +38,8 @@
 	.byte 0x04
 
 .section .bootstrap_stack, "aw", @nobits
+.global stack_bottom
+.global stack_top
 	.align 16
 	stack_bottom:
 	.skip 16384

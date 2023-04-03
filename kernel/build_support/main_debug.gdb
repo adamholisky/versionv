@@ -40,7 +40,6 @@ end
 #break *0x0010aaaa
 #break debug.cpp:30
 #break debug.cpp:39
-break task.c:258
-break task.c:307
+break interrupt_0x99
 
 target remote localhost:5894

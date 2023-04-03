@@ -37,10 +37,9 @@ typedef struct {
 	int32_t status;
 
 	x86_context	context;
-	uint32_t * context_at_interrupt;
-
-	uint32_t * stack;
-	uint32_t stack_eip;
+	x86_context * context_at_interrupt;
+	uint32_t saved_esp;
+	
 	int32_t num_syms;
  	Elf32_Sym * sym_table;
 	uint8_t * str_table;
@@ -51,6 +50,7 @@ typedef struct {
 	void * data_start_virt;
 	void * virt_heap_top;
 	void * stack_base;
+	void * stack_top;
 	void * entry;
 
 	page_directory_entry * code_page_table;
@@ -83,6 +83,11 @@ void task_end_from_wrapper( void );
 void set_next_active_task( int32_t task_id );
 void set_current_task_id( int32_t task_id );
 int kfork( void );
+void setup_test_task( void );
+void test_task_call( void );
+void task_check( void );
+void task_check_a( void );
+void task_check_b( void );
 
 #ifdef __cplusplus
 }

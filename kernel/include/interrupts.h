@@ -99,9 +99,9 @@ typedef struct {
 	uint32_t	ecx; // 28 50
 	uint32_t	eax; // 2C 58
 
-	uint32_t	_esp;
+	uint32_t	_esp; // 30
 	
-	uint32_t	err;
+	uint32_t	err; // 34
 	uint32_t	eip;
 	uint16_t	cs;
 	uint16_t	cs_padding;
