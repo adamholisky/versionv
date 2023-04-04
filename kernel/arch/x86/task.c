@@ -15,8 +15,8 @@ task tasks[ TASK_MAX ];
 
 extern void save_context( x86_context *old_context );
 extern void restore_context( x86_context *old_context);
-extern void * stack_bottom;
-extern void * stack_top;
+extern uint32_t * stack_bottom;
+extern uint32_t * stack_top;
 
 void task_initalize( void ) {
 	//log_entry_enter();
@@ -39,10 +39,13 @@ void task_initalize( void ) {
 	tasks[ TASK_ID_KERNEL ].code_start_virt = kernel_main;
 	tasks[ TASK_ID_KERNEL ].data_start_phys = (void *)get_physical_memory_base();
 	tasks[ TASK_ID_KERNEL ].data_start_virt = (void *)KERNEL_VIRT_HEAP_BASE;
-	tasks[ TASK_ID_KERNEL ].stack_base = stack_bottom;
-	tasks[ TASK_ID_KERNEL ].stack_top = stack_top;
+	tasks[ TASK_ID_KERNEL ].stack_base = &stack_bottom;
+	tasks[ TASK_ID_KERNEL ].stack_top = &stack_top;
 	
 	strcpy( tasks[ TASK_ID_KERNEL ].name, "kernel_main" );
+
+	klog( "Kernel Stack Base: 0x%X\n", &stack_bottom );
+	klog( "Kernel Stack Top:  0x%X\n", &stack_top );
 
 	//log_entry_exit();
 }
@@ -102,7 +105,20 @@ int32_t task_add( task *t ) {
 	tasks[i].saved_esp = tasks[i].context._esp;
 
 	// Load in the stack and set the context up so it handles the first schedule entry correctly
-	memcpy( tasks[i].stack_top - sizeof( x86_context ), &tasks[i].context, sizeof( x86_context ) );
+	memcpy( tasks[i].stack_top - sizeof( x86_context ) - 5, &tasks[i].context, sizeof( x86_context ) );
+	uint32_t * stack_setup = tasks[i].stack_top;
+	stack_setup = &stack_setup[0];
+	*(stack_setup - 1) = 0x99;
+	*(stack_setup - 2) = 0x2;
+	*(stack_setup - 3) = &stack_setup[4];
+	*(stack_setup - 4) = &stack_setup[5];
+	*(stack_setup - 5) = 0x00000010;
+
+	for( int s = 0; s < 10; s++ ) {
+		klog( "stack_setup[%i]: 0x%X\n", s, stack_setup[s] );
+	}
+
+
 	tasks[i].context_at_interrupt = tasks[i].stack_top - sizeof( x86_context );
 	
 	//debugf( "t[i].stack == 0x%08X\n", tasks[i].stack );

@@ -31,14 +31,14 @@ typedef struct {
 	uint32_t	arg_6;
 } syscall_args;
 
-uint32_t syscall_handler( x86_context ** stack );
+uint32_t syscall_handler( uint32_t * stack, x86_context ** _context );
 uint32_t syscall( uint32_t call_num, uint32_t num_args, syscall_args * args );
 
 uint32_t read( int fd, void * buff, uint32_t size );
 uint32_t syscall_read( int fd, void * buff, uint32_t size );
 
 uint32_t sched_yield( void );
-uint32_t syscall_sched_yield( x86_context ** _stack );
+uint32_t syscall_sched_yield( uint32_t ** stack, x86_context ** _stack );
 
 uint32_t partial_context_switch( x86_context * new_context );
 uint32_t syscall_partial_context_switch( x86_context ** _stack, x86_context * new_context );

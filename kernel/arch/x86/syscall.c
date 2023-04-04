@@ -24,38 +24,38 @@
 	4	sched_yield	
 */
 
-uint32_t syscall_handler( x86_context ** _stack ) {
-	x86_context *stack = *_stack;
+uint32_t syscall_handler( uint32_t * stack, x86_context ** _context ) {
+	x86_context *context = *_context;
 
-	switch( stack->eax ) {
+	switch( context->eax ) {
 		case SYSCALL_READ:
 			//debugf( "[SYSCALL] Read :: fd = %d, buff = 0x%08X, size = %d\n", stack->edi, stack->esi, stack->edx );
-			syscall_read( stack->edi, (void *)stack->esi, stack->edx );
+			syscall_read( context->edi, (void *)context->esi, context->edx );
 			break;
 		case SYSCALL_WRITE:
 			//debugf( "[SYSCALL] Write\n" );
 			break;
 		case SYSCALL_SCHED_YIELD:
 			//debugf( "[SYSCALL] sched_yield\n" );
-			syscall_sched_yield( _stack );
+			syscall_sched_yield( stack, _context );
 			break;
 		case SYSCALL_PARTIAL_CONTEXT_SWITCH:
-			syscall_partial_context_switch( _stack, (x86_context *)stack->edi );
+			syscall_partial_context_switch( _context, (x86_context *)context->edi );
 			break;
 		case SYSCALL_SBRK:
-			syscall_sbrk( stack->edi );
+			syscall_sbrk( context->edi );
 			break;
 		case SYSCALL_ACTTASK:
-			syscall_activate_task( stack->edi );
+			syscall_activate_task( context->edi );
 			break;
 		case SYSCALL_END:
 			syscall_exit_from_wrapper();
 			break;
 		case SYSCALL_EXIT:
-			syscall_exit( stack->edi );
+			syscall_exit( context->edi );
 			break;
 		default:
-			klog( "Undefined syscall number: 0x%04X\n", stack->eax );
+			klog( "Undefined syscall number: 0x%04X\n", context->eax );
 	}
 
 	return SYSCALL_RT_SUCCESS;

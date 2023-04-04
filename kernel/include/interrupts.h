@@ -102,12 +102,12 @@ typedef struct {
 	uint32_t	_esp; // 30
 	
 	uint32_t	err; // 34
-	uint32_t	eip;
-	uint16_t	cs;
+	uint32_t	eip; // 38
+	uint16_t	cs; // 3C
 	uint16_t	cs_padding;
-	uint32_t	eflags;
-	uint32_t  	useresp;
-	uint32_t	ss;
+	uint32_t	eflags; // 40
+	uint32_t  	useresp; // 44
+	uint32_t	ss; //48
 } __attribute__ ((packed)) x86_context;
 
 union x86flags {
@@ -194,7 +194,7 @@ extern void interrupt_0x32( void );
 extern void interrupt_0x99( void );
 
 void interrupts_initalize( void );
-void interrupt_default_handler( unsigned long interrupt_num, unsigned long route_code, x86_context ** _stack );
+void interrupt_default_handler( uint32_t *stack, uint32_t interrupt_num, uint32_t route_code, x86_context ** _stack );
 void load_idtr( void );
 void add_interrupt( int number, void (*handler)(), uint32_t dpl );
 void load_exceptions();

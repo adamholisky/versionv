@@ -98,13 +98,13 @@ void interrupts_initalize( void ) {
 
 /* #pragma GCC push_options
 #pragma GCC optimize ("O0") */
-void interrupt_default_handler( unsigned long interrupt_num, unsigned long route_code, x86_context ** _stack ) {
+void interrupt_default_handler( uint32_t *stack, uint32_t interrupt_num, uint32_t route_code, x86_context ** _context ) {
 	task *p;
-	x86_context * stack = *_stack;
-	uint32_t * uint32_stack_pointer = (uint32_t *)*_stack;
+	x86_context * context = *_context;
+	uint32_t * uint32_stack_pointer = (uint32_t *)*_context;
 	uint32_t fault_addr = 0;
-	uint32_t corrected_err = stack->err;
-	uint32_t corrected_eip = stack->eip;
+	uint32_t corrected_err = context->err;
+	uint32_t corrected_eip = context->eip;
 	page_fault_err *pf_err = NULL;
 	bool error_code_present = false;
 	bool allow_return = false;
@@ -161,13 +161,13 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				debugf( "\n" );
 				klog( "Exception: EXCEPTION_PAGE_FAULT\n");
 				error_code_present = true;
-				klog( "    %s() @ 0x%08X\n", kdebug_get_function_at( stack->eip ), stack->eip );
+				klog( "    %s() @ 0x%08X\n", kdebug_get_function_at( context->eip ), context->eip );
 
 				//asm volatile("movL %%cr2,%0" :"=m"(fault_addr));
 				fault_addr = get_cr2();
 				klog( "    Fault address: 0x%08X\n", fault_addr );
 
-				pf_err = (page_fault_err *)&stack->err;
+				pf_err = (page_fault_err *)&context->err;
 				klog( "    Flags present:" );
 				if( pf_err->present ) { debugf( " present "); }
 				if( pf_err->write ) { debugf( " write "); }
@@ -241,15 +241,15 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
         }
 
 		if( !error_code_present ) {
-			corrected_eip = stack->err;
+			corrected_eip = context->err;
 			corrected_err = 0;
 		}
 
 		klog( "    current_task: 0x%X\n", get_current_task_id() );
-		klog( "    eax:  0x%08X  ebx:  0x%08X  ecx:  0x%08X  edx:  0x%08X\n", stack->eax, stack->ebx, stack->ecx, stack->edx );
-		klog( "    esp:  0x%08X  ebp:  0x%08X  esi:  0x%08X  edi:  0x%08X\n", stack->esp, stack->ebp, stack->esi, stack->edi );
-		klog( "    ds:   0x%04X  es:   0x%04X  fs:   0x%04X  gs:   0x%04X\n", stack->ds, stack->es, stack->fs, stack->gs );
-		klog( "    esp:  0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", stack->_esp, stack->cs, stack->eflags, corrected_err);
+		klog( "    eax:  0x%08X  ebx:  0x%08X  ecx:  0x%08X  edx:  0x%08X\n", context->eax, context->ebx, context->ecx, context->edx );
+		klog( "    esp:  0x%08X  ebp:  0x%08X  esi:  0x%08X  edi:  0x%08X\n", context->esp, context->ebp, context->esi, context->edi );
+		klog( "    ds:   0x%04X  es:   0x%04X  fs:   0x%04X  gs:   0x%04X\n", context->ds, context->es, context->fs, context->gs );
+		klog( "    esp:  0x%08X  cs:   0x%04X  ef:   0x%08X  err:  0x%08X\n", context->_esp, context->cs, context->eflags, corrected_err);
 		klog( "    eip:  0x%08X\n", corrected_eip );
 
 		stackframe *frame;
@@ -313,7 +313,7 @@ void interrupt_default_handler( unsigned long interrupt_num, unsigned long route
 				debugf( "-\n" );
 				break;
 			case 0x99:
-				syscall_handler( _stack );
+				syscall_handler( stack, _context );
 				break;
 		}
 	}

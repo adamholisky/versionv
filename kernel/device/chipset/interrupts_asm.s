@@ -22,8 +22,10 @@ interrupt_\interrupt_number :
 						push %eax
 							mov $\interrupt_number, %eax
 							push %eax /* Int num */
+							push %esp
 								cld
 								call interrupt_default_handler
+							pop %esp
 							pop %eax
 						pop %eax
 					pop %esp
@@ -59,8 +61,10 @@ interrupt_\interrupt_number :
 						mov $\interrupt_number, %eax
 						
 						push %eax
+						push %esp
 							cld
 							call interrupt_default_handler
+						pop %esp
 						pop %eax
 					pop %eax
 				add $8, %esp
