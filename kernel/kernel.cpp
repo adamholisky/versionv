@@ -76,7 +76,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	task_check();
 	
-	kshell_run();
+//	kshell_run();
 
 	if( TRIGGER_DIVIDE_BY_ZERO ) {
 		asm volatile( 

@@ -10,6 +10,9 @@ extern "C" {
 #include "memory.h"
 #include "elf.h"
 
+#define TASK_A_CHECK_NUM 37
+#define TASK_B_CHECK_NUM 42
+
 #define TASK_MAX 255
 
 #define TASK_ID_INVALID -1

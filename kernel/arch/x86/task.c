@@ -11,6 +11,9 @@ uint32_t task_last;
 uint32_t task_switch_counter;
 uint32_t process_switch_counter;
 
+int32_t task_a_check_int;
+int32_t task_b_check_int;
+
 task tasks[ TASK_MAX ];
 
 extern void save_context( x86_context *old_context );
@@ -31,6 +34,9 @@ void task_initalize( void ) {
 
 	task_current = 0;
 	task_last = 0;
+	
+	task_a_check_int = -1;
+	task_b_check_int = -1;
 
 	tasks[ TASK_ID_KERNEL ].id = TASK_ID_KERNEL;
 	tasks[ TASK_ID_KERNEL ].type = TASK_TYPE_PROCESS;
@@ -126,7 +132,7 @@ int32_t task_add( task *t ) {
 	tasks[i].saved_esp = stack_setup - 14;
 
 	for( int s = 0; s < 16; s++ ) {
-		klog( "stack_setup[%X]: 0x%X\n", stack_setup - s, *(stack_setup - s) );
+		//klog( "stack_setup[%X]: 0x%X\n", stack_setup - s, *(stack_setup - s) );
 	}
 
 
@@ -437,6 +443,8 @@ void task_check( void ) {
 	task task_a;
 	task task_b;
 
+	bool task_check_passed = false;
+
 	task_a.entry = &task_check_a;
 	task_a.stack_base = kmalloc( 16 * 1024 );
 	task_a.stack_top = task_a.stack_base + (16 * 1024);
@@ -456,25 +464,27 @@ void task_check( void ) {
 	tasks[task_a_id].status = TASK_STATUS_INACTIVE;
 	tasks[task_b_id].status = TASK_STATUS_INACTIVE;
 
-	db1();
-
-	//task_initalize_and_run( task_a_id );
-	//task_initalize_and_run( task_b_id );
-
-	db2();
-
 	sched_yield();
 
-	do {
-		printf( "C" );
+	tasks[task_a_id].status = TASK_STATUS_INVALID;
+	tasks[task_b_id].status = TASK_STATUS_INVALID;
 
-		sched_yield();
-	} while( 1 );
+	if( task_a_check_int == TASK_A_CHECK_NUM ) {
+		if( task_b_check_int == TASK_B_CHECK_NUM ) {
+			task_check_passed = true;
+		}
+	}
+
+	if( task_check_passed == true ) {
+		klog( "Passed.\n" );
+	} else {
+		klog( "Failed.\n" );
+	}
 }
 
 void task_check_a( void ) {	
 	do {
-		printf( "A" );
+		task_a_check_int = TASK_A_CHECK_NUM;
 
 		sched_yield();
 	} while( 1 );
@@ -482,7 +492,7 @@ void task_check_a( void ) {
 
 void task_check_b( void ) {
 	do {
-		printf( "B" );
+		task_b_check_int = TASK_B_CHECK_NUM;
 
 		sched_yield();
 	} while( 1 );
