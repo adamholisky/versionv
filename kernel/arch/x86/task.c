@@ -81,6 +81,7 @@ int32_t task_add( task *t ) {
 	tasks[i].str_table = t->str_table;
 	tasks[i].raw_data = t->raw_data;
 	tasks[i].num_syms = t->num_syms;
+	strcpy( tasks[i].name, t->name );
 
 	tasks[i].context.gs = 0x10;
 	tasks[i].context.gs_padding = 0;
@@ -168,6 +169,21 @@ int32_t task_add( task *t ) {
 
 	//klog( "TID Returing: %d\n", i );
 	return i;
+}
+
+task * switch_task_to( uint32_t task_id ) {
+	task * ret_val = NULL;
+
+	if( tasks[task_current].status == TASK_STATUS_ACTIVE ) {
+		tasks[task_current].status = TASK_STATUS_INACTIVE;
+	}
+
+	tasks[task_id].status = TASK_STATUS_ACTIVE;
+	task_current = task_id;
+
+	ret_val = &tasks[task_id];
+
+	return ret_val;
 }
 
 task * switch_next_task( void ) {
@@ -260,7 +276,7 @@ void task_end_from_wrapper( void ) {
 }
 
 void task_exit( void ) {
-	tasks[task_current].status = TASK_STATUS_MODHACK;
+	tasks[task_current].status = TASK_STATUS_INVALID;
 
 	// unload memory, etc...
 
@@ -350,6 +366,8 @@ char * task_type_to_string( int32_t type ) {
 			return "MODULE ";
 		case TASK_TYPE_PROCESS:
 			return "PROCESS";
+		case TASK_TYPE_KPROCESS:
+			return "KPROCESS";
 	}
 
 	return "";
@@ -448,18 +466,17 @@ void task_check( void ) {
 	task_a.entry = &task_check_a;
 	task_a.stack_base = kmalloc( 16 * 1024 );
 	task_a.stack_top = task_a.stack_base + (16 * 1024);
+	task_a.type = TASK_TYPE_PROCESS;
+	strcpy( task_a.name, "task_check_a" );
 	
 	task_b.entry = &task_check_b;
 	task_b.stack_base = kmalloc( 16 * 1024 );
 	task_b.stack_top = task_b.stack_base + (16 * 1024);
+	task_b.type = TASK_TYPE_PROCESS;
+	strcpy( task_b.name, "task_check_b" );
 
-	klog( "Stack base: 0x%08X\n", task_a.stack_base );
-
-	klog( "Adding\n" );
 	int task_a_id = task_add( &task_a );
 	int task_b_id = task_add( &task_b );
-
-	klog( "child id: %X\n", task_a_id );
 
 	tasks[task_a_id].status = TASK_STATUS_INACTIVE;
 	tasks[task_b_id].status = TASK_STATUS_INACTIVE;
@@ -480,6 +497,29 @@ void task_check( void ) {
 	} else {
 		klog( "Failed.\n" );
 	}
+}
+
+/** 
+ * Execute a kernel function as a new process
+*/
+uint32_t kexec( char * task_name, uint32_t * addr, const char *argv[] ) {
+	klog( "Enter\n" );
+
+	task *t = kmalloc( sizeof( task ) );
+	uint32_t task_id;
+
+	t->entry = addr;
+	t->stack_base = kmalloc( 16 * 1024 );
+	t->stack_top = t->stack_base + ( 16 * 1024 );
+	t->type = TASK_TYPE_KPROCESS;
+	strcpy( t->name, task_name );
+
+	task_id = task_add( t );
+
+	klog( "Yielding\n" );
+	sched_yield_to( task_id );
+
+	klog( "Exit\n" );
 }
 
 void task_check_a( void ) {	

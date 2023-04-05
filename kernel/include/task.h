@@ -23,6 +23,7 @@ extern "C" {
 #define TASK_TYPE_THREAD  1
 #define TASK_TYPE_SERVICE 2
 #define TASK_TYPE_MODULE  3
+#define TASK_TYPE_KPROCESS 4
 
 #define TASK_STATUS_INVALID -1
 #define TASK_STATUS_INACTIVE 0
@@ -68,6 +69,7 @@ typedef struct {
 void task_initalize( void );
 int32_t task_add( task *t );
 task * switch_next_task( void );
+task * switch_task_to( uint32_t task_id );
 task * get_current_task( void );
 int32_t get_current_task_id( void );
 void task_set_name( int32_t task_id, char * n );
@@ -90,6 +92,7 @@ void test_task_call( void );
 void task_check( void );
 void task_check_a( void );
 void task_check_b( void );
+uint32_t kexec( char * task_name, uint32_t * addr, const char *argv[] );
 
 #ifdef __cplusplus
 }

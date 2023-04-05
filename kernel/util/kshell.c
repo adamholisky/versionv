@@ -16,6 +16,8 @@ char* dir_bin;
 char* dir_usr_bin;
 int line_pos;
 
+void kshell_ps( void );
+
 void kshell_get_line( void ) {
 	char c = ' ';
 	bool process_keypress = true;
@@ -88,7 +90,8 @@ void kshell_process_line( void ) {
 	}
 
 	if( strcmp( args[0], "ps" ) == 0 ) {
-		kshell_ps();
+		//kshell_ps();
+		kexec( "ps", kshell_ps, NULL );
 	}
 
 	/* if( strcmp( args[0], "ls" ) == 0 ) {
@@ -128,16 +131,7 @@ void kshell_process_line( void ) {
 }
 
 void kshell_run( void ) {
-
-	setup_test_task();
-
-	kshell_test_fork();
-
-	kshell_ps();
-
-	sched_yield();
-
-	kshell_ps();
+	kexec( "ps", kshell_ps, NULL );
 
 	while( true ) {
 		printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );
@@ -170,6 +164,8 @@ void kshell_ps( void ) {
 			//kdebug_peek_at( context );
 		}
 	}
+
+	task_exit();
 }
 
 void kshell_test_fork( void  ) {

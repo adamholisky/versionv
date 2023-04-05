@@ -84,6 +84,8 @@ interrupt_\interrupt_number :
 interrupt_0x99 :
 	cmp $0x4, %eax
 	je sched_yield_asm
+	cmp $0xA, %eax
+	je sched_yield_to_asm
 	push $0xFEEEFEEE
 		push %esp
 			pushal
@@ -133,6 +135,38 @@ sched_yield_asm:
 			mov %esp, 0xC(%eax)
 			call switch_next_task
 			mov 0xC(%eax), %esp
+		pop %gs
+		pop %fs 
+		pop %es 
+		pop %ds
+	pop %edi
+	pop %esi
+	pop %ebp
+	pop %edx
+	pop %ecx
+	pop %ebx
+	pop %eax
+
+	iret
+
+sched_yield_to_asm:
+	push %eax
+	push %ebx
+	push %ecx
+	push %edx
+	push %ebp
+	push %esi
+	push %edi
+		push %ds
+		push %es
+		push %fs
+		push %gs 
+			call get_current_task
+			mov %esp, 0xC(%eax)
+			push %edi
+				call switch_task_to
+				mov 0xC(%eax), %esp
+			# add $0x4, %esp
 		pop %gs
 		pop %fs 
 		pop %es 

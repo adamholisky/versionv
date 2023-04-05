@@ -36,8 +36,10 @@ uint32_t syscall_handler( uint32_t * stack, x86_context ** _context ) {
 			//debugf( "[SYSCALL] Write\n" );
 			break;
 		case SYSCALL_SCHED_YIELD:
-			//debugf( "[SYSCALL] sched_yield\n" );
-			syscall_sched_yield( stack, _context );
+			// This should never be hit, handled prior to being passed to handler
+			break;
+		case SYSCALL_SCHED_YIELD_TO:
+			// This should never be hit, handled prior to being passed to handler
 			break;
 		case SYSCALL_PARTIAL_CONTEXT_SWITCH:
 			syscall_partial_context_switch( _context, (x86_context *)context->edi );
