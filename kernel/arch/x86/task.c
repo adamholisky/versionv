@@ -107,15 +107,26 @@ int32_t task_add( task *t ) {
 	// Load in the stack and set the context up so it handles the first schedule entry correctly
 	memcpy( tasks[i].stack_top - sizeof( x86_context ) - 5, &tasks[i].context, sizeof( x86_context ) );
 	uint32_t * stack_setup = tasks[i].stack_top;
-	stack_setup = &stack_setup[0];
-	*(stack_setup - 1) = 0x99;
-	*(stack_setup - 2) = 0x2;
-	*(stack_setup - 3) = &stack_setup[4];
-	*(stack_setup - 4) = &stack_setup[5];
-	*(stack_setup - 5) = 0x00000010;
+	*(stack_setup - 0) = 0xc0010000;
+	*(stack_setup - 1) = 0x202;
+	*(stack_setup - 2) = 0x8;
+	*(stack_setup - 3) = tasks[i].entry;
+	*(stack_setup - 4) = 0x0;
+	*(stack_setup - 5) = 0x0;
+	*(stack_setup - 6) = 0x0;
+	*(stack_setup - 7) = 0x0;
+	*(stack_setup - 8) = 0x0;
+	*(stack_setup - 9) = 0x0;
+	*(stack_setup - 10) = 0x0;
+	*(stack_setup - 11) = 0x10;
+	*(stack_setup - 12) = 0x10;
+	*(stack_setup - 13) = 0x10;
+	*(stack_setup - 14) = 0x10;
+	
+	tasks[i].saved_esp = stack_setup - 14;
 
-	for( int s = 0; s < 10; s++ ) {
-		klog( "stack_setup[%i]: 0x%X\n", s, stack_setup[s] );
+	for( int s = 0; s < 16; s++ ) {
+		klog( "stack_setup[%X]: 0x%X\n", stack_setup - s, *(stack_setup - s) );
 	}
 
 
@@ -198,12 +209,12 @@ task * switch_next_task( void ) {
 	task_current = task_next;
 	tasks[task_next].status = TASK_STATUS_ACTIVE;
 
-	task_switch_counter++;
+	/* task_switch_counter++;
 
  	if( task_switch_counter > 6 ) {
 		klog( "END. Processes switched over 100,000 times.\n");
 		outportb( 0xF4, 0x00 );
-	} 
+	}  */
 
 	//klog( "task current: %d\n", task_current );
 
@@ -455,7 +466,7 @@ void task_check( void ) {
 	sched_yield();
 
 	do {
-		printf( "C\n" );
+		printf( "C" );
 
 		sched_yield();
 	} while( 1 );
@@ -463,7 +474,7 @@ void task_check( void ) {
 
 void task_check_a( void ) {	
 	do {
-		printf( "A\n" );
+		printf( "A" );
 
 		sched_yield();
 	} while( 1 );
@@ -471,7 +482,7 @@ void task_check_a( void ) {
 
 void task_check_b( void ) {
 	do {
-		printf( "B\n" );
+		printf( "B" );
 
 		sched_yield();
 	} while( 1 );

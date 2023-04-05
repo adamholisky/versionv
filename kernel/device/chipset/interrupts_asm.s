@@ -1,6 +1,7 @@
 .align 4
 .section .text
 .extern interrupt_default_handler
+.extern get_current_task
 
 /* Interrupts */
 .macro interrupt_handler interrupt_number
@@ -79,6 +80,73 @@ interrupt_\interrupt_number :
 	iret
 .endm
 
+.global interrupt_0x99
+interrupt_0x99 :
+	cmp $0x4, %eax
+	je sched_yield_asm
+	push $0xFEEEFEEE
+		push %esp
+			pushal
+				push %ds
+				push %es
+				push %fs
+				push %gs
+					push %esp /* x86_context struct on the stack */
+					push %esp /* Route */
+						mov $0x10, %eax
+						mov %eax, %ds
+						mov %eax, %es
+						mov $0x2, %eax
+						push %eax
+							mov $0x99, %eax
+							push %eax /* Int num */
+							push %esp
+								cld
+								call interrupt_default_handler
+							pop %esp
+							pop %eax
+						pop %eax
+					pop %esp
+					pop %esp
+				pop %gs
+				pop %fs
+				pop %es
+				pop %ds
+			popal
+		 pop %esp
+	add $4, %esp
+    iret
+
+sched_yield_asm:
+	push %eax
+	push %ebx
+	push %ecx
+	push %edx
+	push %ebp
+	push %esi
+	push %edi
+		push %ds
+		push %es
+		push %fs
+		push %gs 
+			call get_current_task
+			mov %esp, 0xC(%eax)
+			call switch_next_task
+			mov 0xC(%eax), %esp
+		pop %gs
+		pop %fs 
+		pop %es 
+		pop %ds
+	pop %edi
+	pop %esi
+	pop %ebp
+	pop %edx
+	pop %ecx
+	pop %ebx
+	pop %eax
+
+	iret
+
 interrupt_handler 0x20
 interrupt_handler 0x21
 interrupt_handler 0x22
@@ -98,7 +166,6 @@ interrupt_handler 0x2F
 interrupt_handler 0x30
 interrupt_handler 0x31
 interrupt_handler 0x32
-interrupt_handler 0x99
 
 exception_handler 0
 exception_handler 1

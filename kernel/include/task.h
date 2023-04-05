@@ -30,16 +30,11 @@ extern "C" {
 #define TASK_VIRT_HEAP_BASE 0x40000000
 
 typedef struct {
-	int32_t id;
-	int32_t type;
-	char name[25];
+	int32_t id; //0
+	int32_t type; //4
+	int32_t status; //8
+	uint32_t saved_esp; //C
 
-	int32_t status;
-
-	x86_context	context;
-	x86_context * context_at_interrupt;
-	uint32_t saved_esp;
-	
 	int32_t num_syms;
  	Elf32_Sym * sym_table;
 	uint8_t * str_table;
@@ -52,13 +47,17 @@ typedef struct {
 	void * stack_base;
 	void * stack_top;
 	void * entry;
-
 	page_directory_entry * code_page_table;
 	page_directory_entry * data_page_table;
 
 	uint32_t start_time;
 	uint32_t total_share_time;
 	uint32_t share_time_start;
+
+	x86_context * context_at_interrupt;
+	x86_context	context;
+
+	char name[25];
 } task;
 
 
