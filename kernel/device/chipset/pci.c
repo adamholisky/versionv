@@ -59,10 +59,8 @@ void pci_initalize( void ) {
 
 		if( d->class_code == 0x06 ) continue;
 
-		#ifdef kdebug_pci
 		k_log( sys_pci, level_info, "[%d] Class: %02X   Subclass: %02X   Prog IF: %02X   Revision: %02X   Vendor: %04X   Device ID: %04X",
 			     i, d->class_code, d->subclass, d->prog_if, d->revision_id, d->vendor_id, d->device_id );
-		#endif
 	}
 
 	log_entry_exit();

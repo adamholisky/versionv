@@ -117,7 +117,7 @@ int32_t task_add( task *t ) {
 	*(stack_setup - 0) = 0xc0010000;
 	*(stack_setup - 1) = 0x202;
 	*(stack_setup - 2) = 0x8;
-	*(stack_setup - 3) = tasks[i].entry;
+	*(stack_setup - 3) = (uint32_t)tasks[i].entry;
 	*(stack_setup - 4) = 0x0;
 	*(stack_setup - 5) = 0x0;
 	*(stack_setup - 6) = 0x0;
@@ -130,7 +130,7 @@ int32_t task_add( task *t ) {
 	*(stack_setup - 13) = 0x10;
 	*(stack_setup - 14) = 0x10;
 	
-	tasks[i].saved_esp = stack_setup - 14;
+	tasks[i].saved_esp = (uint32_t)stack_setup - (14 * 4);
 
 	for( int s = 0; s < 16; s++ ) {
 		//klog( "stack_setup[%X]: 0x%X\n", stack_setup - s, *(stack_setup - s) );

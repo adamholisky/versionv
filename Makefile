@@ -20,9 +20,7 @@ CPP = /usr/local/osdev/bin/i686-elf-g++
 ASM = /usr/local/osdev/bin/i686-elf-as
 DEFINES = -DPAGING_PAE \
 		  -DGRAPHICS_OFF \
-		  -DBITS_32 \
-		  #-DDF_COM4_ONLY
-#		  -DGRAPHICS_ON
+		  -DBITS_32 
 CFLAGS = $(DEFINES) -Wno-write-strings -fcompare-debug-second -ffreestanding -fno-omit-frame-pointer -O0 -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/../libcvv/libc/include
 CFLAGS_END = -nostdlib -lgcc
 AFLAGS = $(CFLAGS)

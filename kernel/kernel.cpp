@@ -48,8 +48,6 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 		DF_COM4_ONLY = true;
 	}
 
-	GRAPHICS_ACTIVE = false;
-
 	multiboot_echo_to_serial();
 	memory_initalize();
 	kdebug_initalize();

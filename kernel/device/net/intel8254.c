@@ -51,7 +51,7 @@ void intel8254_initalize( void ) {
 	klog( "Bar4: 0x%08X\n", device->bar4 );
 	klog( "Bar5: 0x%08X\n", device->bar5 );
 
-	intel8254_io_port = device->bar1;
+	intel8254_io_port = (uint32_t *)device->bar1;
 
 	uint32_t reg_eerd = 0x0014;
 
@@ -72,7 +72,7 @@ void intel8254_initalize( void ) {
 	klog( "data: 0x%04X\n", data );
 	debugf_bit_array( data );
 
-	uint32_t *dev = page_allocate_and_map( 0xFEA00000 );
+	uint32_t *dev = page_allocate_and_map( (uint32_t *)0xFEA00000 );
 	
 	uint32_t *addr_status = (uint32_t *)((uint32_t)dev + (0xFEB80000 - 0xFEA00000) + 0x8);
 	dbA();

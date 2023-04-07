@@ -101,7 +101,7 @@ void memory_initalize( void ) {
 
 	asm_refresh_cr3();
 
-	global_page_data_tables = (page_directory_entry *)page_allocate( 1 );
+	global_page_data_tables = (uint64_t *)(page_directory_entry *)page_allocate( 1 );
 
 	#ifdef kdebug_memory_pages
 	klog( "0: 0x%08X\n", global_page_data_directories[0] );
@@ -113,7 +113,7 @@ void memory_initalize( void ) {
 
 	dump_active_pt();
 
-	mem_virt_to_phys( mbh );
+	mem_virt_to_phys( (uint32_t *)mbh );
 
 	echo_page( (page_directory_entry *)&kernel_page_data_tables[128] );
 

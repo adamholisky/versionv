@@ -8,6 +8,8 @@
 #include <kmalloc.h>
 #include <kapps.h>
 #include <task.h>
+#include <kshell.h>
+#include <syscall.h>
 
 char line[256];
 char jail_env[256];
@@ -91,7 +93,7 @@ void kshell_process_line( void ) {
 
 	if( strcmp( args[0], "ps" ) == 0 ) {
 		//kshell_ps();
-		kexec( "ps", kshell_ps, NULL );
+		kexec( "ps",(uint32_t *)kshell_ps, NULL );
 	}
 
 	/* if( strcmp( args[0], "ls" ) == 0 ) {
@@ -131,7 +133,10 @@ void kshell_process_line( void ) {
 }
 
 void kshell_run( void ) {
-	kexec( "ps", kshell_ps, NULL );
+	kexec( "ps", (uint32_t *)kshell_ps, NULL );
+
+	printf( "Shutting down gracefully.\n" );
+	kshell_shutdown();
 
 	while( true ) {
 		printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );
