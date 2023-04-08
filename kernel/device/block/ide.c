@@ -65,7 +65,7 @@ typedef volatile struct tagHBA_PORT
 	uint32_t fbs;		// 0x40, FIS-based switch control
 	uint32_t rsv1[11];	// 0x44 ~ 0x6F, Reserved
 	uint32_t vendor[4];	// 0x70 ~ 0x7F, vendor specific
-} HBA_PORT;
+} __attribute__ ((packed)) HBA_PORT;
 
 typedef volatile struct tagHBA_MEM
 {
@@ -90,7 +90,7 @@ typedef volatile struct tagHBA_MEM
  
 	// 0x100 - 0x10FF, Port control registers
 	HBA_PORT	ports[1];	// 1 ~ 32
-} HBA_MEM;
+} __attribute__ ((packed)) HBA_MEM;
  
 typedef struct tagHBA_CMD_HEADER
 {
@@ -118,7 +118,7 @@ typedef struct tagHBA_CMD_HEADER
  
 	// DW4 - 7
 	uint32_t rsv1[4];	// Reserved
-} HBA_CMD_HEADER;
+} __attribute__ ((packed)) HBA_CMD_HEADER;
 
 typedef struct tagFIS_REG_H2D
 {
@@ -152,7 +152,7 @@ typedef struct tagFIS_REG_H2D
  
 	// DWORD 4
 	uint8_t  rsv1[4];	// Reserved
-} FIS_REG_H2D;
+} __attribute__ ((packed)) FIS_REG_H2D;
 
 typedef struct tagHBA_PRDT_ENTRY
 {
@@ -164,7 +164,7 @@ typedef struct tagHBA_PRDT_ENTRY
 	uint32_t dbc:22;		// Byte count, 4M max
 	uint32_t rsv1:9;		// Reserved
 	uint32_t i:1;		// Interrupt on completion
-} HBA_PRDT_ENTRY;
+} __attribute__ ((packed)) HBA_PRDT_ENTRY;
 
 typedef struct tagHBA_CMD_TBL
 {
@@ -179,7 +179,7 @@ typedef struct tagHBA_CMD_TBL
  
 	// 0x80
 	HBA_PRDT_ENTRY	prdt_entry[1];	// Physical region descriptor table entries, 0 ~ 65535
-} HBA_CMD_TBL;
+} __attribute__ ((packed)) HBA_CMD_TBL;
  
 
 
@@ -212,12 +212,19 @@ void ide_initalize( void ) {
 	d->cache_disabled = 1;
 	asm_refresh_cr3();
 
-    port_rebase( &abar->ports[0], 0, port_page );
+	klog( "port page: %X\n", port_page );
+    port_rebase( &abar->ports[0], 0, port_page);
 
-    uint16_t *buff = malloc( 1024 );
-    bool read_result = read_ahci( &abar->ports[0], 0,0,1024,buff);
+    uint16_t *buff = page_allocate(2);
+    bool read_result = read_ahci( &abar->ports[0], 0,0,4,buff - 0xD0000000 );
 
-    klog( "Read_result: %d\b", read_result );
+    klog( "Read_result: %d\n", read_result );
+	
+	printf( "Buffer: \n" );
+	
+	for( int b = 0; b < 512; b++ ) {
+		printf( "%X ", buff[b]);
+	}
 
     log_entry_exit();
 }
@@ -294,27 +301,27 @@ void port_rebase(HBA_PORT *port, int portno,uint32_t addr_base)
 	// Command list entry size = 32
 	// Command list entry maxim count = 32
 	// Command list maxim size = 32*32 = 1K per port
-	port->clb = addr_base + (portno<<10);
+	port->clb = addr_base + (portno<<10) - 0xD0000000;
 	port->clbu = 0;
-	memset((void*)(port->clb), 0, 1024);
+	memset((void*)(port->clb + 0xD0000000), 0, 1024);
  
 	// FIS offset: 32K+256*portno
 	// FIS entry size = 256 bytes per port
-	port->fb = addr_base + (32<<10) + (portno<<8);
+	port->fb = addr_base + (32<<10) + (portno<<8) - 0xD0000000;
 	port->fbu = 0;
-	memset((void*)(port->fb), 0, 256);
+	memset((void*)(port->fb + 0xD0000000), 0, 256);
  
 	// Command table offset: 40K + 8K*portno
 	// Command table size = 256*32 = 8K per port
-	HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*)(port->clb);
+	HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*)(port->clb + 0xD0000000 );
 	for (int i=0; i<32; i++)
 	{
 		cmdheader[i].prdtl = 8;	// 8 prdt entries per command table
 					// 256 bytes per command table, 64+16+48+16*8
 		// Command table offset: 40K + 8K*portno + cmdheader_index*256
-		cmdheader[i].ctba = addr_base + (40<<10) + (portno<<13) + (i<<8);
+		cmdheader[i].ctba = (addr_base - 0xD0000000) + (40<<10) + (portno<<13) + (i<<8);
 		cmdheader[i].ctbau = 0;
-		memset((void*)cmdheader[i].ctba, 0, 256);
+		memset((void*)(cmdheader[i].ctba + 0xD0000000), 0, 256);
 	}
  
 	start_cmd(port);	// Start command engine
@@ -364,7 +371,7 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
     klog( "clbu: %X\n", port->clbu );
     klog( "clb:  %X\n", port->clb );
  
-    HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*)(port->clb);
+    HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*)(port->clb + 0xD0000000);
     klog( "cmdheader: %X\n", cmdheader );
 
 	cmdheader += slot;
@@ -372,7 +379,9 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 	cmdheader->w = 0;		// Read from device
 	cmdheader->prdtl = (uint16_t)((count-1)>>4) + 1;	// PRDT entries count
  
-	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*)(cmdheader->ctba);
+	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*)(cmdheader->ctba + 0xD0000000);
+	klog( "cmdtable: %X\n", cmdtbl );
+
 	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) +
  		(cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
 

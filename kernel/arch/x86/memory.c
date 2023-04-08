@@ -96,12 +96,13 @@ void memory_initalize( void ) {
 	klog( "K Page Data Table loc:     0x%08X\n", &kernel_page_data_tables );
 
 	// Set the contents of the kernel's initial table entry
-	memset( kernel_page_data_tables, 0, 512 );
+	memset( kernel_page_data_tables, 0, 512*8 );
 	kernel_page_data_tables[0] = 0x83;
 
 	asm_refresh_cr3();
 
 	global_page_data_tables = (uint64_t *)(page_directory_entry *)page_allocate( 1 );
+	memset( global_page_data_tables, 0, 512 * 3 * 8 );
 
 	#ifdef kdebug_memory_pages
 	klog( "0: 0x%08X\n", global_page_data_directories[0] );
@@ -155,6 +156,30 @@ void memory_initalize( void ) {
 		kpanic( "0x0 and pmem are not equal!\n" );
 	}
 	// End sanity check
+
+	// Test identity mapping
+
+	klog( "0: 0x%08X\n", global_page_data_directories[0] );
+	klog( "1: 0x%08X\n", global_page_data_directories[1] );
+	klog( "2: 0x%08X\n", global_page_data_directories[2] );
+	klog( "3: 0x%08X\n", global_page_data_directories[3] );
+
+	dump_active_pt();
+
+	uint64_t *apd = &global_page_data_tables;
+	for( int a = 0; a < 512; a++ ) {
+		if( apd[a] != 0 ) {
+			klog( "pd[0].page[%d] = %08X %08X\n", a, apd[a]>>32, apd[a] );
+		}
+	}
+
+	uint32_t * ptr_im = page_map( 0x02800000, 0x02800000 );
+	dump_active_pt();
+	//*((uint32_t *)(0x00C00000)) = 0xABBA0000;
+	*ptr_im = 0xADA01111;
+	klog( "*ptr_im: 0x%08X\n", *ptr_im );
+
+	// End test
  
 	log_entry_exit();
 }
@@ -314,7 +339,14 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	uint32_t pdpt_index = (uint32_t)virt_addr / 0x40000000; // 0x40000000;
 	uint32_t pd_index = ((uint32_t)virt_addr - (pdpt_index * 0x40000000)) / PAGE_SIZE_IN_BYTES; // PAGE_SIZE_IN_BYTES
 	uint64_t *pdpt_uint = ((uint64_t *)&global_page_data_directories) + pdpt_index;
-	uint64_t *pd_uint = (uint64_t *)&kernel_page_data_tables + pd_index;
+
+	int pt_index_add = pdpt_index * 512;
+	uint64_t *pd_uint = (uint64_t *)&global_page_data_tables + pd_index + pt_index_add;
+	
+	if( virt_addr >= 0xC0000000 ) {
+		pd_uint = (uint64_t *)&kernel_page_data_tables + pd_index;
+	}
+	
 
 	//kdebug_peek_at( pdpt_uint );
 
@@ -326,16 +358,14 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 		*pd_uint = 0x00000000FFFFFFFF & *pd_uint;
 	}
 
-	/* debugf( "virt_addr:          0x%08X\n", virt_addr );
+	debugf( "virt_addr:          0x%08X\n", virt_addr );
 	debugf( "phys_addr:          0x%08X\n", phys_addr );
 	debugf( "  pdpt_index:         0x%08X\n", pdpt_index );
 	debugf( "  pd_index:           0x%08X\n", pd_index );
-	debugf( "  paging_pdpt:        0x%08X\n", &paging_pdpt );
 	debugf( "  PDPT addr:          0x%08X\n", pdpt_uint );
-	debugf( "  paging_pd:          0x%08X\n", &paging_pd );
 	debugf( "  PD addr:            0x%08X\n", pd_uint );
 	debugf( "  PDPT present:       %d\n", test_bit(*pdpt_uint, PTE_BIT_PRESENT) );
-	debugf( "  PD contents:        0x%08X\n", *pd_uint ); */
+	debugf( "  PD contents:        0x%08X\n", *pd_uint ); 
 	
 	asm volatile("invlpg (%0)" ::"r" (pd_uint) : "memory");
 	asm_refresh_cr3(); 	
