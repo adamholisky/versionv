@@ -216,14 +216,25 @@ void ide_initalize( void ) {
     port_rebase( &abar->ports[0], 0, port_page);
 
     uint16_t *buff = page_allocate(2);
-    bool read_result = read_ahci( &abar->ports[0], 0,0,4,buff - 0xD0000000 );
+
+	page_directory_entry *bp = get_page( buff );
+	bp->cache_disabled = 1;
+	bp->write_through = 1;
+	asm_refresh_cr3();
+
+	echo_page( bp );
+
+	klog( "Buff: %X\n", buff );
+	klog( "buff should be: %X\n", bp->address<<21 );
+
+    bool read_result = read_ahci( &abar->ports[0], 0,0,1, bp->address<<21);
 
     klog( "Read_result: %d\n", read_result );
 	
 	printf( "Buffer: \n" );
 	
-	for( int b = 0; b < 512; b++ ) {
-		printf( "%X ", buff[b]);
+	for( int b = 0; b < 256; b++ ) {
+		printf( "%X %X ", ( 0x00FF ) & *(buff + b), ((0xFF00) & *(buff + b))>>8 );
 	}
 
     log_entry_exit();
@@ -370,6 +381,7 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 
     klog( "clbu: %X\n", port->clbu );
     klog( "clb:  %X\n", port->clb );
+	klog( "buf:  %X\n", buf );
  
     HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*)(port->clb + 0xD0000000);
     klog( "cmdheader: %X\n", cmdheader );
@@ -436,11 +448,12 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
  
 	port->ci = 1<<slot;	// Issue command
 
-	klog( "test" );
+	klog( "test\n" );
  
 	// Wait for completion
 	while (1)
 	{
+		printf( "." );
 		// In some longer duration reads, it may be helpful to spin on the DPS bit 
 		// in the PxIS port field as well (1 << 5)
 		if ((port->ci & (1<<slot)) == 0) 
