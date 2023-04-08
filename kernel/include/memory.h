@@ -91,6 +91,7 @@ void echo_page( page_directory_entry *page );
 void dump_active_pt( void );
 uint32_t * get_physical_addr_from_virt( uint32_t * virt );
 uint32_t * mem_virt_to_phys( uint32_t * virt );
+page_directory_entry * get_page( uint32_t * virt );
 
 #endif // __ASSEMBLER__
 

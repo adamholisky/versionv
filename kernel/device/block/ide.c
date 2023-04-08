@@ -191,6 +191,8 @@ void stop_cmd(HBA_PORT *port);
 void start_cmd(HBA_PORT *port);
 void port_rebase(HBA_PORT *port, int portno,uint32_t addr_base);
 
+extern void asm_refresh_cr3( void );
+
 void ide_initalize( void ) {
     log_entry_enter();
 
@@ -205,6 +207,11 @@ void ide_initalize( void ) {
     cmdslots = (abar->cap & 0x0f00)>>8;
 
     uint32_t *port_page = page_allocate(1);
+	page_directory_entry *d = get_page( port_page );
+	d->write_through = 1;
+	d->cache_disabled = 1;
+	asm_refresh_cr3();
+
     port_rebase( &abar->ports[0], 0, port_page );
 
     uint16_t *buff = malloc( 1024 );
@@ -368,6 +375,8 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*)(cmdheader->ctba);
 	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) +
  		(cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
+
+	
  
 	// 8K bytes (16 sectors) per PRDT
     int i;
@@ -402,6 +411,8 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
  
 	cmdfis->countl = count & 0xFF;
 	cmdfis->counth = (count >> 8) & 0xFF;
+
+	
  
 	// The below loop waits until the port is no longer busy before issuing a new command
 	while ((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)) && spin < 1000000)
@@ -415,6 +426,8 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 	}
  
 	port->ci = 1<<slot;	// Issue command
+
+	klog( "test" );
  
 	// Wait for completion
 	while (1)
@@ -429,6 +442,8 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 			return false;
 		}
 	}
+
+	
  
 	// Check again
 	if (port->is & HBA_PxIS_TFES)
@@ -436,6 +451,8 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 		klog("Read disk error\n");
 		return false;
 	}
+
+	
  
 	return true;
 }

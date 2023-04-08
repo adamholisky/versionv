@@ -451,3 +451,25 @@ void memory_test( void ) {
 
 	log_entry_exit();
 }
+
+page_directory_entry * get_page( uint32_t * virt ) {	
+
+	uint32_t dir_index = (uint32_t)virt / PAGE_SIZE_IN_BYTES;
+	uint32_t table_index = dir_index % PAGE_NUM_TABLES;
+	dir_index = dir_index / PAGE_NUM_TABLES;
+	uint32_t mem_offset = (uint32_t)virt - (dir_index * PAGE_DIR_SIZE_IN_BYTES) - (table_index * PAGE_SIZE_IN_BYTES);
+
+	klog( "Dir Index:   0x%X\n", dir_index );
+	klog( "Table Index: 0x%X\n", table_index );
+	klog( "Mem Offset:  0x%X\n", mem_offset );
+
+	uint64_t * pae_pd = ((uint64_t *)&global_page_data_directories) + dir_index;
+	klog ("Dir Present: 0x%X\n", test_bit(*pae_pd, PTE_BIT_PRESENT) );
+	klog ("Dir Address: 0x%X\n", (*pae_pd & 0x000FFFFFFFFFF000) );
+
+	uint64_t *pae_pt = (uint64_t *)( (*pae_pd & 0x000FFFFFFFFFF000) + KERNEL_VIRT_LOAD_BASE) + table_index;
+	klog( "PT Present:  0x%X\n",  test_bit(*pae_pt, PTE_BIT_PRESENT) );
+	klog( "PT RW:       0x%X\n",  *pae_pt );
+
+	return (page_directory_entry *)pae_pt;
+}
