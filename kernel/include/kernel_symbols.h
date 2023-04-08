@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#define DEBUG_SYMBOLS_MAX 1024
+#define DEBUG_SYMBOLS_MAX 2048
 
 class KernelSymbol {
 	public:

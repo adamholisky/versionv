@@ -28,7 +28,9 @@ AFLAGS = $(CFLAGS)
 #Support program and flags
 OBJDUMP = /usr/local/osdev/bin/i686-elf-objdump
 QEMU = qemu-system-i386 
-QEMU_COMMON = 	-drive format=raw,if=ide,file=$(ROOT_DIR)/vv_hd.img \
+QEMU_COMMON = 	-drive id=main_drive,if=none,format=raw,file=$(ROOT_DIR)/vv_hd.img \
+				-device ahci,id=ahci \
+				-device ide-hd,drive=main_drive,bus=ahci.0 \
 				-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
 				-nic user,ipv6=off,model=e1000,mac=52:54:98:76:54:32 \
 				-m 4G \
