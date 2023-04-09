@@ -18,7 +18,7 @@
 #include <uione.h>
 #include <kshell.h>
 #include "intel8254.h"
-#include <ide.h>
+#include <ahci.h>
 
 #define END_IMMEDIATELY
 #define TRIGGER_DIVIDE_BY_ZERO false
@@ -66,9 +66,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	task_initalize();
 	
 	pci_initalize();
-	ide_initalize();
+	ahci_initalize();
 	//intel8254_initalize();
-	//ata_initalize();
 	keyboard_initalize();
 
 	serial_clear_buffer( COM2 );

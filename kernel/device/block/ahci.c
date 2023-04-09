@@ -1,6 +1,6 @@
 #include <kernel.h>
 #include <pci.h>
-#include <ide.h>
+#include <ahci.h>
 #include <stdio.h>
 
 #define	SATA_SIG_ATA	0x00000101	// SATA drive
@@ -193,14 +193,19 @@ void port_rebase(HBA_PORT *port, int portno,uint32_t addr_base);
 
 extern void asm_refresh_cr3( void );
 
-void ide_initalize( void ) {
+uint16_t * global_buffer;
+uint32_t global_buffer_addr;
+uint32_t * global_port_page;
+HBA_MEM * abar;
+
+void ahci_initalize( void ) {
     log_entry_enter();
 
     pci_header * ahci_drive = pci_get_header_by_device_id(0x2922);
 
     uint32_t *dev = page_allocate_and_map( (uint32_t *)0xFEA00000 );
 	uint32_t *abar_raw = (uint32_t *)((uint32_t)dev + (ahci_drive->bar5 - 0xFEA00000));
-    HBA_MEM *abar = (HBA_MEM *)abar_raw;
+    abar = (HBA_MEM *)abar_raw;
 
     probe_port( abar );
 
@@ -215,7 +220,11 @@ void ide_initalize( void ) {
 	klog( "port page: %X\n", port_page );
     port_rebase( &abar->ports[0], 0, port_page);
 
+	global_port_page = port_page;
+
     uint16_t *buff = page_allocate(2);
+	
+	global_buffer = buff;
 
 	page_directory_entry *bp = get_page( buff );
 	bp->cache_disabled = 1;
@@ -223,21 +232,36 @@ void ide_initalize( void ) {
 	asm_refresh_cr3();
 
 	echo_page( bp );
+	global_buffer_addr = bp->address<<21;
 
 	klog( "Buff: %X\n", buff );
-	klog( "buff should be: %X\n", bp->address<<21 );
+	klog( "buff should be: %X\n", global_buffer_addr);
 
-    bool read_result = read_ahci( &abar->ports[0], 0,0,1, bp->address<<21);
+    bool read_result = read_ahci( &abar->ports[0], 0,0,1, (uint16_t *)global_buffer_addr );
 
     klog( "Read_result: %d\n", read_result );
 	
-	printf( "Buffer: \n" );
+	/* printf( "Buffer: \n" );
 	
 	for( int b = 0; b < 256; b++ ) {
 		printf( "%X %X ", ( 0x00FF ) & *(buff + b), ((0xFF00) & *(buff + b))>>8 );
 	}
+ 	*/
 
     log_entry_exit();
+}
+
+bool ahci_read_sector( uint32_t sector, uint32_t *buffer ) {
+	bool read_result = false;
+
+	read_result = read_ahci( &abar->ports[0], sector, 0, 1, (uint16_t *)global_buffer_addr );
+
+	if( !read_result ) {
+		klog( "Read failed. sector = %X\n", sector );
+		return false;
+	}
+
+	memcpy( buffer, global_buffer, 512 );
 }
 
 
@@ -453,7 +477,7 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 	// Wait for completion
 	while (1)
 	{
-		printf( "." );
+		//printf( "." );
 		// In some longer duration reads, it may be helpful to spin on the DPS bit 
 		// in the PxIS port field as well (1 << 5)
 		if ((port->ci & (1<<slot)) == 0) 
