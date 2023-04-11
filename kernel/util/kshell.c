@@ -19,6 +19,7 @@ char* dir_usr_bin;
 int line_pos;
 
 void kshell_ps( void );
+void kshell_test_loaded_file( void );
 
 void kshell_get_line( void ) {
 	char c = ' ';
@@ -133,7 +134,10 @@ void kshell_process_line( void ) {
 }
 
 void kshell_run( void ) {
+	kexec( "test_loaded_file", (uint32_t *)kshell_test_loaded_file, NULL );
 	kexec( "ps", (uint32_t *)kshell_ps, NULL );
+
+
 
 	printf( "Shutting down gracefully.\n" );
 	kshell_shutdown();
@@ -181,4 +185,17 @@ void kshell_test_fork( void  ) {
 	} else {
 		printf( "Child task: %d\n", pid );
 	}
+}
+
+void kshell_test_loaded_file( void ) {
+	log_entry_enter();
+
+	
+
+	uint32_t *mem = page_map( 0xE0000000, 0xE0000000 );
+
+	kdebug_peek_at( mem );
+
+	task_exit();
+	log_entry_exit();
 }

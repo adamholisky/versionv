@@ -33,6 +33,8 @@ QEMU_COMMON = 	-drive id=main_drive,if=none,format=raw,file=$(ROOT_DIR)/vv_hd.im
 				-device ide-hd,drive=main_drive,bus=ahci.0 \
 				-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
 				-nic user,ipv6=off,model=e1000,mac=52:54:98:76:54:32 \
+				-device loader,file=$(ROOT_DIR)/elfdump.txt,addr=0xE0000000,force-raw=on \
+				-device loader,addr=0xE0000000,data=0xADA0ADA1,data-len=4 \
 				-m 4G \
 				-serial null \
 				-serial stdio \
