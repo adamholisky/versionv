@@ -25,6 +25,8 @@ extern "C"
 #define AFS_BLOCK_TYPE_FILE 1
 #define AFS_BLOCK_TYPE_DIRECTORY 2
 
+#define MAX_FD 20
+
 typedef struct {
 	uint32_t	start;			// starting byte of the item
 	uint32_t	name_index;		// string table index
@@ -62,16 +64,17 @@ typedef struct {
 	uint8_t		*base;
 	uint32_t	size;
 	uint32_t	position;
+	char		*name;
 	bool		dirty;
-
 } vv_file;
 
 typedef struct {
-	vv_file *	fd[128];
+	vv_file		fd[MAX_FD];
 	char		working_directory[128];
 	afs_drive *	drive;
 	afs_block_directory * root_dir;
 	afs_string_table * string_table;
+	uint32_t	next_fd;
 } vv_file_internal;
 
 

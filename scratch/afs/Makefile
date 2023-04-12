@@ -6,7 +6,7 @@ run: all
 	./afs
 
 afs: afs.c
-	$(CC) $< -g -o afs
+	$(CC) -O0 $< -g -o afs
 
 clean:
 	rm afs
