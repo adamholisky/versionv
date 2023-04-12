@@ -48,7 +48,8 @@ typedef struct {
 
 typedef struct {
 	uint8_t 	type;			// Type, always AFS_BLOCK_TYPE_FILE
-	uint32_t 	size;			// size of the file
+	uint32_t 	block_size;		// size of the block
+	uint32_t	file_size;		// size of the actual file data
 	uint32_t	name_index;		// string table index
 } afs_file;
 
@@ -60,14 +61,6 @@ typedef struct {
 } afs_block_directory;
 
 typedef struct {
-	vv_file *	fd[128];
-	char		working_directory[128];
-	afs_drive *	drive;
-	afs_block_directory * root_dir;
-	afs_string_table * string_table;
-} vv_file_internal;
-
-typedef struct {
 	uint32_t	fd;
 	uint8_t		*base;
 	uint32_t	size;
@@ -76,7 +69,13 @@ typedef struct {
 
 } vv_file;
 
-#define FILE_VV vv_file
+typedef struct {
+	vv_file *	fd[128];
+	char		working_directory[128];
+	afs_drive *	drive;
+	afs_block_directory * root_dir;
+	afs_string_table * string_table;
+} vv_file_internal;
 
 
 #ifdef __cplusplus

@@ -8,7 +8,8 @@
 #define afsfile "/usr/local/osdev/versions/v/afs.img"
 
 bool afs_format( FILE *fp, uint32_t size );
-FILE_VV * afs_fopen( const char * filename, const char * mode );
+
+/* FILE_VV * afs_fopen( const char * filename, const char * mode );
 int afs_fclose( FILE_VV *fp );
 
 bool afs_exists( const char * filename );
@@ -32,9 +33,9 @@ int afs_fclose( FILE_VV *fp ) {
 
 char * afs_ls( const char * directory, char * list ) {
 
-}
+} */
 
-bool afs_exists( const char * filename ) {
+/* bool afs_exists( const char * filename ) {
 	char full_filename[512];
 	char list_of_dir[256];
 	char item_name[256];
@@ -134,21 +135,6 @@ bool afs_exists( const char * filename ) {
 
 
 vv_file_internal filesys;
-
-uint32_t drive_size_in_bytes = 1024 * 1024 * 256;
-
-int main( void ) {
-	// Setup the file system internals
-	strcpy( filesys.working_directory, "/" );
-
-	FILE *fp = fopen( afsfile, "r+" );
-
-	//afs_format( fp, 1024 * 1024 * 2 );
-
-	fclose( fp );
-
-	return 0;
-}
 
 afs_block_directory * afs_get_directory_block_from_path( char * path ) {
 	afs_block_directory * d;
@@ -250,11 +236,28 @@ afs_block_directory * afs_get_directory_block_from_path( char * path ) {
 
 bool afs_mkdir( char * path, char * name ) {
 	afs_block_directory * d = afs_get_directory_block_from_path( path );
+} */
+
+uint32_t drive_size_in_bytes = 1024 * 1024 * 256;
+
+int main( void ) {
+	// Setup the file system internals
+	//strcpy( filesys.working_directory, "/" );
+
+	FILE *fp = fopen( afsfile, "r+" );
+
+	afs_format( fp, 1024 * 1024 * 2 );
+
+	fclose( fp );
+
+	return 0;
 }
 
 bool afs_format( FILE *fp, uint32_t size ) {
 	uint8_t * buff = malloc( size );
 	afs_drive * a_drive = (afs_drive *)buff;
+
+	printf( "beep\n" );
 
 	a_drive->version = AFS_VERSION_1;
 	a_drive->size = size;
@@ -268,23 +271,13 @@ bool afs_format( FILE *fp, uint32_t size ) {
 	strcpy( a_st->string[0], "AFS Drive 1" );
 	a_st->next_free++;
 
-	// Setup first directory, bin
-	afs_block_directory * d = (afs_block_directory *)(buff + a_drive->next_free );
-	d->type = AFS_BLOCK_TYPE_DIRECTORY;
-	d->name_index = 1;
-	strcpy( a_st->string[ a_st->next_free ], "bin" );
 
-	a_drive->index[ a_drive->next_index ].start = a_drive->next_free;
-	a_drive->index[ a_drive->next_index ].name_index = a_st->next_free;
-	a_drive->next_free = a_drive->next_free + sizeof( afs_block_directory );
-
-	a_drive->next_index++;
-	a_st->next_free++;
 
 	// Setup first file, test.txt
 	afs_file * f = (afs_file *)(buff + a_drive->next_free);
-	f->name_index = 2;
-	f->size = 1024 * 100;
+	f->name_index = a_st->next_free;
+	f->block_size = 1024 * 100;
+	f->file_size = strlen( "This is a test text file." );
 	f->type = AFS_BLOCK_TYPE_FILE;
 
 	strcpy( a_st->string[ a_st->next_free ], "test.txt" );
@@ -292,19 +285,19 @@ bool afs_format( FILE *fp, uint32_t size ) {
 
 	a_drive->next_free = a_drive->next_free + sizeof( afs_file );
 	
-	printf( "next_free: %X\n", a_drive->next_free );
-
 	strcpy( (buff + a_drive->next_free ), "This is a test text file." );
 
 	a_drive->next_free = a_drive->next_free +  1024 * 100;
 
 	size_t written = fwrite( buff, size, 1, fp );
 
+	
+
 	printf( "Written: %d\n", written );
 
 	for( int i = 0; i < a_drive->next_free; i++ ) {
 		if( *(buff + i) != 0 ) {
-			printf( "%X: %02X\n", i,  *(buff + i) );
+			//printf( "%X: %02X\n", i,  *(buff + i) );
 		}
 	}
 

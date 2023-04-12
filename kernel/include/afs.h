@@ -39,21 +39,27 @@ typedef struct {
 	uint32_t 	version;		// version of the drive struct
 	uint32_t 	size;			// overall size of the drive, in bytes
 	uint32_t	name_index;		// string table index
-	afs_index 	index[256];		// root drive
+	uint32_t	root_directory;	// starting byte of the dir struct for root
+
 	uint32_t	next_free;		// next free byte
+	afs_index 	index[256];		// root drive
+	uint32_t	next_index;		// new index free
 } afs_drive;
 
 typedef struct {
 	uint8_t 	type;			// Type, always AFS_BLOCK_TYPE_FILE
-	uint32_t 	size;			// size of the file
+	uint32_t 	block_size;		// size of the block
+	uint32_t	file_size;		// size of the actual file data
 	uint32_t	name_index;		// string table index
 } afs_file;
 
 typedef struct {
 	uint8_t 	type;			// Type, always AFS_BLOCK_TYPE_DIRECTORY
+    uint32_t	name_index;		// string table index
 	afs_index	index[256];		// Block index for things in this directory
-	uint32_t	name_index;		// string table index
+	uint32_t	next_index;		// next index free
 } afs_block_directory;
+
 
 #ifdef __cplusplus
 }
