@@ -5,10 +5,6 @@
 #include <string.h>
 #include "afs.h"
 
-#define afsfile "/usr/local/osdev/versions/v/afs.img"
-
-bool afs_format( FILE *fp, uint32_t size );
-
 /* FILE_VV * afs_fopen( const char * filename, const char * mode );
 int afs_fclose( FILE_VV *fp );
 
@@ -238,68 +234,118 @@ bool afs_mkdir( char * path, char * name ) {
 	afs_block_directory * d = afs_get_directory_block_from_path( path );
 } */
 
-uint32_t drive_size_in_bytes = 1024 * 1024 * 256;
+#define afsfile "/usr/local/osdev/versions/v/afs.img"
+
+bool afs_format( uint8_t *buff, uint32_t size );
+uint32_t afs_add_name_to_string_table( char * name );
+bool afs_add_file( uint8_t *drive_buff, afs_block_directory *dir, uint8_t *file_buff, uint32_t size, char * name );
+void afs_disply_diagnostic_data( uint8_t * buff );
+
+uint32_t drive_size_in_bytes = 1024 * 1024 * 2;
+char str_test[] = "Hello, world!";
+
+afs_drive * a_drive;
+afs_string_table * a_st;
+afs_block_directory *a_dir;
 
 int main( void ) {
-	// Setup the file system internals
-	//strcpy( filesys.working_directory, "/" );
+	uint8_t * buff = malloc( drive_size_in_bytes );
 
 	FILE *fp = fopen( afsfile, "r+" );
 
-	afs_format( fp, 1024 * 1024 * 2 );
+	afs_format( buff, drive_size_in_bytes );
+
+	printf( "beep\n" );
+
+	afs_add_file( buff, a_dir, str_test, strlen( str_test ), "testing.txt" );
+
+	size_t written = fwrite( buff, drive_size_in_bytes, 1, fp );
+
+	printf( "ast->nf %d\n", a_st->next_free );
+	printf( "Written: %d\n", written );
+
+	for( int i = 0; i < a_drive->next_free; i++ ) {
+		if( *(buff + i) != 0 ) {
+			printf( "%X: %02X\n", i,  *(buff + i) );
+		}
+	}
+
+	printf( "\n" );
 
 	fclose( fp );
+
+	afs_disply_diagnostic_data( buff );
 
 	return 0;
 }
 
-bool afs_format( FILE *fp, uint32_t size ) {
-	uint8_t * buff = malloc( size );
-	afs_drive * a_drive = (afs_drive *)buff;
-
-	printf( "beep\n" );
+bool afs_format( uint8_t *buff, uint32_t size ) {
+	a_drive = (afs_drive *)buff;
 
 	a_drive->version = AFS_VERSION_1;
 	a_drive->size = size;
 	a_drive->name_index = 0;
 	a_drive->next_free = sizeof( afs_drive );
-	memset( a_drive->index, 0, sizeof( afs_index ) * 256 );
-	a_drive->next_index = 0;
 
-	afs_string_table * a_st = (afs_string_table *)(buff + a_drive->next_free );
+	a_st = (afs_string_table *)(buff + a_drive->next_free );
 	a_drive->next_free = a_drive->next_free + sizeof( afs_string_table );
 	strcpy( a_st->string[0], "AFS Drive 1" );
 	a_st->next_free++;
 
+	a_dir = (afs_block_directory *)(buff + a_drive->next_free );
+	a_drive->root_directory = a_drive->next_free;
+	a_dir->type = AFS_BLOCK_TYPE_DIRECTORY;
+	a_dir->name_index = 0;
+	a_dir->next_index = 0;
+	memset( a_dir->index, 0, sizeof( afs_index ) * 256 );
+	a_drive->next_free = a_drive->next_free + sizeof( afs_block_directory );
+}
 
-
-	// Setup first file, test.txt
-	afs_file * f = (afs_file *)(buff + a_drive->next_free);
-	f->name_index = a_st->next_free;
-	f->block_size = 1024 * 100;
-	f->file_size = strlen( "This is a test text file." );
+bool afs_add_file( uint8_t *drive_buff, afs_block_directory *dir, uint8_t *file_buff, uint32_t size, char * name ) {
+	afs_file * f = (afs_file *)(drive_buff + a_drive->next_free);
+	f->name_index = afs_add_name_to_string_table( name );
+	f->block_size = size + 1024;
+	f->file_size = size;
 	f->type = AFS_BLOCK_TYPE_FILE;
 
-	strcpy( a_st->string[ a_st->next_free ], "test.txt" );
-	a_st->next_free++;
+	dir->index[ dir->next_index ].start = a_drive->next_free;
+	dir->index[ dir->next_index ].name_index = f->name_index;
+	dir->next_index++;
 
 	a_drive->next_free = a_drive->next_free + sizeof( afs_file );
 	
-	strcpy( (buff + a_drive->next_free ), "This is a test text file." );
+	memcpy( (drive_buff + a_drive->next_free), file_buff, size );
 
-	a_drive->next_free = a_drive->next_free +  1024 * 100;
+	a_drive->next_free = a_drive->next_free + f->file_size;
 
-	size_t written = fwrite( buff, size, 1, fp );
+	return true;
+}
 
-	
+uint32_t afs_add_name_to_string_table( char * name ) {
+	strcpy( a_st->string[ a_st->next_free ], name );
+	a_st->next_free++;
 
-	printf( "Written: %d\n", written );
+	return a_st->next_free - 1;
+}
 
-	for( int i = 0; i < a_drive->next_free; i++ ) {
-		if( *(buff + i) != 0 ) {
-			//printf( "%X: %02X\n", i,  *(buff + i) );
-		}
-	}
+void afs_disply_diagnostic_data( uint8_t * buff ) {
 
+	// First dump the drive info
+
+	afs_drive * drive = (afs_drive *)buff;
+
+	printf( "drive.version: %d\n", drive->version );
+	printf( "drive.size: %d\n", drive->size );
+	printf( "drive.name_index: %d\n", drive->name_index );
+	printf( "drive.root_directory: %d\n", drive->root_directory );
+	printf( "drive.next_free: %d\n", drive->next_free );
 	printf( "\n" );
+
+	// Dump string index
+
+	afs_string_table *st = (afs_string_table *)(buff + sizeof(afs_drive) );
+
+	for( int i = 0; i < st->next_free; i++ ) {
+		printf( "string_table[%d] = \"%s\"\n", i, st->string[i] );
+	}
 }

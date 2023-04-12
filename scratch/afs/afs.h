@@ -31,8 +31,8 @@ typedef struct {
 } afs_index;
 
 typedef struct {
-	char		string[5000][50];
 	uint32_t	next_free;		// next free string table name
+	char		string[100][50];
 } afs_string_table;
 
 typedef struct {	
@@ -40,10 +40,7 @@ typedef struct {
 	uint32_t 	size;			// overall size of the drive, in bytes
 	uint32_t	name_index;		// string table index
 	uint32_t	root_directory;	// starting byte of the dir struct for root
-
 	uint32_t	next_free;		// next free byte
-	afs_index 	index[256];		// root drive
-	uint32_t	next_index;		// new index free
 } afs_drive;
 
 typedef struct {
