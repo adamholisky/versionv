@@ -244,12 +244,16 @@ bool afs_cp( char *name, char *name_new, uint8_t *drive_buff, afs_block_director
 
 
 uint32_t afs_get_file_location( vv_file_internal *fs, const char *filename );
-afs_file* afs_get_file( vv_file_internal *fs, const char *filename );
+uint32_t afs_get_file_location_in_dir( vv_file_internal *fs, afs_block_directory *d, const char *filename );
+uint32_t afs_add_string(vv_file_internal *fs, char *name);
+void afs_ls(vv_file_internal *fs, char *path);
+afs_file *afs_get_file(vv_file_internal *fs, const char *filename);
 vv_file * afs_fopen( vv_file_internal *fs, const char * filename, const char * mode );
 uint32_t afs_exists( vv_file_internal *fs, const char * filename );
 uint32_t afs_fread( vv_file_internal *fs, void *ptr, uint32_t size, uint32_t nmemb, vv_file *fp );
 void afs_disply_diagnostic_data( uint8_t * buff );
 void dump_afs_file( vv_file_internal *fs, afs_file *f );
+uint32_t afs_exists_in_dir( vv_file_internal *fs, afs_block_directory *d, char *name );
 
 
 uint32_t drive_size_in_bytes = 1024 * 1024 * 2;
@@ -268,8 +272,6 @@ int main( void ) {
 
 	afs_format( buff, drive_size_in_bytes );
 
-	printf( "beep\n" );
-
 	afs_add_file( buff, a_dir, str_test, strlen( str_test ), "testing.txt" );
 	afs_cp( "hi", "log.txt", buff, a_dir );
 
@@ -280,7 +282,7 @@ int main( void ) {
 
 	for( int i = 0; i < a_drive->next_free; i++ ) {
 		if( *(buff + i) != 0 ) {
-			printf( "%X: %02X\n", i,  *(buff + i) );
+			//printf( "%X: %02X\n", i,  *(buff + i) );
 		}
 	}
 
@@ -293,7 +295,7 @@ int main( void ) {
 	file_system.string_table = a_st;
 	file_system.next_fd = 0;
 
-	afs_disply_diagnostic_data( file_system.drive );
+	//afs_disply_diagnostic_data( file_system.drive );
 
 	vv_file *f = afs_fopen( &file_system, "testing.txt", "r" );
 
@@ -309,8 +311,10 @@ int main( void ) {
 	printf( "num_read: %d\n", num_read );
 	printf( "data read: \"%s\"\n", file_buff );
 
+	afs_ls( &file_system, "usr::bin" );
+
 	return 0;
-}
+}	
 
 bool afs_format( uint8_t *buff, uint32_t size ) {
 	a_drive = (afs_drive *)buff;
@@ -519,6 +523,27 @@ uint32_t afs_get_file_location( vv_file_internal *fs, const char *filename ) {
 }
 
 /**
+ * @brief Returns bytes of file in the given dir
+ * 
+ * @param fs Filesystem object
+ * @param dir Directory object
+ * @param filename Name of the file
+ * @return uint32_t byte location of the file's afs_file if found, otherwise 0
+ */
+uint32_t afs_get_file_location_in_dir( vv_file_internal *fs, afs_block_directory *d, const char *filename ) {
+	uint32_t loc = 0;
+
+	for( int i = 0; i < d->next_index; i++ ) {
+		if( strcmp( fs->string_table->string[ d->index[i].name_index ], filename ) == 0 ) {
+			loc = d->index[i].start;
+			i = 1000000;
+		}
+	}
+
+	return loc;
+}
+
+/**
  * @brief Returns an afs_file object for the given filename
  * 
  * @param fs Pointer to the filesystem object
@@ -603,4 +628,106 @@ void dump_afs_file( vv_file_internal *fs, afs_file *f ) {
 	printf( "\n" );
 
 	printf( "%s\n\n", (char *)((char *)f + sizeof( afs_file )) );
+}
+
+/**
+ * @brief Add name to the string table
+ * 
+ * @param name Text string to add
+ * 
+ * @return uint32_t Index that the name was added at
+ */
+uint32_t afs_add_string( vv_file_internal *fs, char * name ) {
+	strcpy( fs->string_table->string[ fs->string_table->next_free ], name );
+	fs->string_table->next_free++;
+
+	return fs->string_table->next_free - 1;
+}
+
+void afs_ls( vv_file_internal *fs, char *path ) {
+	afs_block_directory *dir_to_list = fs->root_dir;
+
+	printf( "ls output:\n" );
+
+	for( int i = 0; i < dir_to_list->next_index; i++ ) {
+		printf( "%s\t", fs->string_table->string[ dir_to_list->index[i].name_index ] );
+	}
+
+	printf( "\n" );
+}
+
+bool afs_mkdir( vv_file_internal *fs, afs_block_directory *d, char *name ) {
+	d->index[ d->next_index ].start = fs->drive->next_free;
+	d->index[ d->next_index ].name_index = afs_add_string( fs, name );
+}
+
+afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename ) {
+	char full_filename[256];
+	int i = 0;
+	char item_name[256];
+	afs_block_directory *d = fs->root_dir;
+	bool keep_going = true;
+	bool found = false;
+
+	memset( full_filename, 0, 256 );
+
+	// If first char isn't /, then it's a relative path
+		// pre-pend with working dir
+	
+	if( filename[0] != '/' ) {
+		strcpy( full_filename, fs.working_directory );
+		
+		int wd_len = strlen( fs.working_directory );
+
+		if( full_filename[wd_len] != '/' ) {
+			full_filename[wd_len] = '/';
+			full_filename[wd_len + 1] = 0;
+		}
+
+		strcat( full_filename, filename );
+	}
+
+	// If first char is /, then it's an absolute path
+		// iterate over each /
+		// result is final iteration
+	
+	while( full_filename[i] != 0 && keep_going ) {
+		memset( item_name, 0, 256 );
+
+		// Copy the current element into item_name
+		for( int x = 0; x < 256; x++, i++ ) {
+			item_name[x] = full_filename[i];
+
+			if( full_filename[i] == '/' ) {
+				x = 256;
+				i++;
+			}
+
+			if( full_filename[i] == 0 ) {
+				x = 256;
+			}
+		}
+
+		// Test if item_name exists
+		if( afs_exists_in_dir( d, item_name ) != 0 ) {
+			keep_going = false;
+			found = false;
+		} else {
+			found = true;
+		}
+	}
+
+
+}
+
+uint32_t afs_exists_in_dir( vv_file_internal *fs, afs_block_directory *d, char *name ) {
+	uint32_t result = 0;
+
+	for( int i = 0; i < d->next_index; i++ ) {
+		if( strcmp( fs->string_table->string[ d->index[i].name_index ], name ) == 0 ) {
+			result = d->index[i].start;
+		}
+	}
+
+	return result;
 }

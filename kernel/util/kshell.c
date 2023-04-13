@@ -10,6 +10,7 @@
 #include <task.h>
 #include <kshell.h>
 #include <syscall.h>
+#include <afs.h>
 
 char line[256];
 char jail_env[256];
@@ -139,6 +140,8 @@ void kshell_run( void ) {
 
 	uint32_t binaddr = kdebug_get_symbol_addr( "_binary_afs_img_start" );
 	kdebug_peek_at( binaddr );
+
+	afs_disply_diagnostic_data( (uint8_t *)binaddr );
 
 	printf( "Shutting down gracefully.\n" );
 	kshell_shutdown();

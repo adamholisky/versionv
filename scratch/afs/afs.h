@@ -46,6 +46,10 @@ typedef struct {
 } afs_drive;
 
 typedef struct {
+	uint8_t 	type;				// Type of the block
+} afs_generic_block;
+
+typedef struct {
 	uint8_t 	type;			// Type, always AFS_BLOCK_TYPE_FILE
 	uint32_t 	block_size;		// size of the block
 	uint32_t	file_size;		// size of the actual file data
