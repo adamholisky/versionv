@@ -137,7 +137,8 @@ void kshell_run( void ) {
 	kexec( "test_loaded_file", (uint32_t *)kshell_test_loaded_file, NULL );
 	kexec( "ps", (uint32_t *)kshell_ps, NULL );
 
-
+	uint32_t binaddr = kdebug_get_symbol_addr( "_binary_afs_img_start" );
+	kdebug_peek_at( binaddr );
 
 	printf( "Shutting down gracefully.\n" );
 	kshell_shutdown();

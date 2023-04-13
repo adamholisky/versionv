@@ -98,6 +98,8 @@ void memory_initalize( void ) {
 	// Set the contents of the kernel's initial table entry
 	memset( kernel_page_data_tables, 0, 512*8 );
 	kernel_page_data_tables[0] = 0x83;
+	kernel_page_data_tables[1] = 0x83 + 0x200000;
+	kernel_page_data_tables[2] = 0x83 + 0x400000;
 
 	asm_refresh_cr3();
 
