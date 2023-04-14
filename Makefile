@@ -28,10 +28,10 @@ QEMU = qemu-system-i386
 QEMU_COMMON = 	-drive id=main_drive,if=none,format=raw,file=$(ROOT_DIR)/vv_hd.img \
 				-device ahci,id=ahci \
 				-device ide-hd,drive=main_drive,bus=ahci.0 \
+				-drive id=secondary_drive,if=none,format=raw,file=$(ROOT_DIR)/afs.img \
+				-device ide-hd,drive=secondary_drive,bus=ahci.1 \
 				-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
 				-nic user,ipv6=off,model=e1000,mac=52:54:98:76:54:32 \
-				-device loader,file=$(ROOT_DIR)/elfdump.txt,addr=0xE0000000,force-raw=on \
-				-device loader,addr=0xE0000000,data=0xADA0ADA1,data-len=4 \
 				-m 4G \
 				-serial null \
 				-serial stdio \

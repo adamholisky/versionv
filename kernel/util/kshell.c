@@ -11,6 +11,8 @@
 #include <kshell.h>
 #include <syscall.h>
 #include <afs.h>
+#include <device.h>
+#include <terminal.h>
 
 char line[256];
 char jail_env[256];
@@ -22,6 +24,7 @@ int line_pos;
 void kshell_ps( void );
 void kshell_test_loaded_file( void );
 void test_syscall( void );
+void kshell_test_devices( void );
 
 void kshell_get_line( void ) {
 	char c = ' ';
@@ -136,8 +139,8 @@ void kshell_process_line( void ) {
 }
 
 void kshell_run( void ) {
-	kexec( "test_loaded_file", (uint32_t *)kshell_test_loaded_file, NULL );
 	kexec( "ps", (uint32_t *)kshell_ps, NULL );
+	kexec( "test_devices", (uint32_t *)kshell_test_devices, NULL );
 
 	test_syscall();
 
@@ -199,9 +202,9 @@ void kshell_test_loaded_file( void ) {
 
 	
 
-	uint32_t *mem = page_map( 0xE0000000, 0xE0000000 );
+	uint32_t *mem = page_map( (uint32_t *)0xE0000000, (uint32_t *)0xE0000000 );
 
-	kdebug_peek_at( mem );
+	kdebug_peek_at( (uint32_t)mem );
 
 	task_exit();
 	log_entry_exit();
@@ -214,4 +217,14 @@ void test_syscall( void ) {
 	uint32_t count = read( -2, mem, 5 );
 
 	printf( "Syscall result:\nmem: \"%s\"\ncount: %d\n", mem, count );
+}
+
+void kshell_test_devices( void ) {
+	device *term = get_device_by_file( "/dev/tty0" );
+
+	term->write( "A", 1 );
+
+	printf( "\n" );
+
+	term->write( "Hello, terminal!\n", strlen( "Hello, terminal!\n" ) );
 }

@@ -25,6 +25,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	bool process_keypress;
 
 	multiboot_initalize( mb_magic, mb_info );
+	devices_initalize();
 	term_initalize();
 	initalize_serial();
 

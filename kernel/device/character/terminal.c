@@ -10,6 +10,7 @@
 #include <debug.h>
 #include <kmalloc.h>
 #include <globals.h>
+#include <device.h>
 
 unsigned int term_current_row;
 unsigned int term_current_column;
@@ -27,6 +28,8 @@ unsigned int y_start;
 bool is_debug_output = false;
 bool is_gui_active = false;
 
+device *term_device;
+
 void term_initalize( void ) {
 	// DO NOT PUT KLOG FUNCTIONS HERE
 	unsigned int x = 0;
@@ -43,6 +46,31 @@ void term_initalize( void ) {
 			term_buffer[( y * VGA_WIDTH ) + x] = vga_entry( ' ', term_current_color );
 		}
 	}
+
+	term_device = device_add_new();
+	term_device->init = termainl_device_init;
+	term_device->write = terminal_device_write;
+	term_device->read = terminal_device_read;
+	strcpy( term_device->name, "Terminal" );
+	strcpy( term_device->file, "/dev/tty0" );
+}
+
+void term_device_init( void ) {
+	// Intentionally blank
+}
+
+int terminal_device_write( uint8_t *buff, uint32_t size ) {
+	if( size > 1 ) {
+		term_put_string( (char *)buff, size );
+	} else {
+		term_put_char( (char)*buff );
+	}
+
+	return size;
+}
+
+int terminal_device_read( uint8_t *buff, uint32_t size ) {
+	return 0;
 }
 
 void term_set_color( uint32_t foreground, uint32_t background ) {
