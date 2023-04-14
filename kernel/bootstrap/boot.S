@@ -144,6 +144,7 @@ _asm_kernel_start:
 	call kernel_main
 
 .global asm_refresh_cr3
+.type asm_refresh_cr3, @function
 asm_refresh_cr3:
 	xor %ecx, %ecx
 	movl %cr3, %ecx

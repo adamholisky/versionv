@@ -21,6 +21,7 @@ int line_pos;
 
 void kshell_ps( void );
 void kshell_test_loaded_file( void );
+void test_syscall( void );
 
 void kshell_get_line( void ) {
 	char c = ' ';
@@ -138,10 +139,12 @@ void kshell_run( void ) {
 	kexec( "test_loaded_file", (uint32_t *)kshell_test_loaded_file, NULL );
 	kexec( "ps", (uint32_t *)kshell_ps, NULL );
 
-	uint32_t binaddr = kdebug_get_symbol_addr( "_binary_afs_img_start" );
+	test_syscall();
+
+/* 	uint32_t binaddr = kdebug_get_symbol_addr( "_binary_afs_img_start" );
 	kdebug_peek_at( binaddr );
 
-	afs_disply_diagnostic_data( (uint8_t *)binaddr );
+	afs_disply_diagnostic_data( (uint8_t *)binaddr ); */
 
 	printf( "Shutting down gracefully.\n" );
 	kshell_shutdown();
@@ -202,4 +205,13 @@ void kshell_test_loaded_file( void ) {
 
 	task_exit();
 	log_entry_exit();
+}
+
+void test_syscall( void ) {
+	char *mem = malloc( 6 );
+	memset( mem, 0, 6 );
+
+	uint32_t count = read( -2, mem, 5 );
+
+	printf( "Syscall result:\nmem: \"%s\"\ncount: %d\n", mem, count );
 }

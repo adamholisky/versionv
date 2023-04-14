@@ -125,6 +125,23 @@ void klog_variable_func( uint32_t type, char * name, void * var, char * func, ui
         x ); \
         debugf( "       31   27   23   19   15   11   7    3\n" )
 
+#define dump_stack_trace() { \
+  	stackframe *frame; \
+	uint32_t corrected_eip = 0; \
+	asm volatile("1: lea 1b, %0;": "=a"(corrected_eip)); \
+	klog( "\n" ); \
+	klog( "    Stack Trace\n" );\
+	klog( "    ----------------------\n" );\
+	klog( "    % 2d:    0x%08X %s\n", 1, corrected_eip, kdebug_get_function_at(corrected_eip) );\
+	asm ("movl %%ebp,%0" : "=r"(frame)); \
+	frame = (stackframe *)frame->ebp; \
+	for( int i = 1; (frame != NULL) && (i < STACKFRAME_MAX); i++ ) { \
+		klog( "    % 2d:    0x%08X %s\n", i+1, frame->eip, kdebug_get_function_at(frame->eip) ); \
+		frame = (stackframe *)frame->ebp; \
+	} \
+} 
+
+
 #ifdef __cplusplus
 }
 #endif

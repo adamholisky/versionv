@@ -2,10 +2,12 @@
 .section .text
 .extern interrupt_default_handler
 .extern get_current_task
+.extern syscall_handler
 
 /* Interrupts */
 .macro interrupt_handler interrupt_number
 .global interrupt_\interrupt_number
+.type interrupt_\interrupt_number, @function
 interrupt_\interrupt_number :
 	push $0xFEEEFEEE
 		push %esp
@@ -39,11 +41,13 @@ interrupt_\interrupt_number :
 		 pop %esp
 	add $4, %esp
     iret
+.size interrupt_\interrupt_number, . - interrupt_\interrupt_number
 .endm
 
 /* Exceptions */
 .macro exception_handler interrupt_number
 .global interrupt_\interrupt_number
+.type interrupt_\interrupt_number, @function
 interrupt_\interrupt_number :
     push %esp
 	/*push $0xBAD0BAD0*/
@@ -78,9 +82,11 @@ interrupt_\interrupt_number :
 	pop %esp
 	add $4, %esp
 	iret
+.size interrupt_\interrupt_number, . - interrupt_\interrupt_number
 .endm
 
 .global interrupt_0x99
+.type interrupt_0x99, @function
 interrupt_0x99 :
 	cmp $0x4, %eax
 	je sched_yield_asm
@@ -94,20 +100,14 @@ interrupt_0x99 :
 				push %fs
 				push %gs
 					push %esp /* x86_context struct on the stack */
-					push %esp /* Route */
+					push %esp 
 						mov $0x10, %eax
 						mov %eax, %ds
 						mov %eax, %es
-						mov $0x2, %eax
-						push %eax
-							mov $0x99, %eax
-							push %eax /* Int num */
 							push %esp
 								cld
-								call interrupt_default_handler
+								call syscall_handler
 							pop %esp
-							pop %eax
-						pop %eax
 					pop %esp
 					pop %esp
 				pop %gs
@@ -118,6 +118,7 @@ interrupt_0x99 :
 		 pop %esp
 	add $4, %esp
     iret
+.size interrupt_0x99, . - interrupt_0x99
 
 sched_yield_asm:
 	push %eax

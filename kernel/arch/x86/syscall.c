@@ -26,11 +26,13 @@
 
 uint32_t syscall_handler( uint32_t * stack, x86_context ** _context ) {
 	x86_context *context = *_context;
+	uint32_t result = 0;
 
 	switch( context->eax ) {
 		case SYSCALL_READ:
 			//debugf( "[SYSCALL] Read :: fd = %d, buff = 0x%08X, size = %d\n", stack->edi, stack->esi, stack->edx );
-			syscall_read( context->edi, (void *)context->esi, context->edx );
+			result = syscall_read( context->edi, (void *)context->esi, context->edx );
+			context->eax = result;
 			break;
 		case SYSCALL_WRITE:
 			//debugf( "[SYSCALL] Write\n" );
@@ -60,7 +62,10 @@ uint32_t syscall_handler( uint32_t * stack, x86_context ** _context ) {
 			klog( "Undefined syscall number: 0x%04X\n", context->eax );
 	}
 
-	return SYSCALL_RT_SUCCESS;
+	outportb( 0xA0, 0x20 );
+	outportb( 0x20, 0x20 );
+
+	return result;
 }
 
 uint32_t syscall( uint32_t call_num, uint32_t num_args, syscall_args * args ) {
@@ -119,4 +124,6 @@ uint32_t syscall( uint32_t call_num, uint32_t num_args, syscall_args * args ) {
 		default:
 			klog( "Syscall called with more than six args.\n" );
 	}
+
+	return ret;
 }

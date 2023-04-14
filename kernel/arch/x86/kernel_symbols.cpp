@@ -16,7 +16,7 @@ void KernelSymbols::add( char * name, uint32_t addr, uint32_t size ) {
 	kernel_symbols[ this->kernel_symbol_top ].addr = addr;
 	kernel_symbols[ this->kernel_symbol_top ].size = size;
 	this->kernel_symbol_top++;
-	//debugf( "0x%03X: 0x%08X -> %s\n", this->kernel_symbol_top - 1, addr, name );
+	//debugf( "0x%03X: 0x%08X + 0x%08X -> %s\n", this->kernel_symbol_top - 1, addr, size, name );
 }
 
 KernelSymbol * KernelSymbols::get_symbol_array( void ) {
@@ -30,7 +30,9 @@ char * KernelSymbols::get_function_at( uint32_t addr ) {
 		if( this->kernel_symbols[i].size == 0 ) continue; 
 
 		if( addr >= this->kernel_symbols[i].addr ) {
+			
 			if( addr < ( this->kernel_symbols[i].addr + this->kernel_symbols[i].size) ) {
+				//klog( "hit: 0x%08X\n", addr );
 				ret_val = this->kernel_symbols[i].name;
 			}
 		}

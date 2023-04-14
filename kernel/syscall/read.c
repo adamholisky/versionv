@@ -18,5 +18,13 @@ uint32_t read( int fd, void * buff, uint32_t size ) {
 uint32_t syscall_read( int fd, void * buff, uint32_t size ) {
 	uint32_t num_read = 0;
 
+	if( fd == -2 ) {
+		strcpy( buff, "VFive" );
+
+		num_read = 651;
+	}
+
+	dump_stack_trace();
+	
 	return num_read;
 }
