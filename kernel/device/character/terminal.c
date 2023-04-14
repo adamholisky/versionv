@@ -48,14 +48,14 @@ void term_initalize( void ) {
 	}
 
 	term_device = device_add_new();
-	term_device->init = termainl_device_init;
+	term_device->init = terminal_device_init;
 	term_device->write = terminal_device_write;
 	term_device->read = terminal_device_read;
 	strcpy( term_device->name, "Terminal" );
 	strcpy( term_device->file, "/dev/tty0" );
 }
 
-void term_device_init( void ) {
+void terminal_device_init( void ) {
 	// Intentionally blank
 }
 

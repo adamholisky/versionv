@@ -29,7 +29,7 @@ void set_debug_output( bool d );
 void write_serial(char a);
 void write_to_serial_port( char c );
 
-void termainl_device_init( void );
+void terminal_device_init( void );
 int terminal_device_write( uint8_t *buff, uint32_t size );
 int terminal_device_read( uint8_t *buff, uint32_t size );
 
