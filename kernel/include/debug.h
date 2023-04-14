@@ -9,7 +9,7 @@ extern "C" {
 #include "serial.h"
 #include "terminal.h"
 
-#define KDEBUG_MAX_SYMBOLS 1024
+#define KDEBUG_MAX_SYMBOLS 2048
 #define STACKFRAME_MAX 25
 
 enum level {

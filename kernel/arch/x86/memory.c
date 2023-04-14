@@ -175,7 +175,7 @@ void memory_initalize( void ) {
 		}
 	}
 
-	uint32_t * ptr_im = page_map( 0x02800000, 0x02800000 );
+	uint32_t * ptr_im = page_map( (uint32_t *)0x02800000, (uint32_t *)0x02800000 );
 	dump_active_pt();
 	//*((uint32_t *)(0x00C00000)) = 0xABBA0000;
 	*ptr_im = 0xADA01111;

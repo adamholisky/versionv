@@ -6,14 +6,17 @@ BUILD_LOG = $(ROOT_DIR)/build.log
 SHELL :=/bin/bash -O globstar
 VPATH = $(shell find ./kernel -type d -printf "kernel/%P:")
 SOURCES_C = $(shell ls kernel/**/*.c)
+SOURCES_CPP = $(shell ls kernel/**/*.cpp)
 SOURCES_ASM = $(shell ls kernel/**/*.s)
 SOURCES_ASMS = $(shell ls kernel/**/*.S)
 OBJECTS_C = $(patsubst %.c, build/%.o, $(shell ls kernel/**/*.c | xargs -n 1 basename))
+OBJECTS_CPP = $(patsubst %.cpp, build/%.o, $(shell ls kernel/**/*.cpp | xargs -n 1 basename))
 OBJECTS_ASM = $(patsubst %.s, build/%.o, $(shell ls kernel/**/*.s | xargs -n 1 basename))
 OBJECTS_ASMS = $(patsubst %.S, build/%.o, $(shell ls kernel/**/*.S | xargs -n 1 basename))
 
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
+CPP = /usr/local/osdev/bin/i686-elf-g++
 ASM = /usr/local/osdev/bin/i686-elf-as
 DEFINES = -DPAGING_PAE \
 		  -DGRAPHICS_OFF \
@@ -64,6 +67,12 @@ build/%.o: %.c
 	$(eval OBJNAME := $(shell basename $@))
 	$(CC) $(CFLAGS) $(CFLAGS_END) -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
 
+build/%.o: %.cpp
+	@>&2 printf "[Build] $<\n"
+	$(eval OBJNAME := $(shell basename $@))
+	$(CPP) $(CFLAGS) $(CFLAGS_END) -fno-exceptions -fno-rtti -fpermissive -c $< -o build/$(OBJNAME) >> $(BUILD_LOG)
+
+#build/%.o: kernel/**/%.s
 build/%.o: %.s
 	@>&2 printf "[Build] $<\n"
 	$(eval OBJNAME := $(shell basename $@))

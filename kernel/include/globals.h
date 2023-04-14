@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stdbool.h>
 
 extern bool SERIAL_CONSOLE_ACTIVE;
 extern bool GRAPHICS_ACTIVE;

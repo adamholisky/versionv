@@ -3,12 +3,10 @@
 #include "bootstrap.h"
 #include "string.h"
 #include <kmalloc.h>
-#include <kernel_symbols.h>
-#include <ftp.h>
 
 uint32_t kernel_symbol_top = 0;
 kdebug_symbol kernel_symbols[ KDEBUG_MAX_SYMBOLS ];
-KernelSymbols symbols;
+char no_symbol[] = "Cannot find symbol";
 
 char * sys_text_arr[] = { 
 							"System",
@@ -24,33 +22,68 @@ char * sys_text_arr[] = {
 void kdebug_initalize( void ) {
 	memset( &kernel_symbols, 0, sizeof(kdebug_symbol) * KDEBUG_MAX_SYMBOLS );
 
-	symbols.initalize();
+	kernel_symbol_top = 0;
 }
 
 void kdebug_add_symbol( char * name, uint32_t addr, uint32_t size ) {
-	symbols.add( name, addr, size );
+	kernel_symbols[ kernel_symbol_top ].name = name;
+	kernel_symbols[ kernel_symbol_top ].addr = addr;
+	kernel_symbols[ kernel_symbol_top ].size = size;
+	kernel_symbol_top++;
+	//debugf( "0x%03X: 0x%08X + 0x%08X -> %s\n", kernel_symbol_top - 1, addr, size, name );
 }
 
 kdebug_symbol * kdebug_get_symbol_array( void ) {
-	//return kernel_symbols;
-
-	return (kdebug_symbol *)symbols.get_symbol_array();
+	return kernel_symbols;
 }
 
 char * kdebug_get_function_at( uint32_t addr ) {
-	return symbols.get_function_at( addr );
+	char * ret_val = no_symbol;
+
+	for( int i = 0; i< KDEBUG_MAX_SYMBOLS; i++ ) {
+		if( kernel_symbols[i].size == 0 ) continue; 
+
+		if( addr >= kernel_symbols[i].addr ) {
+			
+			if( addr < ( kernel_symbols[i].addr + kernel_symbols[i].size) ) {
+				//klog( "hit: 0x%08X\n", addr );
+				ret_val = kernel_symbols[i].name;
+			}
+		}
+	}
+
+	return ret_val;
 }
 
 kdebug_symbol * kdebug_get_symbol( char * name ) {
-	return (kdebug_symbol *)symbols.get_symbol( name );
+	kdebug_symbol * ret = NULL;
+
+	for( int i = 0; i < kernel_symbol_top; i++ ) {
+		//klog( "%d", i );
+		if( kernel_symbols[i].name[0] == 0 ) continue;
+
+		if( strcmp( kernel_symbols[i].name, name ) == 0 ) {
+			ret = kernel_symbols + i;
+		}
+	}
+
+	return ret;
 }
 
 uint32_t kdebug_get_total_symbols( void ) {
-	return symbols.get_total_symbols();
+	return kernel_symbol_top;
 }
 
 uint32_t kdebug_get_symbol_addr( char * name ) {
-	return symbols.get_symbol_addr( name );
+	uint32_t ret = 0;
+
+	kdebug_symbol * sym = kdebug_get_symbol( name );
+
+	if( sym != NULL ) {
+		ret = sym->addr;
+	}
+
+	return ret;
 }
 
 char * kdebug_peek_at( uint32_t addr ) {

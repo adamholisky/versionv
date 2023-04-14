@@ -10,22 +10,14 @@
 #include "callback.h"
 #include "keyboard.h"
 #include "observer.h"
-#include <ftp.h>
-#include <modules.h>
-#include <vshell.h>
 #include <string.h>
 #include <device.h>
-#include <uione.h>
 #include <kshell.h>
 #include "intel8254.h"
 #include <ahci.h>
 
 #define END_IMMEDIATELY
 #define TRIGGER_DIVIDE_BY_ZERO false
-
-extern void cpp_tests( void );
-
-void test_func( void );
 
 void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	int x = 0;
@@ -52,7 +44,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	multiboot_echo_to_serial();
 	memory_initalize();
 	kdebug_initalize();
-	elf_initalize( reinterpret_cast<uint32_t>(kernel_main) );
+	elf_initalize( (uint32_t)kernel_main );
 	interrupts_initalize();
 	observer_initalize();
 
@@ -85,37 +77,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 		);
 	}
 
-	do_immediate_shutdown();
-
-	test_func();
-	init_devices();
-
-	cpp_tests();
-
-	//uione_test();
-
-	/* FTP *host_ftp = new FTP();
-
-	host_ftp->login( "vv", "vv" );
-	host_ftp->cwd( "/usr/local/osdev/versions/v/modules/build" );
-	host_ftp->get_file( "reference.vvs" );
-	
-	Module m;
-	m.load( (uint32_t *)host_ftp->data_buffer, "reference.vvs" );
-	m.call_main();
-	
-
-	VShell v;
-	v.init( host_ftp, &m );
-	v.run();
-
-	*/
-
 	klog( "\n\nEnd of line." );
 
 	while( true ) { x = x - x + 1; }
-}
-
-void test_func( void ) {
-	//
 }

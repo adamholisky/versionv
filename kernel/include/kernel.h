@@ -21,11 +21,6 @@ typedef uint16_t word;
 
 #define do_immediate_shutdown() outportb( 0xF4, 0x00 )
 
-/* void *operator new(size_t size);
-void *operator new[](size_t size);
-void operator delete(void *p);
-void operator delete[](void *p); */
-
 #ifdef __cplusplus
 }
 #endif
