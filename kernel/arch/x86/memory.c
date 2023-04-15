@@ -26,8 +26,6 @@ Memory Map Virtual
 
 */
 
-#define kdebug_memory_pages 1
-
 extern uint32_t _kernel_end;
 extern void asm_refresh_cr3( void );
 extern void asm_invalidate_page( void * p );
@@ -360,6 +358,7 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 		*pd_uint = 0x00000000FFFFFFFF & *pd_uint;
 	}
 
+	#ifdef kdebug_memory_pages
 	debugf( "virt_addr:          0x%08X\n", virt_addr );
 	debugf( "phys_addr:          0x%08X\n", phys_addr );
 	debugf( "  pdpt_index:         0x%08X\n", pdpt_index );
@@ -368,6 +367,7 @@ uint32_t * page_map( uint32_t *virt_addr, uint32_t *phys_addr ) {
 	debugf( "  PD addr:            0x%08X\n", pd_uint );
 	debugf( "  PDPT present:       %d\n", test_bit(*pdpt_uint, PTE_BIT_PRESENT) );
 	debugf( "  PD contents:        0x%08X\n", *pd_uint ); 
+	#endif
 	
 	asm volatile("invlpg (%0)" ::"r" (pd_uint) : "memory");
 	asm_refresh_cr3(); 	

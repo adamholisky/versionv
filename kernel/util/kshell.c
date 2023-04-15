@@ -135,7 +135,7 @@ void kshell_process_line( void ) {
 
 void kshell_run( void ) {
 	kexec( "ps", (uint32_t *)kshell_ps, NULL );
-	//kexec( "test_devices", (uint32_t *)kshell_test_devices, NULL );
+	kexec( "test_devices", (uint32_t *)kshell_test_devices, NULL );
 
 	test_syscall();
 
@@ -222,6 +222,8 @@ void kshell_test_devices( void ) {
 	printf( "\n" );
 
 	term->write( "Hello, terminal!\n", strlen( "Hello, terminal!\n" ) );
+
+	task_exit();
 }
 
 void kshell_divide_by_zero( void ) {

@@ -218,7 +218,7 @@ void ahci_initalize( void ) {
 	asm_refresh_cr3();
 
 	klog( "port page: %X\n", port_page );
-    port_rebase( &abar->ports[1], 0, port_page);
+    port_rebase( &abar->ports[1], 1, port_page);
 
 	global_port_page = port_page;
 
@@ -231,10 +231,11 @@ void ahci_initalize( void ) {
 	bp->write_through = 1;
 	asm_refresh_cr3();
 
+	klog( "Buff Page:\n" );
 	echo_page( bp );
 	global_buffer_addr = bp->address<<21;
 
-	klog( "Buff: %X\n", buff );
+	klog( "Buff: %X\n", (uint32_t *)buff );
 	klog( "buff should be: %X\n", global_buffer_addr);
 
     bool read_result = read_ahci( &abar->ports[1], 0,0,1, (uint16_t *)global_buffer_addr );
@@ -247,7 +248,6 @@ void ahci_initalize( void ) {
 		printf( "%X %X ", ( 0x00FF ) & *(buff + b), ((0xFF00) & *(buff + b))>>8 );
 	}
  	
-
     log_entry_exit();
 }
 

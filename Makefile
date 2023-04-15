@@ -28,9 +28,9 @@ QEMU = qemu-system-i386
 QEMU_COMMON = 	-drive id=main_drive,if=none,format=raw,file=$(ROOT_DIR)/vv_hd.img \
 				-device ahci,id=ahci \
 				-device ide-hd,drive=main_drive,bus=ahci.0 \
+				-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
 				-drive id=secondary_drive,if=none,format=raw,file=$(ROOT_DIR)/afs.img \
 				-device ide-hd,drive=secondary_drive,bus=ahci.1 \
-				-device isa-debug-exit,iobase=0xf4,iosize=0x04 \
 				-nic user,ipv6=off,model=e1000,mac=52:54:98:76:54:32 \
 				-m 4G \
 				-serial null \
@@ -43,6 +43,8 @@ QEMU_DISPLAY_NORMAL = -vga std
 QEMU_DEBUG_COMMON = -S -gdb tcp::5894 
 QEMU_DEBUG_LOGGING = -D $(ROOT_DIR)/qemu_debug_log.txt -d int,cpu_reset 
 
+
+
 # tcp:192.168.0.100:21,nodelay=on,reconnect=0
 # tcp::6699,nodelay=on,server=on,wait=no
 
@@ -54,7 +56,7 @@ export
 all: debug_dump install
 
 build/versionv.bin: $(SOURCES_C) $(SOURCES_CPP) $(SOURCES_ASM) $(SOURCES_ASMS) $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS)
-	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) afsimg.o ../libcvv/libc/vvlibc.o $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(CFLAGS_END)
+	$(CC) -T kernel/build_support/linker.ld -o build/versionv.bin $(CFLAGS) ../libcvv/libc/vvlibc.o $(OBJECTS_C) $(OBJECTS_CPP) $(OBJECTS_ASM) $(OBJECTS_ASMS) $(CFLAGS_END)
 	$(OBJDUMP) -x -D -S build/versionv.bin > objdump.txt
 	readelf -a build/versionv.bin > elfdump.txt
 	@>&2 printf "[Build] Done\n"
