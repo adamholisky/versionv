@@ -157,7 +157,7 @@ void afs_disply_diagnostic_data( uint8_t * buff ) {
 	printf( "dir.name_index = %d\n", d->name_index );
 	
 	for( int i = 0; i < d->next_index; i++ ) {
-		printf( "dir.index[%d].start = %d\n", i, d->index[i].start );
+		printf( "dir.index[%d].start = 0x%X\n", i, d->index[i].start );
 		printf( "dir.index[%d].name_index = \"%s\"\n", i, st->string[d->index[i].name_index] );
 	}
 	printf( "\n" );

@@ -238,14 +238,25 @@ void ahci_initalize( void ) {
 	klog( "Buff: %X\n", (uint32_t *)buff );
 	klog( "buff should be: %X\n", global_buffer_addr);
 
-    bool read_result = read_ahci( &abar->ports[1], 0,0,1, (uint16_t *)global_buffer_addr );
+    bool read_result = read_ahci( &abar->ports[1], 0,0,16, (uint16_t *)global_buffer_addr );
 
     klog( "Read_result: %d\n", read_result );
 	
 	printf( "Buffer: \n" );
 	
-	for( int b = 0; b < 256; b++ ) {
-		printf( "%X %X ", ( 0x00FF ) & *(buff + b), ((0xFF00) & *(buff + b))>>8 );
+	int z = 0;
+	for( int b = 0; b < 50; b++ ) {
+		if (z == 0) {
+			printf( "\n%04X    ", b * 2 );
+		}
+		
+		printf( "%02X %02X  ", ( 0x00FF ) & *(buff + b), ((0xFF00) & *(buff + b))>>8 );
+
+		z++;
+
+		if( z == 0x8 ) {
+			z = 0;
+		}
 	}
  	
     log_entry_exit();
@@ -254,7 +265,7 @@ void ahci_initalize( void ) {
 bool ahci_read_sector( uint32_t sector, uint32_t *buffer ) {
 	bool read_result = false;
 
-	read_result = read_ahci( &abar->ports[0], sector, 0, 1, (uint16_t *)global_buffer_addr );
+	read_result = read_ahci( &abar->ports[1], sector, 0, 1, (uint16_t *)global_buffer_addr );
 
 	if( !read_result ) {
 		klog( "Read failed. sector = %X\n", sector );
@@ -262,6 +273,52 @@ bool ahci_read_sector( uint32_t sector, uint32_t *buffer ) {
 	}
 
 	memcpy( buffer, global_buffer, 512 );
+
+	return true;
+}
+
+bool ahci_read_at_byte_offset( uint32_t offset, uint32_t size, uint8_t *buffer ) {
+	bool read_result = false;
+	uint32_t sector = 0;
+	uint32_t count = 0;
+	uint32_t internal_offset = 0;
+
+	sector = offset / 512;
+	internal_offset = offset - (sector * 512);
+	count = (size / 512) + 1;
+
+	klog( "read: offset -- %X, size %X\n", offset, size );
+	klog( "read at offset -- sector = %X, count = %X, internal_offset = %X\n", sector, count, internal_offset );
+
+	read_result = read_ahci( &abar->ports[1], sector, 0, count, (uint16_t *)global_buffer_addr );
+
+	if( !read_result ) {
+		klog( "Read failed. sector = %X\n", sector );
+		return false;
+	}
+	
+	memcpy( buffer, (uint8_t *)global_buffer + internal_offset, size );
+
+	int z = 0;
+	for( int b = 0; b < (size / 2); b++ ) {
+		if (z == 0) {
+			debugf( "\n%04X    ", b * 2 );
+		}
+		
+		debugf( "%02X %02X  ", ( 0x00FF ) & *(buffer + b), ((0xFF00) & *(buffer + b))>>8 );
+
+		z++;
+
+		if( z == 0x8 ) {
+			z = 0;
+		}
+	}
+
+	debugf( "\n" );
+
+	
+
+	return true;
 }
 
 

@@ -13,6 +13,7 @@
 #include <afs.h>
 #include <device.h>
 #include <terminal.h>
+#include <ahci.h>
 
 char line[256];
 char jail_env[256];
@@ -139,6 +140,8 @@ void kshell_run( void ) {
 
 	test_syscall();
 
+	kshell_afs_test();
+
 /* 	uint32_t binaddr = kdebug_get_symbol_addr( "_binary_afs_img_start" );
 	kdebug_peek_at( binaddr );
 
@@ -195,8 +198,6 @@ void kshell_test_fork( void  ) {
 void kshell_test_loaded_file( void ) {
 	log_entry_enter();
 
-	
-
 	uint32_t *mem = page_map( (uint32_t *)0xE0000000, (uint32_t *)0xE0000000 );
 
 	kdebug_peek_at( (uint32_t)mem );
@@ -232,4 +233,68 @@ void kshell_divide_by_zero( void ) {
 		"movl 0, %ecx \n\t"
 		"div %ecx \n\t"
 	);
+}
+
+void kshell_afs_test( void ) {
+	afs_drive *drive = malloc( sizeof(afs_drive) );
+	afs_string_table *st = malloc( sizeof(afs_string_table) );
+	afs_block_directory *root_dir = malloc( sizeof(afs_block_directory) );
+	afs_file *f = malloc( sizeof(afs_file) );
+
+	if( ahci_read_at_byte_offset( 0, sizeof(afs_drive), drive) ) {
+		printf( "drive.version: %d\n", drive->version );
+		printf( "drive.size: %08X\n", drive->size );
+		printf( "drive.name_index: %d\n", drive->name_index );
+		printf( "drive.root_directory: %04X\n", drive->root_directory );
+		printf( "drive.next_free: %04X\n", drive->next_free );
+		printf( "\n\n" );
+
+		if( ahci_read_at_byte_offset( sizeof(afs_drive), sizeof( afs_string_table), st ) ) {
+			for( int i = 0; i < st->next_free; i++ ) {
+				printf( "string_table[%d] = \"%s\" @ 0x%08X\n", i, st->string[i], st->string[i]);
+			}
+			printf( "\n" );
+
+			if( ahci_read_at_byte_offset( drive->root_directory, sizeof( afs_block_directory), root_dir ) ) {
+				printf( "dir.next_index = %d\n", root_dir->next_index );
+				printf( "dir.name_index = %d\n", root_dir->name_index );
+				
+				for( int i = 0; i < root_dir->next_index; i++ ) {
+					printf( "dir.index[%d].start = 0x%X\n", i, root_dir->index[i].start );
+					printf( "dir.index[%d].name_index = %d\n", i, root_dir->index[i].name_index );
+					char * s = st->string[root_dir->index[i].name_index];
+					printf( "dir.index[%d].name  = \"%s\"\n", i, s );
+				}
+				printf( "\n" );
+
+				for( int i = 0; i < root_dir->next_index; i++ ) {
+					memset( f, 0, sizeof( afs_file ) );
+					klog( "file table %d\n", i );
+					if( ahci_read_at_byte_offset( root_dir->index[i].start, sizeof( afs_file ), f ) ) {
+
+						printf( "f.block_size: %d\n", f->block_size );
+						printf( "f.file_size: %d\n", f->file_size );
+						printf( "f.name_index = \"%s\"\n", st->string[f->name_index]);
+						printf( "\n" );
+
+						//printf( "%s\n\n", (char *)((char *)f + sizeof( afs_file )) );
+					} else {
+						printf( "file info read failed" );
+					}
+				}
+			} else {
+				printf( "dir read failed" );
+			}
+
+		} else {
+			printf( "string table read failed\n" );
+		}
+	} else {
+		printf( "drive read failed\n" );
+	}
+
+	printf( "file system tests done.\n" );
+	do_immediate_shutdown();
+
+	task_exit();
 }

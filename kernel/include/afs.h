@@ -34,7 +34,7 @@ typedef struct {
 
 typedef struct {
 	uint32_t	next_free;		// next free string table name
-	char		string[100][50];
+	char		string[50][50];
 } afs_string_table;
 
 typedef struct {	
@@ -46,14 +46,14 @@ typedef struct {
 } afs_drive;
 
 typedef struct {
-	uint8_t 	type;			// Type, always AFS_BLOCK_TYPE_FILE
+	uint32_t 	type;			// Type, always AFS_BLOCK_TYPE_FILE
 	uint32_t 	block_size;		// size of the block
 	uint32_t	file_size;		// size of the actual file data
 	uint32_t	name_index;		// string table index
 } afs_file;
 
 typedef struct {
-	uint8_t 	type;			// Type, always AFS_BLOCK_TYPE_DIRECTORY
+	uint32_t 	type;			// Type, always AFS_BLOCK_TYPE_DIRECTORY
     uint32_t	name_index;		// string table index
 	afs_index	index[256];		// Block index for things in this directory
 	uint32_t	next_index;		// next index free

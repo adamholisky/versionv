@@ -295,7 +295,7 @@ int main( void ) {
 	file_system.string_table = a_st;
 	file_system.next_fd = 0;
 
-	//afs_disply_diagnostic_data( file_system.drive );
+	afs_disply_diagnostic_data( file_system.drive );
 
 	vv_file *f = afs_fopen( &file_system, "testing.txt", "r" );
 
@@ -365,7 +365,7 @@ bool afs_add_file( uint8_t *drive_buff, afs_block_directory *dir, uint8_t *file_
 	
 	memcpy( (drive_buff + a_drive->next_free), file_buff, size );
 
-	a_drive->next_free = a_drive->next_free + f->file_size;
+	a_drive->next_free = a_drive->next_free + f->file_size + 1024;
 
 	return true;
 }
@@ -675,9 +675,9 @@ afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename )
 		// pre-pend with working dir
 	
 	if( filename[0] != '/' ) {
-		strcpy( full_filename, fs.working_directory );
+		strcpy( full_filename, fs->working_directory );
 		
-		int wd_len = strlen( fs.working_directory );
+		int wd_len = strlen( fs->working_directory );
 
 		if( full_filename[wd_len] != '/' ) {
 			full_filename[wd_len] = '/';
@@ -709,7 +709,7 @@ afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename )
 		}
 
 		// Test if item_name exists
-		if( afs_exists_in_dir( d, item_name ) != 0 ) {
+		if( afs_exists_in_dir( fs, d, item_name ) != 0 ) {
 			keep_going = false;
 			found = false;
 		} else {
