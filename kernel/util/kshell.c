@@ -21,11 +21,6 @@ char* dir_bin;
 char* dir_usr_bin;
 int line_pos;
 
-void kshell_ps( void );
-void kshell_test_loaded_file( void );
-void test_syscall( void );
-void kshell_test_devices( void );
-
 void kshell_get_line( void ) {
 	char c = ' ';
 	bool process_keypress = true;
@@ -140,7 +135,7 @@ void kshell_process_line( void ) {
 
 void kshell_run( void ) {
 	kexec( "ps", (uint32_t *)kshell_ps, NULL );
-	kexec( "test_devices", (uint32_t *)kshell_test_devices, NULL );
+	//kexec( "test_devices", (uint32_t *)kshell_test_devices, NULL );
 
 	test_syscall();
 
@@ -227,4 +222,12 @@ void kshell_test_devices( void ) {
 	printf( "\n" );
 
 	term->write( "Hello, terminal!\n", strlen( "Hello, terminal!\n" ) );
+}
+
+void kshell_divide_by_zero( void ) {
+	asm volatile( 
+		"movl 0, %eax \n\t"
+		"movl 0, %ecx \n\t"
+		"div %ecx \n\t"
+	);
 }

@@ -70,13 +70,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	
 	kshell_run();
 
-	if( TRIGGER_DIVIDE_BY_ZERO ) {
-		asm volatile( 
-			"movl 0, %eax \n\t"
-			"movl 0, %ecx \n\t"
-			"div %ecx \n\t"
-		);
-	}
+	
 
 	klog( "\n\nEnd of line." );
 

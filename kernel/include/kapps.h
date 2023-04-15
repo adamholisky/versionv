@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-void kapp_main_ps( int argc, char *argv[] );
+void kapp_ps( int argc, char *argv[] );
 
 #ifdef __cplusplus
 }
