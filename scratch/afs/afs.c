@@ -237,50 +237,41 @@ bool afs_mkdir( char * path, char * name ) {
 
 #define afsfile "/usr/local/osdev/versions/v/afs.img"
 
-bool afs_format( uint8_t *buff, uint32_t size );
-uint32_t afs_add_name_to_string_table( char * name );
-bool afs_add_file( uint8_t *drive_buff, afs_block_directory *dir, uint8_t *file_buff, uint32_t size, char * name );
-bool afs_cp( char *name, char *name_new, uint8_t *drive_buff, afs_block_directory *dir );
-
-
-uint32_t afs_get_file_location( vv_file_internal *fs, const char *filename );
-uint32_t afs_get_file_location_in_dir( vv_file_internal *fs, afs_block_directory *d, const char *filename );
-uint32_t afs_add_string(vv_file_internal *fs, char *name);
-void afs_ls(vv_file_internal *fs, char *path);
-afs_file *afs_get_file(vv_file_internal *fs, const char *filename);
-vv_file * afs_fopen( vv_file_internal *fs, const char * filename, const char * mode );
-uint32_t afs_exists( vv_file_internal *fs, const char * filename );
-uint32_t afs_fread( vv_file_internal *fs, void *ptr, uint32_t size, uint32_t nmemb, vv_file *fp );
-void afs_disply_diagnostic_data( uint8_t * buff );
-void dump_afs_file( vv_file_internal *fs, afs_file *f );
-uint32_t afs_exists_in_dir( vv_file_internal *fs, afs_block_directory *d, char *name );
-
 
 uint32_t drive_size_in_bytes = 1024 * 1024 * 2;
 char str_test[] = "Hello, world!";
 
-afs_drive * a_drive;
-afs_string_table * a_st;
-afs_block_directory *a_dir;
+afs_drive * bs_drive;
+afs_string_table * bs_string_table;
+afs_block_directory *bs_root_dir;
+afs_block_directory *bs_bin_dir;
 
 vv_file_internal file_system;
 
 int main( void ) {
 	uint8_t * buff = malloc( drive_size_in_bytes );
 
+	// Step 1 -- Format the drive
+
 	FILE *fp = fopen( afsfile, "r+" );
 
-	afs_format( buff, drive_size_in_bytes );
+	bootstrap_format( buff, drive_size_in_bytes );
 
-	afs_add_file( buff, a_dir, str_test, strlen( str_test ), "testing.txt" );
-	afs_cp( "hi", "log.txt", buff, a_dir );
+	// Step 2 -- Add files to root
+	bootstrap_add_file( buff, bs_root_dir, str_test, strlen( str_test ), "testing.txt" );
+	bootstrap_cp( "hi", "log.txt", buff, bs_root_dir );
+	
+	afs_block_directory *dir_bin = bootstrap_mkdir( buff, bs_root_dir, "bin" );
+	bootstrap_add_file( buff, dir_bin, "do something", strlen( "do something" ), "do_a_thing" );
+
+	// Step 3 -- Save drive contents
 
 	size_t written = fwrite( buff, drive_size_in_bytes, 1, fp );
 
-	printf( "ast->nf %d\n", a_st->next_free );
+	printf( "ast->nf %d\n", bs_string_table->next_free );
 	printf( "Written: %d\n", written );
 
-	for( int i = 0; i < a_drive->next_free; i++ ) {
+	for( int i = 0; i < bs_drive->next_free; i++ ) {
 		if( *(buff + i) != 0 ) {
 			//printf( "%X: %02X\n", i,  *(buff + i) );
 		}
@@ -290,9 +281,12 @@ int main( void ) {
 
 	fclose( fp );
 
+
+	// Step 4 -- Test OS routines and read logic
+
 	file_system.drive = buff;
-	file_system.root_dir = a_dir;
-	file_system.string_table = a_st;
+	file_system.root_dir = bs_root_dir;
+	file_system.string_table = bs_string_table;
 	file_system.next_fd = 0;
 
 	afs_disply_diagnostic_data( file_system.drive );
@@ -311,31 +305,37 @@ int main( void ) {
 	printf( "num_read: %d\n", num_read );
 	printf( "data read: \"%s\"\n", file_buff );
 
-	afs_ls( &file_system, "usr::bin" );
+	afs_ls( &file_system, "/bin" );
+	afs_ls( &file_system, "/" );
+	afs_ls( &file_system, "/bin/boop" );
 
 	return 0;
 }	
 
-bool afs_format( uint8_t *buff, uint32_t size ) {
-	a_drive = (afs_drive *)buff;
+bool bootstrap_format( uint8_t *buff, uint32_t size ) {
+	bs_drive = (afs_drive *)buff;
 
-	a_drive->version = AFS_VERSION_1;
-	a_drive->size = size;
-	a_drive->name_index = 0;
-	a_drive->next_free = sizeof( afs_drive );
+	bs_drive->version = AFS_VERSION_1;
+	bs_drive->size = size;
+	bs_drive->name_index = 0;
+	bs_drive->next_free = sizeof( afs_drive );
 
-	a_st = (afs_string_table *)(buff + a_drive->next_free );
-	a_drive->next_free = a_drive->next_free + sizeof( afs_string_table );
-	strcpy( a_st->string[0], "AFS Drive 1" );
-	a_st->next_free++;
+	bs_string_table = (afs_string_table *)(buff + bs_drive->next_free );
+	bs_drive->next_free = bs_drive->next_free + sizeof( afs_string_table );
+	strcpy( bs_string_table->string[0], "AFS Drive 1" );
+	bs_string_table->next_free++;
+	strcpy( bs_string_table->string[1], "." );
+	bs_string_table->next_free++;
+	strcpy( bs_string_table->string[2], ".." );
+	bs_string_table->next_free++;
 
-	a_dir = (afs_block_directory *)(buff + a_drive->next_free );
-	a_drive->root_directory = a_drive->next_free;
-	a_dir->type = AFS_BLOCK_TYPE_DIRECTORY;
-	a_dir->name_index = 0;
-	a_dir->next_index = 0;
-	memset( a_dir->index, 0, sizeof( afs_index ) * 256 );
-	a_drive->next_free = a_drive->next_free + sizeof( afs_block_directory );
+	bs_root_dir = (afs_block_directory *)(buff + bs_drive->next_free );
+	bs_drive->root_directory = bs_drive->next_free;
+	bs_root_dir->type = AFS_BLOCK_TYPE_DIRECTORY;
+	bs_root_dir->name_index = 0;
+	bs_root_dir->next_index = 0;
+	memset( bs_root_dir->index, 0, sizeof( afs_index ) * 256 );
+	bs_drive->next_free = bs_drive->next_free + sizeof( afs_block_directory );
 }
 
 /**
@@ -350,24 +350,40 @@ bool afs_format( uint8_t *buff, uint32_t size ) {
  * @return true File adding was successful
  * @return false File adding failed
  */
-bool afs_add_file( uint8_t *drive_buff, afs_block_directory *dir, uint8_t *file_buff, uint32_t size, char * name ) {
-	afs_file * f = (afs_file *)(drive_buff + a_drive->next_free);
-	f->name_index = afs_add_name_to_string_table( name );
+bool bootstrap_add_file( uint8_t *drive_buff, afs_block_directory *dir, uint8_t *file_buff, uint32_t size, char * name ) {
+	afs_file * f = (afs_file *)(drive_buff + bs_drive->next_free);
+	f->name_index = bootstrap_add_name_to_string_table( name );
 	f->block_size = size + 1024;
 	f->file_size = size;
 	f->type = AFS_BLOCK_TYPE_FILE;
 
-	dir->index[ dir->next_index ].start = a_drive->next_free;
+	dir->index[ dir->next_index ].start = bs_drive->next_free;
 	dir->index[ dir->next_index ].name_index = f->name_index;
 	dir->next_index++;
 
-	a_drive->next_free = a_drive->next_free + sizeof( afs_file );
+	bs_drive->next_free = bs_drive->next_free + sizeof( afs_file );
 	
-	memcpy( (drive_buff + a_drive->next_free), file_buff, size );
+	memcpy( (drive_buff + bs_drive->next_free), file_buff, size );
 
-	a_drive->next_free = a_drive->next_free + f->file_size + 1024;
+	bs_drive->next_free = bs_drive->next_free + f->file_size + 1024;
 
 	return true;
+}
+
+afs_block_directory* bootstrap_mkdir( uint8_t *drive_buff, afs_block_directory *parent, char *name ) {
+	afs_block_directory *d = (afs_file *)(drive_buff + bs_drive->next_free);
+	d->name_index = bootstrap_add_name_to_string_table( name );
+	d->next_index = 0;
+	d->type = AFS_BLOCK_TYPE_DIRECTORY;
+
+
+	parent->index[ parent->next_index ].name_index = d->name_index;
+	parent->index[ parent->next_index ].start = bs_drive->next_free;
+	parent->next_index++;
+
+	bs_drive->next_free = bs_drive->next_free + sizeof( afs_block_directory );
+
+	return d;
 }
 
 /**
@@ -381,7 +397,7 @@ bool afs_add_file( uint8_t *drive_buff, afs_block_directory *dir, uint8_t *file_
  * @return true Copying the file was successful
  * @return false Copying the file failed
  */
-bool afs_cp( char *name_old, char *name_new, uint8_t *drive_buff, afs_block_directory *dir ) {
+bool bootstrap_cp( char *name_old, char *name_new, uint8_t *drive_buff, afs_block_directory *dir ) {
 	FILE *fp = fopen( name_old, "r" );
 
 	struct stat sta;
@@ -395,7 +411,7 @@ bool afs_cp( char *name_old, char *name_new, uint8_t *drive_buff, afs_block_dire
 	uint32_t read_size = fread( buff, file_size, 1, fp );
 	printf( "read_size: %d\n", read_size );
 
-	afs_add_file( drive_buff, a_dir, buff, file_size, name_new );
+	bootstrap_add_file( drive_buff, bs_root_dir, buff, file_size, name_new );
 
 	fclose( fp );
 }
@@ -407,11 +423,11 @@ bool afs_cp( char *name_old, char *name_new, uint8_t *drive_buff, afs_block_dire
  * 
  * @return uint32_t Index that the name was added at
  */
-uint32_t afs_add_name_to_string_table( char * name ) {
-	strcpy( a_st->string[ a_st->next_free ], name );
-	a_st->next_free++;
+uint32_t bootstrap_add_name_to_string_table( char * name ) {
+	strcpy( bs_string_table->string[ bs_string_table->next_free ], name );
+	bs_string_table->next_free++;
 
-	return a_st->next_free - 1;
+	return bs_string_table->next_free - 1;
 }
 
 
@@ -600,7 +616,7 @@ void afs_disply_diagnostic_data( uint8_t * buff ) {
 	printf( "dir.name_index = %d\n", d->name_index );
 	
 	for( int i = 0; i < d->next_index; i++ ) {
-		printf( "dir.index[%d].start = %d\n", i, d->index[i].start );
+		printf( "dir.index[%d].start = 0x%X\n", i, d->index[i].start );
 		printf( "dir.index[%d].name_index = \"%s\"\n", i, st->string[d->index[i].name_index] );
 	}
 	printf( "\n" );
@@ -644,15 +660,30 @@ uint32_t afs_add_string( vv_file_internal *fs, char * name ) {
 	return fs->string_table->next_free - 1;
 }
 
+/**
+ * @brief Send list of files to stdout
+ * 
+ * @param fs Pointer to the file system object
+ * @param path Path of directory to list
+ */
 void afs_ls( vv_file_internal *fs, char *path ) {
-	afs_block_directory *dir_to_list = fs->root_dir;
+	afs_generic_block *block = afs_get_generic_block( fs, path );
 
-	printf( "ls output:\n" );
-
-	for( int i = 0; i < dir_to_list->next_index; i++ ) {
-		printf( "%s\t", fs->string_table->string[ dir_to_list->index[i].name_index ] );
+	if( block == NULL ) {
+		printf( "Directory not found.\n" );
+		return;
 	}
 
+	if( block->type == AFS_BLOCK_TYPE_DIRECTORY ) {
+		afs_block_directory *dir_to_list = (afs_block_directory *)block;
+
+		for( int i = 0; i < dir_to_list->next_index; i++ ) {
+			printf( "%s  ", fs->string_table->string[ dir_to_list->index[i].name_index ] );
+		}
+	} else {
+		printf( "Not a directory." );
+	}
+	
 	printf( "\n" );
 }
 
@@ -661,6 +692,14 @@ bool afs_mkdir( vv_file_internal *fs, afs_block_directory *d, char *name ) {
 	d->index[ d->next_index ].name_index = afs_add_string( fs, name );
 }
 
+#undef KDEBUG_GET_GENERIC_BLOCK
+/**
+ * @brief Get the generic block of the item located at filename
+ * 
+ * @param fs Pointer to the filesystem object
+ * @param filename Filename (and path) of the block to get
+ * @return afs_generic_block* Generic block, acceptable to cast to given type
+ */
 afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename ) {
 	char full_filename[256];
 	int i = 0;
@@ -668,6 +707,7 @@ afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename )
 	afs_block_directory *d = fs->root_dir;
 	bool keep_going = true;
 	bool found = false;
+	afs_generic_block *result = NULL;
 
 	memset( full_filename, 0, 256 );
 
@@ -685,7 +725,13 @@ afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename )
 		}
 
 		strcat( full_filename, filename );
+	} else {
+		strcpy( full_filename, filename );
 	}
+
+	#ifdef KDEBUG_GET_GENERIC_BLOCK
+	printf( "full_filename: \"%s\"\n", full_filename );
+	#endif
 
 	// If first char is /, then it's an absolute path
 		// iterate over each /
@@ -700,7 +746,6 @@ afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename )
 
 			if( full_filename[i] == '/' ) {
 				x = 256;
-				i++;
 			}
 
 			if( full_filename[i] == 0 ) {
@@ -708,16 +753,51 @@ afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename )
 			}
 		}
 
-		// Test if item_name exists
-		if( afs_exists_in_dir( fs, d, item_name ) != 0 ) {
-			keep_going = false;
-			found = false;
-		} else {
+		#ifdef KDEBUG_GET_GENERIC_BLOCK
+		printf( "item_name: \"%s\"\n", item_name );
+		#endif
+
+		// If item name is /, then continue
+		if( strcmp(item_name, "/") == 0 ) {
+			d = fs->root_dir;
+
+			// If this is it, then just return the root directory
+			if( strcmp(full_filename, "/") == 0 ) {
+				return d;
+			}
+
 			found = true;
+		} else {
+			// Test if item_name exists
+			uint32_t loc = afs_exists_in_dir( fs, d, item_name );
+
+			if( loc == 0 ) {
+				keep_going = false;
+				found = false;
+			} else {
+				found = true;
+				
+				#ifdef KDEBUG_GET_GENERIC_BLOCK
+				printf( "loc: 0x%X\n", loc );
+				#endif
+
+				result = (afs_generic_block *)((uint8_t *)fs->drive + loc );
+				if( result->type == AFS_BLOCK_TYPE_DIRECTORY ) {
+					d = (afs_block_directory *)result;
+				} 
+
+				#ifdef KDEBUG_GET_GENERIC_BLOCK
+				printf( "block type: %d\n", result->type );
+				#endif
+			}
 		}
+		
+		#ifdef KDEBUG_GET_GENERIC_BLOCK
+		printf( "found: %d\n", found );
+		#endif
 	}
 
-
+	return result;
 }
 
 uint32_t afs_exists_in_dir( vv_file_internal *fs, afs_block_directory *d, char *name ) {

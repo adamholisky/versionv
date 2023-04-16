@@ -186,3 +186,198 @@ void dump_afs_file( vv_file_internal *fs, afs_file *f ) {
 
 	printf( "%s\n\n", (char *)((char *)f + sizeof( afs_file )) );
 }
+
+#undef KDEBUG_GET_GENERIC_BLOCK
+/**
+ * @brief Get the generic block of the item located at filename
+ * 
+ * @param fs Pointer to the filesystem object
+ * @param filename Filename (and path) of the block to get
+ * @return afs_generic_block* Generic block, acceptable to cast to given type
+ */
+afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename, afs_generic_block *result_block ) {
+	char full_filename[256];
+	int i = 0;
+	char item_name[256];
+	afs_block_directory *d = fs->root_dir;
+	bool keep_going = true;
+	bool found = false;
+	afs_generic_block *result = NULL;
+
+	memset( full_filename, 0, 256 );
+
+	// If first char isn't /, then it's a relative path
+		// pre-pend with working dir
+	
+	if( filename[0] != '/' ) {
+		// Handle an empty path at root
+		if( filename[0] == 0 ) {
+			strcpy( full_filename, fs->working_directory );
+		} else {
+			strcpy( full_filename, fs->working_directory );
+		
+			int wd_len = strlen( fs->working_directory );
+
+			if( full_filename[wd_len] != '/' ) {
+				full_filename[wd_len] = '/';
+				full_filename[wd_len + 1] = 0;
+			}
+
+			strcat( full_filename, filename );
+		}
+		
+	} else {
+		strcpy( full_filename, filename );
+	}
+
+	#ifdef KDEBUG_GET_GENERIC_BLOCK
+	printf( "full_filename: \"%s\"\n", full_filename );
+	#endif
+
+	// If first char is /, then it's an absolute path
+		// iterate over each /
+		// result is final iteration
+	
+	while( full_filename[i] != 0 && keep_going ) {
+		memset( item_name, 0, 256 );
+
+		// Copy the current element into item_name
+		for( int x = 0; x < 256; x++, i++ ) {
+			item_name[x] = full_filename[i];
+
+			if( full_filename[i] == '/' ) {
+				x = 256;
+			}
+
+			if( full_filename[i] == 0 ) {
+				x = 256;
+			}
+		}
+
+		#ifdef KDEBUG_GET_GENERIC_BLOCK
+		printf( "item_name: \"%s\"\n", item_name );
+		#endif
+
+		// If item name is /, then continue
+		if( strcmp(item_name, "/") == 0 ) {
+			d = fs->root_dir;
+
+			// If this is it, then just return the root directory
+			if( strcmp(full_filename, "/") == 0 ) {
+				return d;
+			}
+
+			found = true;
+		} else {
+			// Test if item_name exists
+			uint32_t loc = afs_exists_in_dir( fs, d, item_name );
+
+			if( loc == 0 ) {
+				keep_going = false;
+				found = false;
+			} else {
+				found = true;
+				
+				#ifdef KDEBUG_GET_GENERIC_BLOCK
+				printf( "loc: 0x%X\n", loc );
+				#endif
+
+				// TODO: don't use a hardcoded overflow to make sure that we encompas all block types' sizes
+				if( ! ahci_read_at_byte_offset( loc, sizeof( afs_generic_block), result_block ) ) {
+					printf( "FS GGB: Read of generic block location failed.\n" );
+					return;
+				}
+
+				if( result_block->type == AFS_BLOCK_TYPE_DIRECTORY ) {
+					d = (afs_block_directory *)result_block;
+				} 
+
+				#ifdef KDEBUG_GET_GENERIC_BLOCK
+				printf( "block type: %d\n", result_block->type );
+				#endif
+			}
+		}
+		
+		#ifdef KDEBUG_GET_GENERIC_BLOCK
+		printf( "found: %d\n", found );
+		#endif
+	}
+
+	if( found ) {
+		result = result_block;
+	}
+
+	return result;
+}
+
+#undef KDEBUG_AFS_LS
+/**
+ * @brief Send list of files to stdout
+ * 
+ * @param fs Pointer to the file system object
+ * @param path Path of directory to list
+ */
+void afs_ls( vv_file_internal *fs, char *path ) {
+	afs_generic_block _block;
+	afs_generic_block *block = NULL;
+	
+	memset( &_block, 0, sizeof(afs_generic_block) );
+
+	block = afs_get_generic_block( fs, path, &_block );
+
+	if( block == NULL ) {
+		printf( "Directory not found.\n" );
+		return;
+	}
+
+	if( block->type == AFS_BLOCK_TYPE_DIRECTORY ) {
+		afs_block_directory *dir_to_list = (afs_block_directory *)block;
+
+		#ifdef KDEBUG_AFS_LS
+		printf( "dir.next_index = %d\n", dir_to_list->next_index );
+		printf( "dir.name_index = %d\n", dir_to_list->name_index );
+	
+		for( int i = 0; i < dir_to_list->next_index; i++ ) {
+			printf( "dir.index[%d].start = 0x%X\n", i, dir_to_list->index[i].start );
+			printf( "dir.index[%d].name_index = %d\n", i, dir_to_list->index[i].name_index );
+			char * s = fs->string_table->string[dir_to_list->index[i].name_index];
+			printf( "dir.index[%d].name  = \"%s\"\n", i, s );
+		}
+		printf( "\n" );
+		#endif
+
+		for( int i = 0; i < dir_to_list->next_index; i++ ) {
+			printf( "%s  ", fs->string_table->string[ dir_to_list->index[i].name_index ] );
+		}
+	} else {
+		printf( "Not a directory." );
+	}
+	
+	printf( "\n" );
+}
+
+/**
+ * @brief Add name to the string table
+ * 
+ * @param name Text string to add
+ * 
+ * @return uint32_t Index that the name was added at
+ */
+uint32_t afs_add_string( vv_file_internal *fs, char * name ) {
+	strcpy( fs->string_table->string[ fs->string_table->next_free ], name );
+	fs->string_table->next_free++;
+
+	return fs->string_table->next_free - 1;
+}
+
+uint32_t afs_exists_in_dir( vv_file_internal *fs, afs_block_directory *d, char *name ) {
+	uint32_t result = 0;
+
+	for( int i = 0; i < d->next_index; i++ ) {
+		if( strcmp( fs->string_table->string[ d->index[i].name_index ], name ) == 0 ) {
+			result = d->index[i].start;
+		}
+	}
+
+	return result;
+}

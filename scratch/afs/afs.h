@@ -46,7 +46,8 @@ typedef struct {
 } afs_drive;
 
 typedef struct {
-	uint8_t 	type;				// Type of the block
+	uint8_t 	type;			// Type of the block
+	uint8_t		padding[100];
 } afs_generic_block;
 
 typedef struct {
@@ -81,6 +82,32 @@ typedef struct {
 	uint32_t	next_fd;
 } vv_file_internal;
 
+uint32_t afs_get_file_location( vv_file_internal *fs, const char *filename );
+uint32_t afs_get_file_location_in_dir( vv_file_internal *fs, afs_block_directory *d, const char *filename );
+uint32_t afs_add_string(vv_file_internal *fs, char *name);
+void afs_ls(vv_file_internal *fs, char *path);
+afs_file *afs_get_file(vv_file_internal *fs, const char *filename);
+vv_file * afs_fopen( vv_file_internal *fs, const char * filename, const char * mode );
+uint32_t afs_exists( vv_file_internal *fs, const char * filename );
+uint32_t afs_fread( vv_file_internal *fs, void *ptr, uint32_t size, uint32_t nmemb, vv_file *fp );
+void afs_disply_diagnostic_data( uint8_t * buff );
+void dump_afs_file( vv_file_internal *fs, afs_file *f );
+uint32_t afs_exists_in_dir( vv_file_internal *fs, afs_block_directory *d, char *name );
+afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename );
+
+//
+//
+//
+// DO NOT INCLUDE IN VV
+// 
+//
+//
+
+bool bootstrap_format( uint8_t *buff, uint32_t size );
+uint32_t bootstrap_add_name_to_string_table( char * name );
+bool bootstrap_add_file( uint8_t *drive_buff, afs_block_directory *dir, uint8_t *file_buff, uint32_t size, char * name );
+bool bootstrap_cp( char *name, char *name_new, uint8_t *drive_buff, afs_block_directory *dir );
+afs_block_directory* bootstrap_mkdir( uint8_t *drive_buff, afs_block_directory *parent, char *name );
 
 #ifdef __cplusplus
 }

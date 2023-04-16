@@ -15,6 +15,7 @@
 #include <kshell.h>
 #include "intel8254.h"
 #include <ahci.h>
+#include <fs.h>
 
 #define END_IMMEDIATELY
 #define TRIGGER_DIVIDE_BY_ZERO false
@@ -60,6 +61,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	
 	pci_initalize();
 	ahci_initalize();
+	fs_initalize();
 	//intel8254_initalize();
 	keyboard_initalize();
 
@@ -67,7 +69,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	READY_FOR_INPUT = true;
 
 	task_check();
-	
+
 	kshell_run();
 
 	

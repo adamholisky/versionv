@@ -14,6 +14,7 @@
 #include <device.h>
 #include <terminal.h>
 #include <ahci.h>
+#include <fs.h>
 
 char line[256];
 char jail_env[256];
@@ -135,12 +136,23 @@ void kshell_process_line( void ) {
 }
 
 void kshell_run( void ) {
+	kshell_fake_cli( "ps_to_log" );
 	kexec( "ps", (uint32_t *)kshell_ps, NULL );
-	kexec( "test_devices", (uint32_t *)kshell_test_devices, NULL );
 
-	test_syscall();
+	kshell_fake_cli( "ls" );
+	primative_ls( "" );
 
-	kshell_afs_test();
+	kshell_fake_cli( "ls /" );
+	primative_ls( "/" );
+
+	kshell_fake_cli( "ls /bin" );
+	primative_ls( "/bin" );
+
+	//kexec( "test_devices", (uint32_t *)kshell_test_devices, NULL );
+
+	//test_syscall();
+
+	//kshell_afs_test_alpha();
 
 /* 	uint32_t binaddr = kdebug_get_symbol_addr( "_binary_afs_img_start" );
 	kdebug_peek_at( binaddr );
@@ -218,9 +230,9 @@ void test_syscall( void ) {
 void kshell_test_devices( void ) {
 	device *term = get_device_by_file( "/dev/tty0" );
 
-	term->write( "A", 1 );
+	//term->write( "A", 1 );
 
-	printf( "\n" );
+	//printf( "\n" );
 
 	term->write( "Hello, terminal!\n", strlen( "Hello, terminal!\n" ) );
 
@@ -235,7 +247,7 @@ void kshell_divide_by_zero( void ) {
 	);
 }
 
-void kshell_afs_test( void ) {
+void kshell_afs_test_alpha( void ) {
 	afs_drive *drive = malloc( sizeof(afs_drive) );
 	afs_string_table *st = malloc( sizeof(afs_string_table) );
 	afs_block_directory *root_dir = malloc( sizeof(afs_block_directory) );

@@ -242,7 +242,7 @@ void ahci_initalize( void ) {
 
     klog( "Read_result: %d\n", read_result );
 	
-	printf( "Buffer: \n" );
+	/* printf( "Buffer: \n" );
 	
 	int z = 0;
 	for( int b = 0; b < 50; b++ ) {
@@ -257,7 +257,7 @@ void ahci_initalize( void ) {
 		if( z == 0x8 ) {
 			z = 0;
 		}
-	}
+	} */
  	
     log_entry_exit();
 }
