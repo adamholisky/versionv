@@ -70,3 +70,11 @@ void fs_initalize( void ) {
 void primative_ls( char *path ) {
 	afs_ls( &file_system, path );
 }
+
+void primative_pwd( void ) {
+	printf( "%s\n", file_system.working_directory );
+}
+
+void primative_cat( char *path ) {
+	
+}
