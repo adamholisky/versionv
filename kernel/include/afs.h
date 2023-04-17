@@ -18,14 +18,13 @@ extern "C"
 
 
 	*/
+#define MAX_FD 20
 
 #define AFS_VERSION_1 1
 
 #define AFS_BLOCK_TYPE_UNKNOWN 0
 #define AFS_BLOCK_TYPE_FILE 1
 #define AFS_BLOCK_TYPE_DIRECTORY 2
-
-#define MAX_FD 20
 
 typedef struct {
 	uint32_t	start;			// starting byte of the item
@@ -65,7 +64,6 @@ typedef struct {
 	uint8_t		padding[ sizeof(afs_block_directory) ];	// TODO: Fix this it's dumb
 } afs_generic_block;
 
-
 typedef struct {
 	uint32_t	fd;
 	uint8_t		*base;
@@ -95,8 +93,8 @@ afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename, 
 afs_block_directory * afs_get_parent_dir( vv_file_internal *fs, char *name, afs_block_directory *d );
 
 // Syscall implementations
-vv_file * afs_fopen( vv_file_internal *fs, const char * filename, const char * mode );
-uint32_t afs_fread( vv_file_internal *fs, void *ptr, uint32_t size, uint32_t nmemb, vv_file *fp );
+vv_file * afs_open( vv_file_internal *fs, const char * filename, const char * mode );
+uint32_t afs_read( vv_file_internal *fs, void *ptr, uint32_t size, vv_file *fp );
 void afs_ls(vv_file_internal *fs, char *path);
 
 // Diagnostic routines

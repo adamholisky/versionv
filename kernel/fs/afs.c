@@ -1,6 +1,7 @@
 #include <kernel.h>
 #include <afs.h>
 
+#undef KDEBUG_AFS_OPEN
 /**
  * @brief Opens a file, returning FP
  * 
@@ -10,12 +11,16 @@
  * 
  * @return vv_file* Pointer to the file struct
  */
-vv_file * afs_fopen( vv_file_internal *fs, const char * filename, const char * mode ) {
-	afs_file f;
+vv_file * afs_open( vv_file_internal *fs, const char * filename, const char * mode ) {
+	afs_file *f_pointer, f;
 	vv_file *fp;
 	
+	memset( &f, 0, sizeof(afs_file) );
+
+	f_pointer = afs_get_file( fs, filename, &f );
+	
 	// Bail if not found
-	if( ! afs_get_file( fs, filename, &f ) ) {
+	if( ! f_pointer ) {
 		printf( "afs_open: afs_get_file returned NULL.\n" );
 		return NULL;
 	}
@@ -25,9 +30,20 @@ vv_file * afs_fopen( vv_file_internal *fs, const char * filename, const char * m
 		return NULL;
 	}
 
+	#ifdef KDEBUG_AFS_OPEN
+	printf( "filename: \"%s\"\n", filename );
+	#endif
+
+	uint32_t base = afs_get_file_location( fs, filename );
+
+	#ifdef KDEBUG_AFS_OPEN
+	printf( "base: 0x%X\n", base );
+	klog( "hit\n" );
+	#endif
+
 	fp = &fs->fd[fs->next_fd];
 	fp->fd = fs->next_fd;
-	fp->base = afs_get_file_location( fs, filename ) + sizeof(afs_file);
+	fp->base = base + sizeof(afs_file);
 	fp->size = f.file_size;
 	fp->position = 0;
 	fp->dirty = false;
@@ -38,49 +54,36 @@ vv_file * afs_fopen( vv_file_internal *fs, const char * filename, const char * m
 	return fp;
 }
 
-#undef KDEBUG_AFS_FREAD
+#undef KDEBUG_AFS_READ
 /**
  * @brief Reads data from the given stream
  * 
  * @param fs pointer to the file system object
  * @param ptr pointer to buffer to put read data into
- * @param size number of bytes of each element to read
- * @param nmemb number of elements
+ * @param size number of bytes to read
  * @param fp pointer to the file pointer object
  * 
  * @return uint32_t number of members read
  */
-uint32_t afs_fread( vv_file_internal *fs, void *ptr, uint32_t size, uint32_t nmemb, vv_file *fp ) {
-	uint32_t num_read = 0;
-	uint32_t ahci_memb_read = 0;
+uint32_t afs_read( vv_file_internal *fs, void *ptr, uint32_t size, vv_file *fp ) {
+	uint32_t bytes_read = 0;
 
-	#ifdef KDEBUG_AFS_FREAD
+	#ifdef KDEBUG_AFS_READ
 	printf( "fs: 0x%X\n", fs );
 	printf( "ptr: 0x%X\n", ptr );
 	printf( "size: %d\n", size );
-	printf( "nmemb: %d\n", nmemb );
 	printf( "fp: 0x%X\n", fp );
 	printf( "fp.pos: 0x%X\n", fp->position );
+	printf( "fp.base: 0x%X\n", fp->base );
 	#endif
 
-	for( int i = 0; i < nmemb; i++ ) {
-		if( fp->position + size > fp->size ) {
-			i = nmemb + 1;
-		}
+	bytes_read = ahci_read_at_byte_offset( fp->base + fp->position, size, (uint8_t *)ptr );
 
-		ahci_memb_read = 0;
-
-		ahci_memb_read = ahci_read_at_byte_offset( fp->base + fp->position + (size * i), size, (uint8_t *)ptr + (size * i) );
-
-		#ifdef KDEBUG_AFS_FREAD
-		printf( "ahci memb read: %d\n", ahci_memb_read );
-		#endif 
-
-		fp->position = fp->position + size;
-		num_read++;
-	}
+	#ifdef KDEBUG_AFS_READ
+	printf( "num bytes read: %d\n", bytes_read );
+	#endif 
 	
-	return num_read;
+	return bytes_read;
 }
 
 /**
@@ -115,7 +118,7 @@ uint32_t afs_get_file_location( vv_file_internal *fs, const char *filename ) {
 	dd = afs_get_parent_dir( fs, filename, &d );
 
 	if( ! dd ) {
-		//printf( "afs_get_file_location: parent dir is NULL\n" );
+		printf( "afs_get_file_location: parent dir is NULL\n" );
 		return 0;
 	}
 
@@ -126,18 +129,28 @@ uint32_t afs_get_file_location( vv_file_internal *fs, const char *filename ) {
 	char actual_filename[256];
 	memset( actual_filename, 0, 256 );
 
-	char *last_slash = strrchr( filename, '/' );
-	strcpy( &actual_filename, (last_slash + 1) );
+	if( strchr( filename, '/' ) ) {
+		char *last_slash = strrchr( filename, '/' );
+		strcpy( &actual_filename, (last_slash + 1) );
+	} else {
+		strcpy( &actual_filename, filename );
+	}
 	
 	#ifdef KDEBUG_AFS_GET_FILE_LOCATION
 	printf( "filename: %s\n", filename );
 	printf( "afs_get_file_location: actual file name = %s\n", actual_filename );
+	printf( "dd name: \"%s\"\n", fs->string_table->string[ dd->name_index ] );
+	printf( "dd->next_index: %d\n", dd->next_index );
 	#endif
 
-	for( int i = 0; i < d.next_index; i++ ) {
-		if( strcmp( fs->string_table->string[ d.index[i].name_index ], actual_filename ) == 0 ) {
-			loc = d.index[i].start;
+	for( int i = 0; i < dd->next_index; i++ ) {
+		if( strcmp( fs->string_table->string[ dd->index[i].name_index ], actual_filename ) == 0 ) {
+			loc = dd->index[i].start;
 			i = 1000000;
+			
+			#ifdef KDEBUG_AFS_GET_FILE_LOCATION
+			printf( "hit\n" );
+			#endif
 		}
 	}
 
@@ -273,7 +286,7 @@ afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename, 
 		
 			int wd_len = strlen( fs->working_directory );
 
-			if( full_filename[wd_len] != '/' ) {
+			if( full_filename[wd_len - 1] != '/' ) {
 				full_filename[wd_len] = '/';
 				full_filename[wd_len + 1] = 0;
 			}
@@ -368,6 +381,8 @@ afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename, 
 	if( found ) {
 		result = result_block;
 	}
+
+	dump_stack_trace();
 
 	return result;
 }

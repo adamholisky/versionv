@@ -3,27 +3,13 @@
 #include "task.h"
 #include "interrupts.h"
 
-/*
-	Call Num.		Function
-					Return
-					Param List
-					Notes
-	
-	0	read
-		uint32_t	number of bytes read
-		1			fd
-		2			buff pointer
-		3			max num of bytes to read
-
-	1	write
-
-	2	open
-
-	3	close
-
-	4	sched_yield	
-*/
-
+/**
+ * @brief Handle a syscall from the assembly interrupt
+ * 
+ * @param stack Stack of the syscall
+ * @param _context x86 context at the interrupt point
+ * @return uint32_t Value expected to return for good measure, actual result goes into eax
+ */
 uint32_t syscall_handler( uint32_t * stack, x86_context ** _context ) {
 	x86_context *context = *_context;
 	uint32_t result = 0;
@@ -36,6 +22,10 @@ uint32_t syscall_handler( uint32_t * stack, x86_context ** _context ) {
 			break;
 		case SYSCALL_WRITE:
 			//debugf( "[SYSCALL] Write\n" );
+			break;
+		case SYSCALL_OPEN:
+			result = syscall_open( (char *)context->edi, context->esi );
+			context->eax = result;
 			break;
 		case SYSCALL_SCHED_YIELD:
 			// This should never be hit, handled prior to being passed to handler
@@ -68,8 +58,20 @@ uint32_t syscall_handler( uint32_t * stack, x86_context ** _context ) {
 	return result;
 }
 
+/**
+ * @brief Sets up and executes a syscall with the given structures 
+ * 
+ * @param call_num Syscall number as indicated in defines
+ * @param num_args Number of arguments in the syscall
+ * @param args Pointer to the argument array
+ * @return uint32_t Result of the syscall (from eax)
+ */
 uint32_t syscall( uint32_t call_num, uint32_t num_args, syscall_args * args ) {
 	uint32_t ret = 0;
+
+	//klog( "arg3: 0x%08X\n", args->arg_3 );
+	// TODO: WHY DO WE NEED THIS?!?!?
+	int arg3 = args->arg_3;
 
 	switch( num_args ) {
 		case 6:
@@ -84,7 +86,7 @@ uint32_t syscall( uint32_t call_num, uint32_t num_args, syscall_args * args ) {
 				"int %5 \n"
 				"movl %%eax, %0"
 				:"=r"(ret)
-				:"r"(call_num), "m"(args->arg_1), "m"(args->arg_2), "m"(args->arg_3), "i"(0x99)
+				:"r"(call_num), "m"(args->arg_1), "m"(args->arg_2), "m"(arg3), "i"(0x99)
 				:"%eax" 
 			);
 			break;

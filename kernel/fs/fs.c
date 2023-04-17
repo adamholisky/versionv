@@ -8,7 +8,7 @@ afs_drive main_drive;
 afs_block_directory root_dir;
 afs_string_table string_table;
 
-#define KDEBUG_FS_INIT
+#undef KDEBUG_FS_INIT
 /**
  * @brief Initalize the filesystem
  * 
@@ -76,10 +76,15 @@ void primative_pwd( void ) {
 }
 
 #undef KDEBUG_PRIMATIVE_CAT
-void primative_cat( char *path ) {
+/**
+ * @brief AFS/Low version of cat for testing
+ * 
+ * @param pathname path + filename of the file to cat
+ */
+void primative_cat( char *pathname ) {
 	vv_file *fp;
 
-	fp = afs_fopen( &file_system, path, "r" );
+	fp = afs_open( &file_system, pathname, "r" );
 
 	if( ! fp ) {
 		printf( "CAT: fp is NULL\n" );
@@ -93,7 +98,7 @@ void primative_cat( char *path ) {
 
 	uint8_t *data = malloc( fp->size );
 
-	if( afs_fread( &file_system, data, fp->size, 1, fp ) == 0 ) {
+	if( afs_read( &file_system, data, fp->size, fp ) == 0 ) {
 		printf( "CAT: afs_fread returned 0.\n" );
 		return;
 	}
@@ -101,4 +106,23 @@ void primative_cat( char *path ) {
 	printf( "%s\n", data );
 
 	free( data );
+}
+
+/**
+ * @brief Get the fs internal object
+ * 
+ * @return vv_file_internal* Pointer to the file system internal management object
+ */
+vv_file_internal * get_fs_internal( void ) {
+	return &file_system;
+}
+
+/**
+ * @brief Get the file size of the given FD
+ * 
+ * @param FD file descriptor to get the size of
+ * @return uint32_t size of the file, 0 if empty or invalid
+ */
+uint32_t get_file_size( int _FD ) {
+	return file_system.fd[_FD].size;
 }

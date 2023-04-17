@@ -56,19 +56,27 @@ void kshell_process_line( void ) {
 	bool check_file_cmd = true;
 	char path[256];
 	char args[4][100];
+	char *argv_builder[4];
 	char *c = line;
 	bool keep_processing = true;
-	int i = 0;
-	int j = 0;
+	int num_args = 0;
 
 	memset( path, 0, 256 );
 	memset( args, 0, 4 * 100 );
 
+	int i = 0;
+	int j = 0;
+
 	do {
-		if( *c != ' ' ) {
+		if( *c != ' ' && *c != 0 ) {
 			args[i][j] = *c; 
 			j++;
 		} else {
+			if( j != 0 ) {
+				num_args++;
+			}
+
+			args[i][j] = 0;
 			i++;
 			j = 0;
 
@@ -79,12 +87,15 @@ void kshell_process_line( void ) {
 
 		c++;
 	} while( keep_processing );
+
+	klog( "num_args = %d\n", num_args );
 	
-	/* 
-	for( i = 0; i < 4; i++ ) {
-		debugf( "args[%d] = \"%s\"\n", i, args[i] );
+	
+	for( int z = 0; z < 4; z++ ) {
+		debugf( "args[%d] = \"%s\"\n", z, args[z] );
+		argv_builder[z] = args[z];
 	} 
-	*/
+	
 
 	if( strcmp( args[0], "1" ) == 0 ) {
 		kshell_test_fork();
@@ -97,6 +108,14 @@ void kshell_process_line( void ) {
 	if( strcmp( args[0], "ps" ) == 0 ) {
 		//kshell_ps();
 		kexec( "ps",(uint32_t *)kshell_ps, NULL );
+	}
+
+	if( strcmp( args[0], "cat" ) == 0 ) {
+		kshell_cat( num_args, argv_builder );
+	}
+
+	if( strcmp( args[0], "ls" ) == 0 ) {
+		primative_ls( args[1] );
 	}
 
 	/* if( strcmp( args[0], "ls" ) == 0 ) {
@@ -135,35 +154,61 @@ void kshell_process_line( void ) {
 	} */
 }
 
+#define KDEBUG_CAT
+void kshell_cat( int argc, char *argv[] ) {
+	bool show_help = false;
+
+	if( argc < 2 ) {
+		show_help = true;	
+	} else if( strcmp( argv[1], "--help" ) == 0 ) {
+		show_help = true;
+	}
+
+	if( show_help ) {
+		printf( "cat: cat <pathname>\n" );
+	}
+
+	#ifdef KDEBUG_CAT
+	klog( "cating \"%s\"\n", argv[1] );
+	#endif
+
+	int FD = open( argv[1], 0 );
+	
+	char *buff = malloc( 2048 );
+	memset( buff, 0, 2048 );
+
+	int size = get_file_size(FD);
+	int bytes_read = read( FD, buff, size );
+
+	#ifdef KDEBUG_CAT
+	klog( "bytes read: %d\n", bytes_read );
+	#endif
+
+	printf( "%s\n", buff );
+
+	free( buff );
+}
+
+void kshell_fake_cli( char *cmd ) {
+	printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> %s\n" , wd, cmd );
+}
+
+void kshell_automate( char *cmd_line ) {
+	memset( line, 0, 256 );
+	strcpy( line, cmd_line );
+
+	kshell_fake_cli( cmd_line );
+	kshell_process_line();
+}
+
 void kshell_run( void ) {
 	kshell_fake_cli( "ps_to_log" );
 	kexec( "ps", (uint32_t *)kshell_ps, NULL );
 
-	kshell_fake_cli( "ls" );
-	primative_ls( "" );
-
-	kshell_fake_cli( "ls /" );
-	primative_ls( "/" );
-
-	kshell_fake_cli( "ls /bin" );
-	primative_ls( "/bin" );
-
-	kshell_fake_cli( "pwd" );
-	primative_pwd();
-
-	kshell_fake_cli( "cat /bin/do_a_thing" );
-	primative_cat( "/bin/do_a_thing" );
-
-	//kexec( "test_devices", (uint32_t *)kshell_test_devices, NULL );
-
-	//test_syscall();
-
-	//kshell_afs_test_alpha();
-
-/* 	uint32_t binaddr = kdebug_get_symbol_addr( "_binary_afs_img_start" );
-	kdebug_peek_at( binaddr );
-
-	afs_disply_diagnostic_data( (uint8_t *)binaddr ); */
+	kshell_automate( "ls" );
+	kshell_automate( "ls /bin" );
+	kshell_automate( "cat /bin/do_a_thing" );
+	kshell_automate( "cat bin/do_a_thing" );
 
 	printf( "Shutting down gracefully.\n" );
 	kshell_shutdown();
@@ -253,6 +298,10 @@ void kshell_divide_by_zero( void ) {
 	);
 }
 
+/**
+ * @brief Test that AFS drive and root directory are sane
+ * 
+ */
 void kshell_afs_test_alpha( void ) {
 	afs_drive *drive = malloc( sizeof(afs_drive) );
 	afs_string_table *st = malloc( sizeof(afs_string_table) );
