@@ -11,11 +11,12 @@
  * @return vv_file* Pointer to the file struct
  */
 vv_file * afs_fopen( vv_file_internal *fs, const char * filename, const char * mode ) {
-	afs_file *f = afs_get_file( fs, filename );
+	afs_file f;
 	vv_file *fp;
-
+	
 	// Bail if not found
-	if( f == NULL ) {
+	if( ! afs_get_file( fs, filename, &f ) ) {
+		printf( "afs_open: afs_get_file returned NULL.\n" );
 		return NULL;
 	}
 
@@ -26,20 +27,18 @@ vv_file * afs_fopen( vv_file_internal *fs, const char * filename, const char * m
 
 	fp = &fs->fd[fs->next_fd];
 	fp->fd = fs->next_fd;
-	fp->base = (uint8_t *)(f);
-	fp->base = fp->base + sizeof(afs_file);
-	fp->size = f->file_size;
+	fp->base = afs_get_file_location( fs, filename ) + sizeof(afs_file);
+	fp->size = f.file_size;
 	fp->position = 0;
 	fp->dirty = false;
-	fp->name = fs->string_table->string[ f->name_index ];
-
-	//dump_afs_file( fs, f );
+	fp->name = fs->string_table->string[ f.name_index ];
 
 	fs->next_fd++;
 
 	return fp;
 }
 
+#undef KDEBUG_AFS_FREAD
 /**
  * @brief Reads data from the given stream
  * 
@@ -53,13 +52,29 @@ vv_file * afs_fopen( vv_file_internal *fs, const char * filename, const char * m
  */
 uint32_t afs_fread( vv_file_internal *fs, void *ptr, uint32_t size, uint32_t nmemb, vv_file *fp ) {
 	uint32_t num_read = 0;
+	uint32_t ahci_memb_read = 0;
+
+	#ifdef KDEBUG_AFS_FREAD
+	printf( "fs: 0x%X\n", fs );
+	printf( "ptr: 0x%X\n", ptr );
+	printf( "size: %d\n", size );
+	printf( "nmemb: %d\n", nmemb );
+	printf( "fp: 0x%X\n", fp );
+	printf( "fp.pos: 0x%X\n", fp->position );
+	#endif
 
 	for( int i = 0; i < nmemb; i++ ) {
 		if( fp->position + size > fp->size ) {
 			i = nmemb + 1;
 		}
 
-		memcpy( (ptr + (size * i)), ((uint8_t *)fp->base + fp->position), size );
+		ahci_memb_read = 0;
+
+		ahci_memb_read = ahci_read_at_byte_offset( fp->base + fp->position + (size * i), size, (uint8_t *)ptr + (size * i) );
+
+		#ifdef KDEBUG_AFS_FREAD
+		printf( "ahci memb read: %d\n", ahci_memb_read );
+		#endif 
 
 		fp->position = fp->position + size;
 		num_read++;
@@ -76,9 +91,14 @@ uint32_t afs_fread( vv_file_internal *fs, void *ptr, uint32_t size, uint32_t nme
  * @return bool true if the file exists, otherwise false
  */
 uint32_t afs_exists( vv_file_internal *fs, const char * filename ) {
-	return afs_get_file( fs, filename ) ? true : false;
+	if( afs_get_file_location( fs, filename ) == 0 ) {
+		return false;
+	}
+
+	return true;
 }
 
+#define KDEBUG_AFS_GET_FILE_LOCATION
 /**
  * @brief Tests if the file exists
  * 
@@ -87,15 +107,34 @@ uint32_t afs_exists( vv_file_internal *fs, const char * filename ) {
  * @return uint32_t byte location of the file's afs_file if found, otherwise 0
  */
 uint32_t afs_get_file_location( vv_file_internal *fs, const char *filename ) {
-	afs_block_directory *d = fs->root_dir;
+	afs_block_directory d;
+	afs_block_directory *dd;
 	uint32_t loc = 0;
 
-	for( int i = 0; i < d->next_index; i++ ) {
-		if( strcmp( fs->string_table->string[ d->index[i].name_index ], filename ) == 0 ) {
-			loc = d->index[i].start;
+	memset( &d, 0, sizeof(afs_block_directory) );
+	dd = afs_get_parent_dir( fs, filename, &d );
+
+	if( ! dd ) {
+		printf( "afs_get_file_location: parent dir is NULL\n" );
+		return 0;
+	}
+
+	printf( "d.next_index = %d\n", d.next_index );
+
+	// BUG: Need to get the filename from the given path (in filename). This is what we need to compare in the next code block.
+
+	for( int i = 0; i < d.next_index; i++ ) {
+		printf( "d.i.name_index: %d\n", d.index[i].name_index );
+		if( strcmp( fs->string_table->string[ d.index[i].name_index ], filename ) == 0 ) {
+			loc = d.index[i].start;
 			i = 1000000;
+			printf( "hit\n" );
 		}
 	}
+
+	#ifdef KDEBUG_AFS_GET_FILE_LOCATION
+	printf( "afs_get_file_location: loc = 0x%X\n", loc );
+	#endif
 
 	return loc;
 }
@@ -107,19 +146,26 @@ uint32_t afs_get_file_location( vv_file_internal *fs, const char *filename ) {
  * @param filename Name of the file to retrieve
  * @return afs_file* Pointer to the given file struct
  */
-afs_file* afs_get_file( vv_file_internal *fs, const char *filename ) {
+afs_file* afs_get_file( vv_file_internal *fs, const char *filename, afs_file *f ) {
 	afs_file *file = NULL;
+	afs_generic_block gen_block;
 	uint32_t loc;
 
-	loc = afs_get_file_location( fs, filename );
+	//loc = afs_get_file_location( fs, filename );
 
-	if( loc == 0 ) {
+	file = (afs_file *)afs_get_generic_block( fs, filename, &gen_block );
+
+	if( ! file ) {
+		printf( "afs_get_file: file is NULL\n" );
 		return NULL;
 	}
 
-	file = (afs_file *)( (uint8_t *)fs->drive + loc );
+	f->block_size = file->block_size;
+	f->file_size = file->file_size;
+	f->name_index = file->name_index;
+	f->type = file->type;
 
-	return file;
+	return f;
 }
 
 /**
@@ -380,4 +426,79 @@ uint32_t afs_exists_in_dir( vv_file_internal *fs, afs_block_directory *d, char *
 	}
 
 	return result;
+}
+
+#define KDEBUG_AFS_GET_PARENT_DIR
+/**
+ * @brief Returns the parent directory of the given file
+ * 
+ * @param fs vv_file_internal fs object
+ * @param name Full pathname + file of the given file. Assumes starting at root (ie: /)
+ * @param d directory object to use
+ * @return afs_block_directory* returned d
+ */
+afs_block_directory * afs_get_parent_dir( vv_file_internal *fs, char *name, afs_block_directory *d ) {
+	afs_generic_block gen_block;
+	afs_block_directory *dir_returned;
+
+	// handle root dir case(s)
+	if( strchr(name, '/') == NULL ) {
+		#ifdef KDEBUG_AFS_GET_PARENT_DIR
+		printf( "afs_get_parent_dir: did not find /, returning root_dir\n" );
+		#endif
+
+		return fs->root_dir;
+	}
+
+	if( strcmp( name, "/" ) == 0 ) {
+		#ifdef KDEBUG_AFS_GET_PARENT_DIR
+		printf( "/ is only char, returning root_dir\n" );
+		#endif
+
+		return fs->root_dir;
+	}
+
+	/* 
+	Given input in the format of:
+	/element/element-n/element-n+1
+
+	Then remove /element-n+1
+	*/
+
+	char path_to_modify[256];
+	memset( path_to_modify, 0, 256 );
+	strcpy( path_to_modify, name );
+
+	for( int i = strlen(name); i > 0; i-- ) {
+		if( path_to_modify[i - 1] == '/' ) {
+			path_to_modify[i - 1] = 0;
+			i = 0;
+		}
+	}
+
+	#ifdef KDEBUG_AFS_GET_PARENT_DIR
+	printf( "path_to_modify: \"%s\"\n", path_to_modify );
+	#endif
+
+	if( strcmp( path_to_modify, "" ) == 0 ) {
+		#ifdef KDEBUG_AFS_GET_PARENT_DIR
+		printf( "path_to_modify is empty, returning root_dir\n" );
+		#endif
+
+		dir_returned = fs->root_dir;
+	} else {
+		if( ! afs_get_generic_block( fs, path_to_modify, &gen_block ) ) {
+			#ifdef KDEBUG_AFS_GET_PARENT_DIR
+			printf( "afs_get_parent_dir: gen block is NULL\n" );
+			#endif
+
+			return NULL;
+		}
+
+		dir_returned = (afs_block_directory *)&gen_block;
+	}
+
+	memcpy( d, dir_returned, sizeof( afs_block_directory ) );
+
+	return d;
 }

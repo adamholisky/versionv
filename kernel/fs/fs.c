@@ -75,6 +75,30 @@ void primative_pwd( void ) {
 	printf( "%s\n", file_system.working_directory );
 }
 
+#undef KDEBUG_PRIMATIVE_CAT
 void primative_cat( char *path ) {
-	
+	vv_file *fp;
+
+	fp = afs_fopen( &file_system, path, "r" );
+
+	if( ! fp ) {
+		printf( "CAT: fp is NULL\n" );
+		return;
+	}
+
+	#ifdef KDEBUG_PRIMATIVE_CAT
+	printf( "fp.position: 0x%X\n", fp->position );
+	printf( "fp.base: 0x%X\n", fp->base );
+	#endif
+
+	uint8_t *data = malloc( fp->size );
+
+	if( afs_fread( &file_system, data, fp->size, 1, fp ) == 0 ) {
+		printf( "CAT: afs_fread returned 0.\n" );
+		return;
+	}
+
+	printf( "%s\n", data );
+
+	free( data );
 }

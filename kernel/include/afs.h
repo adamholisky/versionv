@@ -88,10 +88,11 @@ typedef struct {
 uint32_t afs_add_string(vv_file_internal *fs, char *name);
 uint32_t afs_exists( vv_file_internal *fs, const char * filename );
 uint32_t afs_exists_in_dir( vv_file_internal *fs, afs_block_directory *d, char *name );
-afs_file* afs_get_file( vv_file_internal *fs, const char *filename );
+afs_file* afs_get_file( vv_file_internal *fs, const char *filename, afs_file *f );
 uint32_t afs_get_file_location( vv_file_internal *fs, const char *filename );
 uint32_t afs_get_file_location_in_dir( vv_file_internal *fs, afs_block_directory *d, const char *filename );
 afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename, afs_generic_block *result_block );
+afs_block_directory * afs_get_parent_dir( vv_file_internal *fs, char *name, afs_block_directory *d );
 
 // Syscall implementations
 vv_file * afs_fopen( vv_file_internal *fs, const char * filename, const char * mode );
