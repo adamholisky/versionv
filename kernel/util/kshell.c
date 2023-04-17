@@ -152,7 +152,7 @@ void kshell_run( void ) {
 	primative_pwd();
 
 	kshell_fake_cli( "cat /bin/do_a_thing" );
-	primative_cat( "/testing.txt" );
+	primative_cat( "/bin/do_a_thing" );
 
 	//kexec( "test_devices", (uint32_t *)kshell_test_devices, NULL );
 

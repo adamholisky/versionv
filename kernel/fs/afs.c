@@ -98,7 +98,7 @@ uint32_t afs_exists( vv_file_internal *fs, const char * filename ) {
 	return true;
 }
 
-#define KDEBUG_AFS_GET_FILE_LOCATION
+#undef KDEBUG_AFS_GET_FILE_LOCATION
 /**
  * @brief Tests if the file exists
  * 
@@ -115,20 +115,29 @@ uint32_t afs_get_file_location( vv_file_internal *fs, const char *filename ) {
 	dd = afs_get_parent_dir( fs, filename, &d );
 
 	if( ! dd ) {
-		printf( "afs_get_file_location: parent dir is NULL\n" );
+		//printf( "afs_get_file_location: parent dir is NULL\n" );
 		return 0;
 	}
 
-	printf( "d.next_index = %d\n", d.next_index );
+	//printf( "d.next_index = %d\n", d.next_index );
 
 	// BUG: Need to get the filename from the given path (in filename). This is what we need to compare in the next code block.
 
+	char actual_filename[256];
+	memset( actual_filename, 0, 256 );
+
+	char *last_slash = strrchr( filename, '/' );
+	strcpy( &actual_filename, (last_slash + 1) );
+	
+	#ifdef KDEBUG_AFS_GET_FILE_LOCATION
+	printf( "filename: %s\n", filename );
+	printf( "afs_get_file_location: actual file name = %s\n", actual_filename );
+	#endif
+
 	for( int i = 0; i < d.next_index; i++ ) {
-		printf( "d.i.name_index: %d\n", d.index[i].name_index );
-		if( strcmp( fs->string_table->string[ d.index[i].name_index ], filename ) == 0 ) {
+		if( strcmp( fs->string_table->string[ d.index[i].name_index ], actual_filename ) == 0 ) {
 			loc = d.index[i].start;
 			i = 1000000;
-			printf( "hit\n" );
 		}
 	}
 
@@ -288,15 +297,22 @@ afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename, 
 		memset( item_name, 0, 256 );
 
 		// Copy the current element into item_name
+		// HERE THERE BE EVIL
 		for( int x = 0; x < 256; x++, i++ ) {
-			item_name[x] = full_filename[i];
-
+			if( i < 1 ) {
+				item_name[x] = full_filename[i];
+			}
+			
 			if( full_filename[i] == '/' ) {
 				x = 256;
 			}
 
 			if( full_filename[i] == 0 ) {
 				x = 256;
+			}
+
+			if( i >= 1 ) {
+				item_name[x] = full_filename[i];
 			}
 		}
 
@@ -428,7 +444,7 @@ uint32_t afs_exists_in_dir( vv_file_internal *fs, afs_block_directory *d, char *
 	return result;
 }
 
-#define KDEBUG_AFS_GET_PARENT_DIR
+#undef KDEBUG_AFS_GET_PARENT_DIR
 /**
  * @brief Returns the parent directory of the given file
  * 
