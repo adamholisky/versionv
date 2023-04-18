@@ -194,7 +194,7 @@ void kshell_run( void ) {
 	kshell_automate( "ls /bin" );
 	kshell_automate( "cat /bin/do_a_thing" );
 	kshell_automate( "cat bin/do_a_thing" );
-	kshell_automate( "cat /root/.passwd" );
+	kshell_automate( "cat /root/" );
 	kshell_automate( "cat --help" );
 
 	printf( "Shutting down gracefully.\n" );
