@@ -52,6 +52,11 @@ void kshell_get_line( void ) {
 	
 }
 
+#undef KDEBUG_KSHELL_PROCESS_LINE
+/**
+ * @brief Process the shell line
+ * 
+ */
 void kshell_process_line( void ) {
 	bool check_file_cmd = true;
 	char path[256];
@@ -88,14 +93,17 @@ void kshell_process_line( void ) {
 		c++;
 	} while( keep_processing );
 
+	#ifdef KDEBUG_KSHELL_PROCESS_LINE
 	klog( "num_args = %d\n", num_args );
-	
+	#endif
 	
 	for( int z = 0; z < 4; z++ ) {
+		#ifdef KDEBUG_KSHELL_PROCESS_LINE
 		debugf( "args[%d] = \"%s\"\n", z, args[z] );
+		#endif
+
 		argv_builder[z] = args[z];
 	} 
-	
 
 	if( strcmp( args[0], "1" ) == 0 ) {
 		kshell_test_fork();
@@ -106,7 +114,6 @@ void kshell_process_line( void ) {
 	}
 
 	if( strcmp( args[0], "ps" ) == 0 ) {
-		//kshell_ps();
 		kexec( "ps",(uint32_t *)kshell_ps, NULL );
 	}
 
@@ -119,7 +126,7 @@ void kshell_process_line( void ) {
 	}
 }
 
-#define KDEBUG_CAT
+#undef KDEBUG_CAT
 void kshell_cat( int argc, char *argv[] ) {
 	bool show_help = false;
 
@@ -162,6 +169,11 @@ void kshell_fake_cli( char *cmd ) {
 	printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> %s\n" , wd, cmd );
 }
 
+/**
+ * @brief Execute cmd_line as if it was typed into kshell
+ * 
+ * @param cmd_line line to execute
+ */
 void kshell_automate( char *cmd_line ) {
 	memset( line, 0, 256 );
 	strcpy( line, cmd_line );
@@ -170,6 +182,10 @@ void kshell_automate( char *cmd_line ) {
 	kshell_process_line();
 }
 
+/**
+ * @brief Run the kshell
+ * 
+ */
 void kshell_run( void ) {
 	kshell_fake_cli( "ps_to_log" );
 	kexec( "ps", (uint32_t *)kshell_ps, NULL );
@@ -195,11 +211,19 @@ void kshell_run( void ) {
 	}
 }
 
+/**
+ * @brief Shutdown the emulator
+ * 
+ */
 void kshell_shutdown( void ) {
 	debugf( "\nGoodbye, Dave.\n" );
 	outportb( 0xF4, 0x00 );
 }
 
+/**
+ * @brief Send process list to debug out
+ * 
+ */
 void kshell_ps( void ) {
 	debugf( "Process Info\n" );
 
@@ -219,6 +243,10 @@ void kshell_ps( void ) {
 	task_exit();
 }
 
+/**
+ * @brief Test forking
+ * 
+ */
 void kshell_test_fork( void  ) {
 	int pid = kfork();
 
@@ -229,17 +257,10 @@ void kshell_test_fork( void  ) {
 	}
 }
 
-void kshell_test_loaded_file( void ) {
-	log_entry_enter();
-
-	uint32_t *mem = page_map( (uint32_t *)0xE0000000, (uint32_t *)0xE0000000 );
-
-	kdebug_peek_at( (uint32_t)mem );
-
-	task_exit();
-	log_entry_exit();
-}
-
+/**
+ * @brief Test systemcalls
+ * 
+ */
 void test_syscall( void ) {
 	char *mem = malloc( 6 );
 	memset( mem, 0, 6 );
@@ -249,6 +270,10 @@ void test_syscall( void ) {
 	printf( "Syscall result:\nmem: \"%s\"\ncount: %d\n", mem, count );
 }
 
+/**
+ * @brief Run device tests
+ * 
+ */
 void kshell_test_devices( void ) {
 	device *term = get_device_by_file( "/dev/tty0" );
 
@@ -261,6 +286,10 @@ void kshell_test_devices( void ) {
 	task_exit();
 }
 
+/**
+ * @brief Throw divide by zero exception
+ * 
+ */
 void kshell_divide_by_zero( void ) {
 	asm volatile( 
 		"movl 0, %eax \n\t"

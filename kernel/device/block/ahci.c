@@ -198,6 +198,7 @@ uint32_t global_buffer_addr;
 uint32_t * global_port_page;
 HBA_MEM * abar;
 
+#define KDEBUG_AHCI_INIT
 void ahci_initalize( void ) {
     log_entry_enter();
 
@@ -217,7 +218,10 @@ void ahci_initalize( void ) {
 	d->cache_disabled = 1;
 	asm_refresh_cr3();
 
+	#ifdef KDEBUG_AHCI_INIT
 	klog( "port page: %X\n", port_page );
+	#endif
+
     port_rebase( &abar->ports[1], 1, port_page);
 
 	global_port_page = port_page;
@@ -231,17 +235,24 @@ void ahci_initalize( void ) {
 	bp->write_through = 1;
 	asm_refresh_cr3();
 
+	#ifdef KDEBUG_AHCI_INIT
 	klog( "Buff Page:\n" );
 	echo_page( bp );
+	#endif 
+
 	global_buffer_addr = bp->address<<21;
 
+	#ifdef KDEBUG_AHCI_INIT
 	klog( "Buff: %X\n", (uint32_t *)buff );
 	klog( "buff should be: %X\n", global_buffer_addr);
+	#endif
 
     bool read_result = read_ahci( &abar->ports[1], 0,0,16, (uint16_t *)global_buffer_addr );
 
+	#ifdef KDEBUG_AHCI_INIT
     klog( "Read_result: %d\n", read_result );
-	
+	#endif
+
 	/* printf( "Buffer: \n" );
 	
 	int z = 0;
@@ -457,6 +468,7 @@ void stop_cmd(HBA_PORT *port)
  
 }
 
+#undef KDEBUG_READ_AHCI
 bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf)
 {
 	port->is = (uint32_t) -1;		// Clear pending interrupt bits
@@ -465,12 +477,17 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 	if (slot == -1)
 		return false;
 
+	#ifdef KDEBUG_READ_AHCI
     klog( "clbu: %X\n", port->clbu );
     klog( "clb:  %X\n", port->clb );
 	klog( "buf:  %X\n", buf );
+	#endif
  
     HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*)(port->clb + 0xD0000000);
-    klog( "cmdheader: %X\n", cmdheader );
+    
+	#ifdef KDEBUG_READ_AHCI
+	klog( "cmdheader: %X\n", cmdheader );
+	#endif
 
 	cmdheader += slot;
 	cmdheader->cfl = sizeof(FIS_REG_H2D)/sizeof(uint32_t);	// Command FIS size
@@ -478,13 +495,14 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 	cmdheader->prdtl = (uint16_t)((count-1)>>4) + 1;	// PRDT entries count
  
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*)(cmdheader->ctba + 0xD0000000);
+
+	#ifdef KDEBUG_READ_AHCI
 	klog( "cmdtable: %X\n", cmdtbl );
+	#endif
 
 	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) +
  		(cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
 
-	
- 
 	// 8K bytes (16 sectors) per PRDT
     int i;
 	for (i=0; i<cmdheader->prdtl-1; i++)
@@ -533,8 +551,6 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 	}
  
 	port->ci = 1<<slot;	// Issue command
-
-	klog( "test\n" );
  
 	// Wait for completion
 	while (1)
@@ -551,8 +567,6 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 		}
 	}
 
-	
- 
 	// Check again
 	if (port->is & HBA_PxIS_TFES)
 	{
@@ -560,8 +574,6 @@ bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 		return false;
 	}
 
-	
- 
 	return true;
 }
  

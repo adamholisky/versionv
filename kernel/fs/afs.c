@@ -161,6 +161,7 @@ uint32_t afs_get_file_location( vv_file_internal *fs, const char *filename ) {
 	return loc;
 }
 
+#undef KDEBUG_AFS_GET_FILE
 /**
  * @brief Returns an afs_file object for the given filename
  * 
@@ -173,13 +174,14 @@ afs_file* afs_get_file( vv_file_internal *fs, const char *filename, afs_file *f 
 	afs_generic_block gen_block;
 	uint32_t loc;
 
-	//loc = afs_get_file_location( fs, filename );
-
 	file = (afs_file *)afs_get_generic_block( fs, filename, &gen_block );
 
 	if( ! file ) {
+		#ifdef KDEBUG_AFS_GET_FILE
 		klog( "afs_get_file: file is NULL for %s\n", filename );
 		dump_stack_trace();
+		#endif
+
 		return NULL;
 	}
 
@@ -383,7 +385,9 @@ afs_generic_block* afs_get_generic_block( vv_file_internal *fs, char *filename, 
 		result = result_block;
 	}
 
+	#ifdef KDEBUG_GET_GENERIC_BLOCK
 	dump_stack_trace();
+	#endif
 
 	return result;
 }
