@@ -277,6 +277,7 @@ bool ahci_read_sector( uint32_t sector, uint32_t *buffer ) {
 	return true;
 }
 
+#undef KDEBUG_AHCI_READ_AT_BYTE_OFFSET
 bool ahci_read_at_byte_offset( uint32_t offset, uint32_t size, uint8_t *buffer ) {
 	bool read_result = false;
 	uint32_t sector = 0;
@@ -287,8 +288,10 @@ bool ahci_read_at_byte_offset( uint32_t offset, uint32_t size, uint8_t *buffer )
 	internal_offset = offset - (sector * 512);
 	count = (size / 512) + 1;
 
+	#ifdef KDEBUG_AHCI_READ_AT_BYTE_OFFSET
 	klog( "read: offset -- %X, size %X\n", offset, size );
 	klog( "read at offset -- sector = %X, count = %X, internal_offset = %X\n", sector, count, internal_offset );
+	#endif
 
 	read_result = read_ahci( &abar->ports[1], sector, 0, count, (uint16_t *)global_buffer_addr );
 
@@ -299,6 +302,7 @@ bool ahci_read_at_byte_offset( uint32_t offset, uint32_t size, uint8_t *buffer )
 	
 	memcpy( buffer, (uint8_t *)global_buffer + internal_offset, size );
 
+	#ifdef KDEBUG_AHCI_READ_AT_BYTE_OFFSET
 	int z = 0;
 	for( int b = 0; b < (size / 2); b++ ) {
 		if (z == 0) {
@@ -315,6 +319,7 @@ bool ahci_read_at_byte_offset( uint32_t offset, uint32_t size, uint8_t *buffer )
 	}
 
 	debugf( "\n" );
+	#endif
 
 	
 

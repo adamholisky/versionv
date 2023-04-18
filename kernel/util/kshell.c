@@ -117,41 +117,6 @@ void kshell_process_line( void ) {
 	if( strcmp( args[0], "ls" ) == 0 ) {
 		primative_ls( args[1] );
 	}
-
-	/* if( strcmp( args[0], "ls" ) == 0 ) {
-		ls();
-
-		check_file_cmd = false;
-	}
-
-	if( strcmp( args[0], "cd" ) == 0 ) {
-		cd( args[1] );
-
-		check_file_cmd = false;
-	}
-
-	if( check_file_cmd ) {
-		strcpy( path, line );
-		strcat( path, ".vvs" );
-
-		if( file_exists( wd, path ) ) {
-			strcpy( path, wd );
-		} else if( file_exists( dir_bin, path ) ) {
-			strcpy( path, dir_bin );
-		} else if( file_exists( dir_usr_bin, path  ) ) {
-			strcpy( path, dir_usr_bin );
-		} else {
-			printf( "%s not found.\n", line );
-			path[0] = 0;
-		}
-
-		if( path[0] != 0 ) {
-			strcat( path, line );
-			strcat( path, ".vvs" );
-
-			load_and_run( path, line );
-		}
-	} */
 }
 
 #define KDEBUG_CAT
@@ -166,27 +131,31 @@ void kshell_cat( int argc, char *argv[] ) {
 
 	if( show_help ) {
 		printf( "cat: cat <pathname>\n" );
+	} else {
+		#ifdef KDEBUG_CAT
+		klog( "cating \"%s\"\n", argv[1] );
+		#endif
+
+		int FD = open( argv[1], 0 );
+
+		if( FD == -1 ) {
+			printf( "cat: %s: No such file or directory\n", argv[1] );
+		} else {
+			char *buff = malloc( 2048 );
+			memset( buff, 0, 2048 );
+
+			int size = get_file_size(FD);
+			int bytes_read = read( FD, buff, size );
+
+			#ifdef KDEBUG_CAT
+			klog( "bytes read: %d\n", bytes_read );
+			#endif
+
+			printf( "%s\n", buff );
+
+			free( buff );
+		}
 	}
-
-	#ifdef KDEBUG_CAT
-	klog( "cating \"%s\"\n", argv[1] );
-	#endif
-
-	int FD = open( argv[1], 0 );
-	
-	char *buff = malloc( 2048 );
-	memset( buff, 0, 2048 );
-
-	int size = get_file_size(FD);
-	int bytes_read = read( FD, buff, size );
-
-	#ifdef KDEBUG_CAT
-	klog( "bytes read: %d\n", bytes_read );
-	#endif
-
-	printf( "%s\n", buff );
-
-	free( buff );
 }
 
 void kshell_fake_cli( char *cmd ) {
@@ -209,6 +178,8 @@ void kshell_run( void ) {
 	kshell_automate( "ls /bin" );
 	kshell_automate( "cat /bin/do_a_thing" );
 	kshell_automate( "cat bin/do_a_thing" );
+	kshell_automate( "cat /root/.passwd" );
+	kshell_automate( "cat --help" );
 
 	printf( "Shutting down gracefully.\n" );
 	kshell_shutdown();

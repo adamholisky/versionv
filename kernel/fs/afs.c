@@ -21,7 +21,7 @@ vv_file * afs_open( vv_file_internal *fs, const char * filename, const char * mo
 	
 	// Bail if not found
 	if( ! f_pointer ) {
-		printf( "afs_open: afs_get_file returned NULL.\n" );
+		klog( "afs_open: afs_get_file returned NULL.\n" );
 		return NULL;
 	}
 
@@ -178,7 +178,8 @@ afs_file* afs_get_file( vv_file_internal *fs, const char *filename, afs_file *f 
 	file = (afs_file *)afs_get_generic_block( fs, filename, &gen_block );
 
 	if( ! file ) {
-		printf( "afs_get_file: file is NULL\n" );
+		klog( "afs_get_file: file is NULL for %s\n", filename );
+		dump_stack_trace();
 		return NULL;
 	}
 

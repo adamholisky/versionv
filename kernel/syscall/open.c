@@ -24,7 +24,8 @@ int open( const char *pathname, int flags ) {
 }
 
 int syscall_open( const char *pathname, int flags ) {
-	vv_file *result = 0;
+	vv_file *file = 0;
+	int result;
 
 	// If we're opening something in dev, handle separately
 	if( strstr( pathname, "/dev" ) ) {
@@ -32,7 +33,12 @@ int syscall_open( const char *pathname, int flags ) {
 	}
 
 	// Handle FS
-	result = afs_open( get_fs_internal(), pathname, flags );
+	file = afs_open( get_fs_internal(), pathname, flags );
+
+	if( file )
+		result = file->fd;
+	else
+		result = -1;
 	
-	return result->fd;
+	return result;
 }
