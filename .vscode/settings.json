@@ -2,6 +2,7 @@
     "files.associations": {
         "stdio.h": "c",
         "task.h": "c",
-        "pci.h": "c"
+        "pci.h": "c",
+        "kshell.h": "c"
     }
 }

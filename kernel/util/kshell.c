@@ -124,6 +124,10 @@ void kshell_process_line( void ) {
 	if( strcmp( args[0], "ls" ) == 0 ) {
 		primative_ls( args[1] );
 	}
+
+	if( strcmp( args[0], "testlibcall" == 0 ) ) {
+		test_lib_call();
+	}
 }
 
 #undef KDEBUG_CAT
@@ -192,10 +196,8 @@ void kshell_run( void ) {
 
 	kshell_automate( "ls" );
 	kshell_automate( "ls /bin" );
-	kshell_automate( "cat /bin/do_a_thing" );
-	kshell_automate( "cat bin/do_a_thing" );
-	kshell_automate( "cat /root/" );
-	kshell_automate( "cat --help" );
+	kshell_automate( "ls /lib" );
+	kshell_automate( "testlibcall" );
 
 	printf( "Shutting down gracefully.\n" );
 	kshell_shutdown();
@@ -364,4 +366,18 @@ void kshell_afs_test_alpha( void ) {
 	do_immediate_shutdown();
 
 	task_exit();
+}
+
+#define KDEBUG_TEST_LIB_CALL
+extern my_lib_call( void );
+/**
+ * @brief Test calling a shared object library function
+ * 
+ */
+void test_lib_call( void ) {
+	log_entry_enter();
+
+	my_lib_call();
+
+	log_entry_exit();
 }

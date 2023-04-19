@@ -15,10 +15,11 @@ OBJECTS_C = $(patsubst %.c, build/%.o, $(shell ls src/**/*.c | xargs -n 1 basena
 #Compile programs and flags
 CC = /usr/local/osdev/bin/i686-elf-gcc
 ASM = /usr/local/osdev/bin/i686-elf-as
+LD = /usr/local/osdev/bin/i686-elf-ld
 DEFINES = -DPAGING_PAE \
 		  -DGRAPHICS_OFF \
 		  -DBITS_32 
-CFLAGS = $(DEFINES) -fpic -Wno-write-strings -fcompare-debug-second -ffreestanding -fno-omit-frame-pointer -O0 -g -I$(ROOT_DIR)/src -I$(ROOT_DIR)/../../../libcvv/libc/include
+CFLAGS = $(DEFINES) -Wno-write-strings -fcompare-debug-second -ffreestanding -fno-omit-frame-pointer -O0 -g -I$(ROOT_DIR)/src -I$(ROOT_DIR)/../../../libcvv/libc/include
 CFLAGS_END = -nostdlib -lgcc
 AFLAGS = $(CFLAGS)
 
@@ -29,8 +30,8 @@ export
 all: install
 
 libmyshare.so: $(SOURCES_C)
-	$(CC) -r -o build/myshare.o $(CFLAGS) $(CFLAGS_END)
-	$(CC) -g -nostdlib -fPIC -shared -Wl,-soname,libmyshare.so -o libmyshare.so build/myshare.o
+	$(CC) $(CFLAGS) -fPIC -o build/myshare.o -c $< $(CFLAGS_END)
+	$(LD) -g -nostdlib -fPIC -shared -o libmyshare.so build/myshare.o
 	$(OBJDUMP) -x -D -S libmyshare.so > objdump.txt
 	readelf -a build/myshare.o > elfdump_o.txt
 	readelf -a libmyshare.so > elfdump.txt

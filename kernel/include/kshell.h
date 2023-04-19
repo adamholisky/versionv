@@ -23,6 +23,7 @@ void kshell_test_devices( void );
 void test_syscall( void );
 void kshell_test_loaded_file( void );
 void kshell_afs_test_alpha( void );
+void kshell_test_lib_call( void );
 
 #ifdef __cplusplus
 }
