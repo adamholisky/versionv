@@ -15,6 +15,7 @@
 #include <terminal.h>
 #include <ahci.h>
 #include <fs.h>
+#include <dlfcn.h>
 
 char line[256];
 char jail_env[256];
@@ -196,6 +197,7 @@ void kshell_run( void ) {
 
 	kshell_automate( "ls" );
 	kshell_automate( "ls /bin" );
+	kshell_automate( "ls /etc" );
 	kshell_automate( "ls /lib" );
 	kshell_automate( "testlibcall" );
 
@@ -377,7 +379,17 @@ extern my_lib_call( void );
 void test_lib_call( void ) {
 	log_entry_enter();
 
-	my_lib_call();
+	dl_info *lib = NULL;
+	void (*func)() = NULL;
+
+	lib = dlopen( "/lib/libmyshare.so", 0 );
+	func = dlsym( lib, "my_lib_call" );
+
+	if( func != NULL ) {
+		func();
+	}
+
+	dlclose( lib );
 
 	log_entry_exit();
 }
