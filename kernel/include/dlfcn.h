@@ -12,7 +12,8 @@ typedef struct {
     char filename[256];
     int flags;
     uint32_t *base;
-    Elf32_Shdr *symtab;
+    Elf32_Shdr *string_section;
+    Elf32_Shdr *symbol_section;
 } dl_info;
 
 void *dlopen( const char *filename, int flags );

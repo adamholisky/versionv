@@ -126,8 +126,8 @@ void kshell_process_line( void ) {
 		primative_ls( args[1] );
 	}
 
-	if( strcmp( args[0], "testlibcall" == 0 ) ) {
-		test_lib_call();
+	if( strcmp( args[0], "testlibcall" ) == 0 ) {
+		kshell_test_lib_call();
 	}
 }
 
@@ -200,6 +200,7 @@ void kshell_run( void ) {
 	kshell_automate( "ls /etc" );
 	kshell_automate( "ls /lib" );
 	kshell_automate( "testlibcall" );
+	kshell_automate( "ls" );
 
 	printf( "Shutting down gracefully.\n" );
 	kshell_shutdown();
@@ -370,13 +371,12 @@ void kshell_afs_test_alpha( void ) {
 	task_exit();
 }
 
-#define KDEBUG_TEST_LIB_CALL
-extern my_lib_call( void );
+#define KDEBUG_KSHELL_TEST_LIB_CALL
 /**
  * @brief Test calling a shared object library function
  * 
  */
-void test_lib_call( void ) {
+void kshell_test_lib_call( void ) {
 	log_entry_enter();
 
 	dl_info *lib = NULL;
@@ -384,6 +384,8 @@ void test_lib_call( void ) {
 
 	lib = dlopen( "/lib/libmyshare.so", 0 );
 	func = dlsym( lib, "my_lib_call" );
+
+	klog( "func addr: 0x%08X\n", func );
 
 	if( func != NULL ) {
 		func();
