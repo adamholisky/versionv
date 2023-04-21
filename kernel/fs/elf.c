@@ -235,3 +235,7 @@ uint16_t elf_get_sym_value_from_index(uint32_t* mem, Elf32_Ehdr* elf_header, uin
 
     return elf_sym->st_value;
 }
+
+void elf_link_got_to_known_syms( Elf32_Ehdr *elf_header, uint8_t *data ) {
+    
+}
