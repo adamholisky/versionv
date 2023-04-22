@@ -29,9 +29,11 @@ OBJDUMP = /usr/local/osdev/bin/i686-elf-objdump
 export
 all: install
 
+#-R /usr/local/osdev/versions/v/build/versionv.bin 
+
 myapp: $(SOURCES_C)
-	$(CC) $(CFLAGS) -o build/myapp.o -c $< $(CFLAGS_END)
-	$(LD) -g -nostdlib --warn-unresolved-symbols -R /usr/local/osdev/versions/v/build/versionv.bin -o myapp build/myapp.o
+	$(CC) $(CFLAGS) -fPIC -o build/myapp.o -c $< $(CFLAGS_END)
+	$(LD) -g -nostdlib --warn-unresolved-symbols -shared -fPIC -entry=main -o myapp build/myapp.o
 	$(OBJDUMP) -x -D -S myapp > objdump.txt
 	readelf -a build/myapp.o > elfdump_o.txt
 	readelf -a myapp > elfdump.txt

@@ -43,6 +43,12 @@ drive_item items[] = {
 		.type = AFS_BLOCK_TYPE_FILE,
 		.loc = "/etc/",
 		.original_loc = "/usr/local/osdev/versions/v/support/afsdrive/magic_key"
+	},
+	{
+		.name = "cat",
+		.type = AFS_BLOCK_TYPE_FILE,
+		.loc = "/bin/",
+		.original_loc = "/usr/local/osdev/versions/v/support/apptest/myapp"
 	}
 };
 
@@ -69,7 +75,7 @@ int main( void ) {
 	afs_block_directory *dir_lib = bootstrap_mkdir( buff, bs_root_dir, "lib" );
 	afs_block_directory *dir_etc = bootstrap_mkdir( buff, bs_root_dir, "etc" );
 
-	for( int i = 0; i < 5; i++ ) {
+	for( int i = 0; i < (sizeof(items) / sizeof(drive_item)); i++ ) {
 		afs_block_directory *dir_to_use = NULL;
 
 		if( strstr( items[i].loc, "etc" ) ) {

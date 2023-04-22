@@ -24,6 +24,7 @@ void test_syscall( void );
 void kshell_test_loaded_file( void );
 void kshell_afs_test_alpha( void );
 void kshell_test_lib_call( void );
+void kshell_test_app( void );
 
 #ifdef __cplusplus
 }
