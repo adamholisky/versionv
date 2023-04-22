@@ -114,23 +114,25 @@ int32_t task_add( task *t ) {
 	// Load in the stack and set the context up so it handles the first schedule entry correctly
 	memcpy( tasks[i].stack_top - sizeof( x86_context ) - 5, &tasks[i].context, sizeof( x86_context ) );
 	uint32_t * stack_setup = tasks[i].stack_top;
-	*(stack_setup - 0) = 0xc0010000;
-	*(stack_setup - 1) = 0x202;
-	*(stack_setup - 2) = 0x8;
-	*(stack_setup - 3) = (uint32_t)tasks[i].entry;
-	*(stack_setup - 4) = 0x0;
-	*(stack_setup - 5) = 0x0;
+	*(stack_setup - 0) = 0xe0010000;
+	*(stack_setup - 1) = 0xd0010000;
+	*(stack_setup - 2) = 0xc0010000;
+	*(stack_setup - 3) = 0x202;
+	*(stack_setup - 4) = 0x8;
+	*(stack_setup - 5) = (uint32_t)tasks[i].entry;
 	*(stack_setup - 6) = 0x0;
 	*(stack_setup - 7) = 0x0;
 	*(stack_setup - 8) = 0x0;
 	*(stack_setup - 9) = 0x0;
 	*(stack_setup - 10) = 0x0;
-	*(stack_setup - 11) = 0x10;
-	*(stack_setup - 12) = 0x10;
+	*(stack_setup - 11) = 0x0;
+	*(stack_setup - 12) = 0x0;
 	*(stack_setup - 13) = 0x10;
 	*(stack_setup - 14) = 0x10;
+	*(stack_setup - 15) = 0x10;
+	*(stack_setup - 16) = 0x10;
 	
-	tasks[i].saved_esp = (uint32_t)stack_setup - (14 * 4);
+	tasks[i].saved_esp = (uint32_t)stack_setup - (16 * 4);
 
 	for( int s = 0; s < 16; s++ ) {
 		//klog( "stack_setup[%X]: 0x%X\n", stack_setup - s, *(stack_setup - s) );

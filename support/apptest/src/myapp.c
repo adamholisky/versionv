@@ -1,9 +1,14 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+extern void task_exit( void );
+
 #undef KDEBUG_CAT
 int main( int argc, char *argv[] ) {
 	bool show_help = false;
+
+	printf( "argc: %d\n", argc );
+	printf( "argv: 0x%08X\n", argv );
 
 	if( argc < 2 ) {
 		show_help = true;	
@@ -39,5 +44,7 @@ int main( int argc, char *argv[] ) {
 		}
 	}
 
-    return 0;
+	task_exit();
+
+	return 0;
 }

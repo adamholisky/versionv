@@ -47,6 +47,6 @@ end
 #break *0x0010aaaa
 #break debug.cpp:30
 #break debug.cpp:39
-break kshell_test_lib_call
+break sched_yield_to_asm
 
 target remote localhost:5894

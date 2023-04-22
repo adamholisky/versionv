@@ -157,7 +157,7 @@ Elf32_Shdr * elf_find_dynstr_tab(uint32_t* mem, Elf32_Ehdr* elf_header) {
     return ret;
 }
 
-
+#define KDEBUG_ELF_FIND_GOT_PLT
 Elf32_Shdr* elf_find_got_plt(uint32_t* mem, Elf32_Ehdr* elf_header) {
     Elf32_Shdr* ret = NULL;
     char* sec_name = NULL;
@@ -167,9 +167,9 @@ Elf32_Shdr* elf_find_got_plt(uint32_t* mem, Elf32_Ehdr* elf_header) {
 
         if (section->sh_type == SHT_PROGBITS) {
             sec_name = elf_get_section_name(mem, elf_header, i);
-            //printf("sn: %s\n", sec_name);
+            printf("sn: %s\n", sec_name);
             if (strcmp(sec_name, ".got.plt") == 0) {
-                #ifdef kdebug_elf
+                #ifdef KDEBUG_ELF_FIND_GOT_PLT
                 klog("got.plt section: [%d / %x @ 0x%08X] %d    0x%08X    0x%08X\n", i, i, (uint32_t)section, section->sh_type, section->sh_addr, section->sh_offset);
                 #endif
                 ret = section;
