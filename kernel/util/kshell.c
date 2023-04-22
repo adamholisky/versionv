@@ -420,6 +420,8 @@ void kshell_test_app( void ) {
 		#ifdef KDEBUG_KSHELL_TEST_APP
 		klog( "size of app: %d\n", size );
 		klog( "bytes read: %d\n", bytes_read );
+
+		kdebug_peek_at_n( buff, size / 0xF );
 		#endif
 
 		char args[4][100];

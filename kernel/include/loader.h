@@ -9,7 +9,7 @@ extern "C" {
 #include <stdint.h>
 
 int loader_load_and_run( uint8_t *buff, int argc, char *argv[] );
-bool loader_load( uint8_t *buff, char *name );
+uint32_t loader_load( uint8_t *buff, char *name );
 
 #ifdef __cplusplus
 }

@@ -44,18 +44,22 @@ int loader_load_and_run( uint8_t *buff, int argc, char *argv[] ) {
  * @return true program has been loaded and is ready to run
  * @return false program has failed to load
  */
-bool loader_load( uint8_t *buff, char *name ) {
+uint32_t loader_load( uint8_t *buff, char *name ) {
+    log_entry_enter();
+
     // put it into a task
     uint32_t *page_start = page_allocate(1);
     uint32_t *phys_page = mem_virt_to_phys( page_start );
     uint32_t *page = page_map( (uint32_t *)0x00000000, phys_page );
     //memcpy( page, buff, size );
 
+    
+
     // resolve task symbols
     Elf32_Ehdr *elf_header = (Elf32_Ehdr *)buff;
     Elf32_Shdr* rel_plt = elf_find_rel_plt((uint32_t*)buff, elf_header);
 
-    elf_load_program_headers( elf_header, page, buff );
+    elf_load_program_headers( elf_header, (uint8_t *)page, buff );
 
     if (rel_plt != NULL) {
         uint32_t* data = (uint32_t*)((uint8_t*)page + rel_plt->sh_offset);
@@ -90,6 +94,7 @@ bool loader_load( uint8_t *buff, char *name ) {
     }
     else {
         klog("Could not find .got.plt section\n");
+        do_immediate_shutdown();
     }
 
 
@@ -137,4 +142,6 @@ bool loader_load( uint8_t *buff, char *name ) {
     strcpy( t->name, name );
 
     task_id = task_add( t );
+
+    return task_id;
 }
