@@ -38,6 +38,9 @@ uint32_t syscall( uint32_t call_num, uint32_t num_args, syscall_args * args );
 uint32_t read( int fd, void * buff, uint32_t size );
 uint32_t syscall_read( int _fd, void * buff, uint32_t size );
 
+uint32_t write( int fd, void * buff, uint32_t count );
+uint32_t syscall_write( int _fd, void * buff, uint32_t count );
+
 int open( const char *pathname, int flags );
 int syscall_open( const char *pathname, int flags );
 

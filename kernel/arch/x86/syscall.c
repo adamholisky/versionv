@@ -22,6 +22,7 @@ uint32_t syscall_handler( uint32_t * stack, x86_context ** _context ) {
 			break;
 		case SYSCALL_WRITE:
 			//debugf( "[SYSCALL] Write\n" );
+			result = syscall_write( context->edi, (void *)context->esi, context->edx );
 			break;
 		case SYSCALL_OPEN:
 			result = syscall_open( (char *)context->edi, context->esi );

@@ -5,6 +5,8 @@
         "pci.h": "c",
         "kshell.h": "c",
         "dlfcn.h": "c",
-        "loader.h": "c"
+        "loader.h": "c",
+        "fs.h": "c",
+        "afs.h": "c"
     }
 }

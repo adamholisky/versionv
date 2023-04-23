@@ -2,11 +2,20 @@
 #include <ahci.h>
 #include <afs.h>
 #include <fs.h>
+#include <unistd.h>
 
 vv_file_internal file_system;
 afs_drive main_drive;
 afs_block_directory root_dir;
 afs_string_table string_table;
+
+char name_stdin[] = "stdin";
+char name_stdout[] = "stdout";
+char name_stderr[] = "srderr";
+
+vv_file *stdin;
+vv_file *stdout;
+vv_file *stderr;
 
 #undef KDEBUG_FS_INIT
 /**
@@ -18,6 +27,15 @@ void fs_initalize( void ) {
 	file_system.drive = &main_drive;
 	file_system.root_dir = &root_dir;
 	file_system.string_table = &string_table;
+	file_system.next_fd = 3;
+
+	stdin = &file_system.fd[ STDIN_FILENO ];
+	stdout = &file_system.fd[ STDOUT_FILENO ];
+	stderr = &file_system.fd[ STDERR_FILENO ];
+
+	stdin->fd = STDIN_FILENO;
+	stdout->fd = STDOUT_FILENO;
+	stderr->fd = STDERR_FILENO;
 
 	// Initalize the main drive block
 	if( ! ahci_read_at_byte_offset( 0, sizeof(afs_drive), file_system.drive ) ) {
