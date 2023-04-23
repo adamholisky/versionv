@@ -54,7 +54,7 @@ vv_file * afs_open( vv_file_internal *fs, const char * filename, const char * mo
 	return fp;
 }
 
-#undef KDEBUG_AFS_READ
+#define KDEBUG_AFS_READ
 /**
  * @brief Reads data from the given stream
  * 

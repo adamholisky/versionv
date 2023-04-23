@@ -84,7 +84,7 @@ void elf_load_program_headers(Elf32_Ehdr* elf_header, uint8_t* process_space, ui
     }
 }
 
-#define KDEBUG_ELF_FIND_REL_PLT
+#undef KDEBUG_ELF_FIND_REL_PLT
 Elf32_Shdr * elf_find_rel_plt(uint32_t* mem, Elf32_Ehdr* elf_header) {
     Elf32_Shdr* ret = NULL;
 
@@ -103,7 +103,7 @@ Elf32_Shdr * elf_find_rel_plt(uint32_t* mem, Elf32_Ehdr* elf_header) {
     return ret;
 }
 
-#define KDEBUG_ELF_FIND_GOT_PLT
+#undef KDEBUG_ELF_FIND_GOT_PLT
 Elf32_Shdr* elf_find_got_plt(uint32_t* mem, Elf32_Ehdr* elf_header) {
     log_entry_enter();
 
@@ -141,7 +141,7 @@ Elf32_Shdr* elf_find_got_plt(uint32_t* mem, Elf32_Ehdr* elf_header) {
     return ret;
 }
 
-#define KDEBUG_ELF_GET_SECTION_NAME
+#undef KDEBUG_ELF_GET_SECTION_NAME
 char* elf_get_section_name(uint32_t* mem, Elf32_Ehdr* elf_header, uint32_t sec_num) {
     uint32_t mem_offset = elf_header->e_shoff + (sizeof(Elf32_Shdr) * elf_header->e_shstrndx);
     Elf32_Shdr* elf_str_shdr = (Elf32_Shdr*)(((uint32_t)mem + elf_header->e_shoff) + (sizeof(Elf32_Shdr) * elf_header->e_shstrndx));

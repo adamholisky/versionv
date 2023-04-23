@@ -288,7 +288,7 @@ bool ahci_read_sector( uint32_t sector, uint32_t *buffer ) {
 	return true;
 }
 
-#undef KDEBUG_AHCI_READ_AT_BYTE_OFFSET
+#define KDEBUG_AHCI_READ_AT_BYTE_OFFSET
 bool ahci_read_at_byte_offset( uint32_t offset, uint32_t size, uint8_t *buffer ) {
 	bool read_result = false;
 	uint32_t sector = 0;
@@ -317,10 +317,11 @@ bool ahci_read_at_byte_offset( uint32_t offset, uint32_t size, uint8_t *buffer )
 	int z = 0;
 	for( int b = 0; b < (size / 2); b++ ) {
 		if (z == 0) {
-			debugf( "\n%04X    ", b * 2 );
+			//debugf( "\n%04X    ", b * 2 );
 		}
 		
-		debugf( "%02X %02X  ", ( 0x00FF ) & *(buffer + b), ((0xFF00) & *(buffer + b))>>8 );
+
+		//debugf( "%02X %02X  ", ( 0x00FF ) & *(buffer + b), ((0xFF00) & *(buffer + b))>>8 );
 
 		z++;
 
@@ -330,6 +331,10 @@ bool ahci_read_at_byte_offset( uint32_t offset, uint32_t size, uint8_t *buffer )
 	}
 
 	debugf( "\n" );
+
+	kdebug_peek_at_n(global_buffer, 300 );
+
+	kdebug_peek_at_n(buffer, 300 );
 	#endif
 
 	
@@ -468,7 +473,7 @@ void stop_cmd(HBA_PORT *port)
  
 }
 
-#undef KDEBUG_READ_AHCI
+#define KDEBUG_READ_AHCI
 bool read_ahci(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf)
 {
 	port->is = (uint32_t) -1;		// Clear pending interrupt bits
