@@ -18,8 +18,8 @@ int loader_load_and_run( uint8_t *buff, int argc, char *argv[] ) {
 
     uint32_t task_id = loader_load( buff, argv[0] );
 
-    printf( "argv: 0x%08X\n", argv );
-    printf( "argv[0]: \"%s\"\n", argv[0] );
+    //printf( "argv: 0x%08X\n", argv );
+    //printf( "argv[0]: \"%s\"\n", argv[0] );
 
     task *tasks = get_tasks();
 

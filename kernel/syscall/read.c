@@ -3,7 +3,7 @@
 #include <afs.h>
 #include <fs.h>
 
-#define KDEBUG_READ
+#undef KDEBUG_READ
 uint32_t read( int fd, void * buff, uint32_t size ) {
 	syscall_args	args;
 
