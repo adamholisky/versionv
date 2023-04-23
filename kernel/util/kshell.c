@@ -200,7 +200,7 @@ void kshell_run( void ) {
 	kshell_fake_cli( "ps_to_log" );
 	kexec( "ps", (uint32_t *)kshell_ps, NULL );
 
-	kshell_automate( "testlibcall" );
+	//kshell_automate( "testlibcall" );
 	kshell_automate( "testapp" );
 
 	printf( "Shutting down gracefully.\n" );
@@ -397,7 +397,7 @@ void kshell_test_lib_call( void ) {
 	log_entry_exit();
 }
 
-#define KDEBUG_KSHELL_TEST_APP
+#undef KDEBUG_KSHELL_TEST_APP
 /**
  * @brief Test calling a shared object library function
  * 
@@ -434,7 +434,7 @@ void kshell_test_app( void ) {
 			argv_builder[z] = args[z];
 		} 
 
-		printf( "argv: 0x%08X\n", argv_builder);
+		//printf( "argv: 0x%08X\n", argv_builder);
 		loader_load_and_run( buff, 2, argv_builder );
 
 		//typedef void (*module_main_func)( int argc, char *argv[] );
