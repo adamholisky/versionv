@@ -25,6 +25,9 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	char c = ' ';
 	bool process_keypress;
 
+	GRAPHICS_ACTIVE = true;
+	DF_COM4_ONLY = true;
+
 	multiboot_initalize( mb_magic, mb_info );
 	devices_initalize();
 	term_initalize();
@@ -32,16 +35,6 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m\n" );
 	debugf( "\x1b[0;31;49mVersionV\x1b[0;0;0m Serial Out\n" );
-
-	// Handle CLI from multiboot header
- 	if( strstr( (char *)mb_info->cmdline, "graphics_on" ) ) {
-		debugf( "CLI: Graphics on\n" );
-		GRAPHICS_ACTIVE = false;
-	} else {
-		debugf( "CLI: Graphics off\n" );
-		GRAPHICS_ACTIVE = false;
-		DF_COM4_ONLY = true;
-	}
 
 	multiboot_echo_to_serial();
 	memory_initalize();

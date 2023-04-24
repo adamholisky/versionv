@@ -28,7 +28,30 @@ unsigned int y_start;
 bool is_debug_output = false;
 bool is_gui_active = false;
 
+typedef struct {
+		rect			box;
+
+		unsigned int 	width;
+		unsigned int 	height;
+
+		unsigned int 	fg_color;
+		unsigned int 	bg_color;
+
+		char 			*buffer;
+
+		unsigned int 	current_x;
+		unsigned int 	current_y;
+
+		unsigned int 	prev_x;
+		unsigned int 	prev_y;
+
+		bool 			waiting_on_input;
+		bool 			can_update_cursor;
+} console;
+
+
 device *term_device;
+console *main_console;
 
 void term_initalize( void ) {
 	// DO NOT PUT KLOG FUNCTIONS HERE
@@ -115,6 +138,7 @@ void term_put_char( char c ) {
 		term_capture_ansi_escape_code = true;
 		capture_i = 0;
 		send_to_com4 = false;
+		send_to_screen = false;
 	} else if( term_capture_ansi_escape_code ) {
 		if( c == 'm' ) {
 			ansi_capture[capture_i] = 0;
@@ -133,6 +157,7 @@ void term_put_char( char c ) {
 					break;
 				case 31:
 					fg = VGA_COLOR_RED;
+					main_console->fg_color = 0x00FF0000;
 					break;
 				case 32:
 					fg = VGA_COLOR_GREEN;
@@ -147,6 +172,7 @@ void term_put_char( char c ) {
 				case 39:
 				case 0:
 				default:
+					main_console->fg_color = 0x00AAAAAA;
 					fg = VGA_COLOR_WHITE;
 			}
 
@@ -172,10 +198,12 @@ void term_put_char( char c ) {
 
 			term_current_color = vga_entry_color( fg, bg );
 			send_to_com4 = false;
+			send_to_screen = false;
 		} else {
 			ansi_capture[capture_i] = c;
 			capture_i++;
 			send_to_com4 = false;
+			send_to_screen = false;
 		}
 	}
 
@@ -274,28 +302,6 @@ void write_to_serial_port( char c ) {
 
 /////
 
-typedef struct {
-		rect			box;
-
-		unsigned int 	width;
-		unsigned int 	height;
-
-		unsigned int 	fg_color;
-		unsigned int 	bg_color;
-
-		char 			*buffer;
-
-		unsigned int 	current_x;
-		unsigned int 	current_y;
-
-		unsigned int 	prev_x;
-		unsigned int 	prev_y;
-
-		bool 			waiting_on_input;
-		bool 			can_update_cursor;
-} console;
-
-console *main_console;
 
 void console_init( char * name, unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned int bg_color, unsigned int fg_color ) {
 	unsigned int _x, _y;

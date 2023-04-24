@@ -14,7 +14,7 @@ extern "C" {
 #define SYSCALL_SCHED_YIELD	4
 #define SYSCALL_SBRK	5
 #define SYSCALL_END		6
-#define SYSCALL_EXIT	7
+#define SYSCALL_EXIT	60
 #define SYSCALL_ACTTASK	8
 #define SYSCALL_PARTIAL_CONTEXT_SWITCH 9
 #define SYSCALL_SCHED_YIELD_TO 10
@@ -44,6 +44,9 @@ uint32_t syscall_write( int _fd, void * buff, uint32_t count );
 int open( const char *pathname, int flags );
 int syscall_open( const char *pathname, int flags );
 
+int close( int fd );
+int syscall_close( int _fd );
+
 uint32_t sched_yield( void );
 
 uint32_t sched_yield_to( uint32_t task_id );
@@ -57,7 +60,9 @@ uint32_t syscall_sbrk( int inc );
 uint32_t exit_from_wrapper( void );
 uint32_t syscall_exit_from_wrapper( void );
 
-uint32_t syscall_exit( int code );
+uint32_t _exit( int status );
+//uint32_t _Exit( int status );
+uint32_t syscall_exit( int status );
 
 uint32_t syscall_activate_task( int32_t task_id );
 

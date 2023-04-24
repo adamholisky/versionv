@@ -16,7 +16,7 @@ OBJECTS_ASMS = $(patsubst %.S, build/%.o, $(shell ls kernel/**/*.S | xargs -n 1 
 CC = /usr/local/osdev/bin/i686-elf-gcc
 ASM = /usr/local/osdev/bin/i686-elf-as
 DEFINES = -DPAGING_PAE \
-		  -DGRAPHICS_OFF \
+		  -DGRAPHICS_ON \
 		  -DBITS_32 
 CFLAGS = $(DEFINES) -Wno-write-strings -fcompare-debug-second -ffreestanding -fno-omit-frame-pointer -O0 -g -I$(ROOT_DIR)/kernel/include -I$(ROOT_DIR)/../libcvv/libc/include
 CFLAGS_END = -nostdlib -lgcc
@@ -34,12 +34,12 @@ QEMU_COMMON = 	-drive id=main_drive,if=none,format=raw,file=$(ROOT_DIR)/vv_hd.im
 				-nic user,ipv6=off,model=e1000,mac=52:54:98:76:54:32 \
 				-m 4G \
 				-serial null \
-				-serial stdio \
+				-serial null \
 				-serial null \
 				-serial file:$(ROOT_DIR)/serial_out.txt \
 				-no-reboot
 QEMU_DISPLAY_NONE =	-display none
-QEMU_DISPLAY_NORMAL = -vga std
+QEMU_DISPLAY_NORMAL = -display gtk -vga std
 QEMU_DEBUG_COMMON = -S -gdb tcp::5894 
 QEMU_DEBUG_LOGGING = -D $(ROOT_DIR)/qemu_debug_log.txt -d int,cpu_reset 
 
@@ -116,7 +116,7 @@ install_stage2: build/versionv.bin
 	sudo umount hd_mount_dir 
 
 run: install
-	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL) $(QEMU_DEBUG_LOGGING)
+	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL)
 
 run_debug: install
 	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL) $(QEMU_DEBUG_COMMON)
