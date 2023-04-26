@@ -172,7 +172,7 @@ void term_put_char( char c ) {
 				case 39:
 				case 0:
 				default:
-					main_console->fg_color = 0x00AAAAAA;
+					main_console->fg_color = 0x00444444;
 					fg = VGA_COLOR_WHITE;
 			}
 

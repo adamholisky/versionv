@@ -45,8 +45,9 @@ const unsigned long left[696] = {
 	0x006b6b6b, 0x00d0d0d0, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3, 0x00a3a3a3
 };
 
+//0x00262626, 
 const unsigned long middle[24] = {
-	0x00262626, 
+	0x00262626,  
 	0x00d2d2d2, 
 	0x00d7d7d7, 
 	0x00d4d4d4, 
@@ -114,7 +115,7 @@ void test_app_main( void ) {
 	// right is 54w and 24h
 
 	int x = 320;
-	int y = 150 - 29;
+	int y = 150 - 24;
 	int i = 0;
 	int middle_repeat = 560 - 29 - 54;
 
@@ -142,7 +143,17 @@ void test_app_main( void ) {
 			put_pixel(x + j, y + i, right[(i * 54) + j]);
 		}
 	}
-	
+
+	// add 1px black border on R and L sides
+	for( int i = 0; i < (350 + 24); i++ ) {
+		put_pixel( 320 - 1, y + i, 0x00000000);
+		put_pixel( x + 54, y + i, 0x00000000);
+	}
+
+	for( int i = 0; i < (560 + 2); i++ ) {
+		put_pixel( 320 + i - 1, y - 1, 0x00000000);
+		put_pixel( 320 + i - 1, y + 350 + 24, 0x00000000);
+	}
 
 	vga_draw_screen();
 }

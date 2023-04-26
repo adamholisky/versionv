@@ -46,7 +46,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	if( GRAPHICS_ACTIVE ) {
 		vga_initalize();
-		console_init( "default-console", (1280/4), 150, 7 * 80, 14 * 25, 0x00282C34, 0x00AAAAAA );
+		console_init( "default-console", (1280/4), 150, 7 * 80, 14 * 25, 0x00EEEEEE, 0x00FF0000 );
 		console_draw();
 	}
 
@@ -66,7 +66,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	test_app_main();
 
-	kshell_run();
+	//kshell_run();
 
 	
 

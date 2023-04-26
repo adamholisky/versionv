@@ -208,7 +208,7 @@ inline void draw_char( uint8_t * buffer, unsigned int x, unsigned int y, uint32_
 	int row, col;
 	uint8_t * where = (buffer + (x * vga_info.pixel_width) + (y * vga_info.width * vga_info.pixel_width));
 	uint32_t new_r, new_g, new_b, new_fg;
-	double alpha = 0.3;
+	double alpha = 0.1;
 
 	new_r = (((fg & 0xFF0000) >> 16) * alpha) + ((1 - alpha) * ((bg & 0xFF0000) >> 16));
 	new_g = (((fg & 0x00FF00) >> 8) * alpha) + ((1 - alpha) * ((bg & 0x00FF00) >> 8));
