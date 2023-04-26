@@ -91,19 +91,20 @@ void vga_initalize( void ) {
 	vga_info.char_height = 14;
 	vga_info.char_width = 7;
 	vga_info.fg_color = 0x00000000;
-	vga_info.bg_color = 0x00262A30;
+	//vga_info.bg_color = 0x00262A30;
+	vga_info.bg_color = 0x00444444;
 
 	char_height = 14;
 	char_width = 7;
 	screen_border = 10;
 
-	bg_color = 0x00262A30;
+	bg_color = vga_info.bg_color;
 	fg_color = 0x00000000;
 	render_background = true;
 
 	bg_mask = kmalloc( sizeof(int) * 14 * 7 );
 
-	fillrect( vga_info.buffer, 0x00262A30, 0, 0, 1280, 720 );
+	fillrect( vga_info.buffer, 0x00444444, 0, 0, 1280, 720 );
 	klog( "Drawing first screen.\n" );
 	vga_draw_screen();
 

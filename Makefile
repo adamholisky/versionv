@@ -39,7 +39,7 @@ QEMU_COMMON = 	-drive id=main_drive,if=none,format=raw,file=$(ROOT_DIR)/vv_hd.im
 				-serial file:$(ROOT_DIR)/serial_out.txt \
 				-no-reboot
 QEMU_DISPLAY_NONE =	-display none
-QEMU_DISPLAY_NORMAL = -display gtk -vga std
+QEMU_DISPLAY_NORMAL = -vga std
 QEMU_DEBUG_COMMON = -S -gdb tcp::5894 
 QEMU_DEBUG_LOGGING = -D $(ROOT_DIR)/qemu_debug_log.txt -d int,cpu_reset 
 

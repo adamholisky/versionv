@@ -7,6 +7,7 @@
         "dlfcn.h": "c",
         "loader.h": "c",
         "fs.h": "c",
-        "afs.h": "c"
+        "afs.h": "c",
+        "syscall.h": "c"
     }
 }
