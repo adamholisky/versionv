@@ -92,7 +92,7 @@ void vga_initalize( void ) {
 	vga_info.char_width = 7;
 	vga_info.fg_color = 0x00000000;
 	//vga_info.bg_color = 0x00262A30;
-	vga_info.bg_color = 0x00444444;
+	vga_info.bg_color = 0x00333399;
 
 	char_height = 14;
 	char_width = 7;
@@ -104,7 +104,7 @@ void vga_initalize( void ) {
 
 	bg_mask = kmalloc( sizeof(int) * 14 * 7 );
 
-	fillrect( vga_info.buffer, 0x00444444, 0, 0, 1280, 720 );
+	fillrect( vga_info.buffer, vga_info.bg_color, 0, 0, 1280, 720 );
 	klog( "Drawing first screen.\n" );
 	vga_draw_screen();
 
