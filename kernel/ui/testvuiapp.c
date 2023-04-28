@@ -6,81 +6,78 @@
 #include <syscall.h>
 #include <vui/parts/window.h>
 #include <vui/font/fira.h>
+#include <vui/font/verab.h>
+#include <vui/font/verar.h>
 
 #define SSFN_IMPLEMENTATION
 #include <ssfn.h>
 
-
+void vui_draw_string( int _x, int _y, int _size, uint32_t _fg, int _font, char *s );
 void vui_draw_window( int x, int y, int width, int height );
 
 void test_app_main( void ) {
 	vui_draw_window_around( (1280/4), 150, 7 * 80, 14 * 25 );
 
-	
-	int x = 0;
-	int font_file = open( "/etc/vera.sfn", 0 );
-	int file_size = get_file_size(font_file);
-	uint8_t *buff = malloc( file_size );
-	int bytes_read = read( font_file, buff, file_size );
+	vui_draw_string( 1280/4, 125, 12, 0xFF000000, VUI_FONT_VERAB, "Hello, world!" );
+}
+
+void vui_draw_string( int _x, int _y, int _size, uint32_t _fg, int _font, char *s ) {
 	vga_information *v = vga_get_info();
 
-	klog( "Size: %d\n", file_size );
-	klog( "Bytes Read: %d\n", bytes_read );
-	
-	if( bytes_read != 0 ) {
-		//kdebug_peek_at_n( buff, (file_size / 0xF) + 0xA );
+	ssfn_t ctx = { 0 };                                 /* the renderer context */
 
-		ssfn_t ctx = { 0 };                                 /* the renderer context */
+	memset( &ctx, 0, sizeof( ssfn_t ) );
 
+	ssfn_buf_t buf = {                                  /* the destination pixel buffer */
+		.ptr = v->buffer,                      /* address of the buffer */
+		.w = v->width,                             /* width */
+		.h = v->height,                             /* height */
+		.p = (v->width * 4),                         /* bytes per line */
+		.x = _x,                                       /* pen position */
+		.y = _y,
+		.fg = _fg
+	};
 
-		memset( &ctx, 0, sizeof( ssfn_t ) );
+	ssfn_font_t *font = NULL;
 
-		ssfn_buf_t buf = {                                  /* the destination pixel buffer */
-			.ptr = v->buffer,                      /* address of the buffer */
-			.w = 1280,                             /* width */
-			.h = 720,                             /* height */
-			.p = (1280*4),                         /* bytes per line */
-			.x = 50,                                       /* pen position */
-			.y = 50,
-			.fg = 0xffffffff,                                /* foreground color */
-			.bg = 0x00000000
-		};
-
-		klog( "0\n" );
-
-		ssfn_font_t *font = (ssfn_font_t *)fira;
-
-		/* add one or more fonts to the context. Fonts must be already in memory */
-		int err = ssfn_load(&ctx, font);          /* you can add different styles... */
-		klog( "ssfn_load err: %d\n", err );
-
-		klog( "1\n" );
-		/* select the typeface to use */
-		err = ssfn_select(&ctx,
-			SSFN_FAMILY_ANY, NULL,                        /* family */
-			SSFN_STYLE_REGULAR,      /* style */
-			16                                            /* size */
-		);
-
-		klog( "ssfn_select err: %d\n", err );
-
-		klog( "2\n" );
-
-		/* rasterize the first glyph in an UTF-8 string into a 32 bit packed pixel buffer */
-		/* returns how many bytes were consumed from the string */
-		err = ssfn_render(&ctx, &buf, "Hello");
-		err = ssfn_render(&ctx, &buf, "ello");
-		err = ssfn_render(&ctx, &buf, "llo");
-		err = ssfn_render(&ctx, &buf, "lo");
-		err = ssfn_render(&ctx, &buf, "o");
-		klog( "ssfn_render err: %d\n", err );
-
-		klog( "3\n" );
-
-		fillrect( v->buffer, 0x00ffffff, 1000, 400, 100, 100 );
-
-		vga_draw_screen();
+	switch( _font ) {
+		case VUI_FONT_FIRA:
+			font = (ssfn_font_t *)fira;
+			break;
+		case VUI_FONT_VERA:
+			font = (ssfn_font_t *)VeraR;
+			break;
+		case VUI_FONT_VERAB:
+			font = (ssfn_font_t *)VeraB;
+			break;
+		default:
+			font = (ssfn_font_t *)fira;
 	}
+
+	int err = ssfn_load(&ctx, font);          /* you can add different styles... */
+
+	if( err < 0 ) {
+		klog( "ssfn_load err: %d\n", err );
+		return;
+	}
+	
+	err = ssfn_select( &ctx, SSFN_FAMILY_ANY, NULL, SSFN_STYLE_REGULAR, _size );
+
+	if( err < 0 ) {
+		klog( "ssfn_select err: %d\n", err );
+		return;
+	}
+
+	for( int i = 0; i < strlen(s); i++ ) {
+		err = ssfn_render( &ctx, &buf, (s + i) );
+
+		if( err < 0 ) {
+			klog( "ssfn_render[%d] err: %d\n", i, err );
+			return;
+		}
+	}
+
+	vga_draw_screen();
 }
 
 int ui_top_height = 20;
