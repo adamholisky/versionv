@@ -49,6 +49,12 @@ drive_item items[] = {
 		.type = AFS_BLOCK_TYPE_FILE,
 		.loc = "/bin/",
 		.original_loc = "/usr/local/osdev/versions/v/support/apptest/myapp"
+	},
+	{
+		.name = "vera.sfn",
+		.type = AFS_BLOCK_TYPE_FILE,
+		.loc = "/etc/",
+		.original_loc = "/usr/local/osdev/versions/v/support/afsdrive/vera.sfn"
 	}
 };
 

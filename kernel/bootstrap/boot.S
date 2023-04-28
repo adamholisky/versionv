@@ -42,7 +42,7 @@
 .global stack_top
 	.align 16
 	stack_bottom:
-	.skip 16384
+	.skip 75000
 	stack_top:
 
 .section .data

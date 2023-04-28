@@ -97,7 +97,9 @@ void memory_initalize( void ) {
 	memset( kernel_page_data_tables, 0, 512*8 );
 	kernel_page_data_tables[0] = 0x83;
 	kernel_page_data_tables[1] = 0x83 + 0x200000;
-	kernel_page_data_tables[2] = 0x83 + 0x400000;
+	//kernel_page_data_tables[2] = 0x83 + 0x400000;
+	//kernel_page_data_tables[3] = 0x83 + 0x600000;
+	//kernel_page_data_tables[4] = 0x83 + 0x800000;
 
 	asm_refresh_cr3();
 
