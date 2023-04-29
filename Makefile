@@ -116,7 +116,7 @@ install_stage2: build/versionv.bin
 	sudo umount hd_mount_dir 
 
 run: install
-	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL)
+	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL) $(QEMU_DEBUG_LOGGING)
 
 run_debug: install
 	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL) $(QEMU_DEBUG_COMMON)

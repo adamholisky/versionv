@@ -16,7 +16,9 @@
 #include "intel8254.h"
 #include <ahci.h>
 #include <fs.h>
-#include <vui/testapp.h>
+#include <vui/vui.h>
+#include <vui/window.h>
+#include <vui/desktop.h>
 
 #define END_IMMEDIATELY
 #define TRIGGER_DIVIDE_BY_ZERO false
@@ -46,7 +48,18 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	if( GRAPHICS_ACTIVE ) {
 		vga_initalize();
-		console_init( "default-console", (1280/4), 150, 7 * 80, 14 * 25, 0x00CCCCCC, 0x00FF0000 );
+		vui_initalize();
+
+		vui_window *win = vui_window_new( 25, 25, 7 * 80 + 6, 14 * 25 + 22, "VVTerm: /dev/tty0" );
+		vui_set_parent( win, vui_get_main_desktop() );
+
+		vui_refresh();
+
+		rect r;
+
+		rect *inner_rect = vui_window_get_inner_rect( win, &r );
+
+		console_init( "default-console", inner_rect->x, inner_rect->y, inner_rect->w, inner_rect->h, 0x00CCCCCC, 0x00FF0000 );
 		console_draw();
 	}
 
@@ -63,8 +76,6 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	READY_FOR_INPUT = true;
 
 	task_check();
-
-	test_app_main();
 
 	kshell_run();
 

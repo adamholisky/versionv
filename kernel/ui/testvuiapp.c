@@ -4,36 +4,32 @@
 #include <fs.h>
 #include <afs.h>
 #include <syscall.h>
-#include <vui/parts/window.h>
+//#include <vui/parts/window.h>
 #include <vui/font/fira.h>
 #include <vui/font/verab.h>
 #include <vui/font/verar.h>
 
-#define SSFN_IMPLEMENTATION
-#include <ssfn.h>
-
-void vui_draw_string( int _x, int _y, int _size, uint32_t _fg, int _font, char *s );
-void vui_draw_window( int x, int y, int width, int height );
+//void vui_draw_window( int x, int y, int width, int height );
 
 void test_app_main( void ) {
-	vui_draw_window_around( (1280/4), 150, 7 * 80, 14 * 25 );
+	//vui_draw_window_around( (1280/4), 150, 7 * 80, 14 * 25 );
 
-	vui_draw_string( 1280/4, 125, 12, 0xFF000000, VUI_FONT_VERAB, "Hello, world!" );
+	//vui_draw_string( 1280/4, 125, 12, 0xFF000000, VUI_FONT_VERAB, "Hello, world!" );
 }
-
+/* 
 void vui_draw_string( int _x, int _y, int _size, uint32_t _fg, int _font, char *s ) {
 	vga_information *v = vga_get_info();
 
-	ssfn_t ctx = { 0 };                                 /* the renderer context */
+	ssfn_t ctx = { 0 };                                 
 
 	memset( &ctx, 0, sizeof( ssfn_t ) );
 
-	ssfn_buf_t buf = {                                  /* the destination pixel buffer */
-		.ptr = v->buffer,                      /* address of the buffer */
-		.w = v->width,                             /* width */
-		.h = v->height,                             /* height */
-		.p = (v->width * 4),                         /* bytes per line */
-		.x = _x,                                       /* pen position */
+	ssfn_buf_t buf = {                                  
+		.ptr = v->buffer,                      
+		.w = v->width,                             
+		.h = v->height,                            
+		.p = (v->width * 4),                         
+		.x = _x,                                      
 		.y = _y,
 		.fg = _fg
 	};
@@ -54,7 +50,7 @@ void vui_draw_string( int _x, int _y, int _size, uint32_t _fg, int _font, char *
 			font = (ssfn_font_t *)fira;
 	}
 
-	int err = ssfn_load(&ctx, font);          /* you can add different styles... */
+	int err = ssfn_load(&ctx, font);       
 
 	if( err < 0 ) {
 		klog( "ssfn_load err: %d\n", err );
@@ -79,15 +75,15 @@ void vui_draw_string( int _x, int _y, int _size, uint32_t _fg, int _font, char *
 
 	vga_draw_screen();
 }
-
-int ui_top_height = 20;
+ */
+/* int ui_top_height = 20;
 int ui_top_l_width = 22;
 int ui_top_r_width = 39;
 int ui_bottom_height = 2;
 
 void vui_draw_window_around( int x, int y, int width, int height ) {
 	vui_draw_window( x - 2, y - ui_top_height, width + 5, height + ui_top_height + ui_bottom_height + 1 );
-}
+} */
 
 /*
 	window_ui_top_left      window_ui_top_mid       window_ui_top_right
@@ -101,7 +97,7 @@ void vui_draw_window_around( int x, int y, int width, int height ) {
 
 */	
 
-void vui_draw_window( int x, int y, int width, int height ) {
+/* void vui_draw_window( int x, int y, int width, int height ) {
 	int _x = x;
 	int _y = y;
 	int middle_repeat = width - ui_top_l_width - ui_top_r_width - 1;
@@ -166,7 +162,7 @@ void vui_draw_window( int x, int y, int width, int height ) {
 		.y = y + ui_top_height
 	};
 
-	draw_rect( r, 0x00FFFFFF ); */
+	draw_rect( r, 0x00FFFFFF );
 
 	vga_draw_screen();
-}
+} */
