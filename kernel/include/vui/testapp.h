@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 void test_app_main( void );
+void mem_viewer_draw( void );
 
 #ifdef __cplusplus
 }

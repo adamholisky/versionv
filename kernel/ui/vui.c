@@ -6,6 +6,7 @@
 #include <vui/font/fira.h>
 #include <vui/font/verab.h>
 #include <vui/font/verar.h>
+#include <observer.h>
 
 #define SSFN_IMPLEMENTATION
 #include <ssfn.h>
@@ -22,6 +23,8 @@ void vui_initalize( void ) {
 
 	vui_handle_top = 0;
 	vui_last_error = 0;
+
+	observer_register_subject( "vui_refresh" );
 	
 	vga_information *v = vga_get_info();
 
@@ -39,7 +42,16 @@ void vui_refresh( void ) {
 	log_entry_enter();
 
 	vui_handle_draw( main_desktop->common.handle );
+	console_draw();
 	vga_draw_screen();
+
+	event_message e;
+	e.data = observer_malloc( sizeof("Event One Message") );
+	strcpy( e.data, "Event One Message" );
+
+	//int b = observer_notify( "vui_refresh", &e );
+
+	//klog( "Result of observers: %d\n", b );
 
 	log_entry_exit();
 }
@@ -68,6 +80,7 @@ void *vui_add_handle( int handle_type ) {
 			break;
 		default:
 			klog( "Unknown type: 0x%X\n", handle_type );
+			dump_stack_trace();
 			return NULL;
 	}
 
@@ -95,6 +108,7 @@ void vui_free_handle( vui_handle handle ) {
 			vui_desktop_destroy( (vui_desktop *)hd->resource );
 			break;
 		case VUI_TYPE_LABEL:
+			vui_label_destroy( (vui_label *)hd->resource );
 			break;
 		case VUI_TYPE_WINDOW:
 			vui_window_destroy( (vui_window *)hd->resource );
@@ -124,6 +138,7 @@ bool vui_handle_draw( vui_handle handle ) {
 			vui_desktop_draw( (vui_desktop *)hd->resource );
 			break;
 		case VUI_TYPE_LABEL:
+			vui_label_draw( (vui_label *)hd->resource );
 			break;
 		case VUI_TYPE_WINDOW:
 			vui_window_draw( (vui_window *)hd->resource );

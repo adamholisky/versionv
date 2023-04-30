@@ -8,6 +8,8 @@
         "loader.h": "c",
         "fs.h": "c",
         "afs.h": "c",
-        "syscall.h": "c"
+        "syscall.h": "c",
+        "testapp.h": "c",
+        "observer.h": "c"
     }
 }
