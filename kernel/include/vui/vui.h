@@ -15,6 +15,7 @@ extern "C" {
 #define VUI_FONT_FIRA   0
 #define VUI_FONT_VERA   1
 #define VUI_FONT_VERAB  2
+#define VUI_FONT_DVSM   3
 
 #define VUI_NO_ERROR 0
 #define VUI_ERROR_UNKNOWN 0
@@ -22,6 +23,8 @@ extern "C" {
 
 typedef uint32_t vui_handle;
 typedef uint32_t vui_error;
+
+typedef void (*vui_draw_func)(void *obj);
 
 typedef struct {
     vui_handle  handle;
@@ -31,9 +34,10 @@ typedef struct {
 } vui_handle_data;
 
 typedef struct {
-    vui_handle  handle;
-    vui_handle  parent;
-    int         type;
+    vui_handle      handle;
+    vui_handle      parent;
+    int             type;
+    vui_draw_func   custom_paint_func;
 } vui_object;
 
 void vui_initalize( void );
@@ -45,6 +49,7 @@ bool vui_set_parent( void *child, void *parent );
 void vui_draw_rectangle( int x, int y, int width, int height, uint32_t color );
 int vui_get_string_width( int font, int size, char *s );
 void vui_draw_string( int x, int y, int size, uint32_t fg, int font, char *s );
+void vui_draw_string_mono( int x, int y, int size, uint32_t fg, int font, char *s );
 
 #ifdef __cplusplus
 }

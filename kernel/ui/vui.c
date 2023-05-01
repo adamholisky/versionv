@@ -6,10 +6,20 @@
 #include <vui/font/fira.h>
 #include <vui/font/verab.h>
 #include <vui/font/verar.h>
-#include <observer.h>
+#include <vui/font/dvsm.h>
+
+uint8_t *DVSM = dvsm;
 
 #define SSFN_IMPLEMENTATION
 #include <ssfn.h>
+
+/*
+ * I hate fonts
+ * 
+ * ./sfnconv.exe -T -M 14 -A DejaVuSansMono.ttf mono.sfn
+ * ./sfnconv.exe -C mono.sfn
+ * 
+ */
 
 vui_handle_data handles[ VUI_MAX_HANDLES ];
 
@@ -18,13 +28,12 @@ vui_error   vui_last_error;
 
 vui_desktop	*main_desktop;
 
+
 void vui_initalize( void ) {
 	log_entry_enter();
 
 	vui_handle_top = 0;
 	vui_last_error = 0;
-
-	observer_register_subject( "vui_refresh" );
 	
 	vga_information *v = vga_get_info();
 
@@ -44,14 +53,6 @@ void vui_refresh( void ) {
 	vui_handle_draw( main_desktop->common.handle );
 	console_draw();
 	vga_draw_screen();
-
-	event_message e;
-	e.data = observer_malloc( sizeof("Event One Message") );
-	strcpy( e.data, "Event One Message" );
-
-	//int b = observer_notify( "vui_refresh", &e );
-
-	//klog( "Result of observers: %d\n", b );
 
 	log_entry_exit();
 }
@@ -161,6 +162,13 @@ bool vui_handle_draw( vui_handle handle ) {
 		}
 	}
 
+	if( hd->handle_type == VUI_TYPE_WINDOW ) {
+		if( ((vui_window *)hd->resource)->common.custom_paint_func ) {
+			((vui_window *)hd->resource)->common.custom_paint_func( hd->resource );
+		}
+		
+	}
+
 	log_entry_exit();
 
 	return true;
@@ -207,6 +215,9 @@ int vui_get_string_width( int font, int size, char *s ) {
 			break;
 		case VUI_FONT_VERAB:
 			user_font = (ssfn_font_t *)VeraB;
+			break;
+		case VUI_FONT_DVSM:
+			user_font = (ssfn_font_t *)DVSM;
 			break;
 		default:
 			user_font = (ssfn_font_t *)fira;
@@ -260,6 +271,9 @@ void vui_draw_string( int x, int y, int size, uint32_t fg, int font, char *s ) {
 		case VUI_FONT_VERAB:
 			user_font = (ssfn_font_t *)VeraB;
 			break;
+		case VUI_FONT_DVSM:
+			user_font = (ssfn_font_t *)DVSM;
+			break;
 		default:
 			user_font = (ssfn_font_t *)fira;
 	}
@@ -270,8 +284,14 @@ void vui_draw_string( int x, int y, int size, uint32_t fg, int font, char *s ) {
 		klog( "ssfn_load err: %d\n", err );
 		return;
 	}
+
+	int family = SSFN_FAMILY_ANY;
+
+	if( font == VUI_FONT_DVSM ) {
+		family = SSFN_FAMILY_ANY;
+	}
 	
-	err = ssfn_select( &ctx, SSFN_FAMILY_ANY, NULL, SSFN_STYLE_REGULAR, size );
+	err = ssfn_select( &ctx, family, NULL, SSFN_STYLE_REGULAR, size );
 
 	if( err < 0 ) {
 		klog( "ssfn_select err: %d\n", err );
@@ -286,4 +306,13 @@ void vui_draw_string( int x, int y, int size, uint32_t fg, int font, char *s ) {
 			return;
 		}
 	}
+}
+
+void vui_draw_string_mono( int x, int y, int size, uint32_t fg, int font, char *s ) {
+	vga_information * vga = vga_get_info();
+
+	for( int i = 0; i < strlen(s); i++ ) {
+		draw_char( vga->buffer, x + (i * vga->char_width), y, fg, 0x00CCCCCC, s[i] );
+	}
+	//draw_string( s, x, y, fg, 0x00FFFFFF );
 }
