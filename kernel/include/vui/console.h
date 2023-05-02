@@ -28,11 +28,15 @@ extern "C"
 #define CONSOLE_COLOR_YELLOW 14
 #define CONSOLE_COLOR_WHITE 15
 
+/* Original colors...
 #define CONSOLE_COLOR_RGB_BLACK 	0x00000000
-#define CONSOLE_COLOR_RGB_BLUE		0x000000AA
-#define CONSOLE_COLOR_RGB_GREEN 	0x0000AA00
-#define CONSOLE_COLOR_RGB_CYAN		0x0000AAAA
-#define CONSOLE_COLOR_RGB_RED 		0x00AA0000
+*/
+
+#define CONSOLE_COLOR_RGB_BLACK 	0x00444444
+#define CONSOLE_COLOR_RGB_BLUE		0x000000CC
+#define CONSOLE_COLOR_RGB_GREEN 	0x0000CC00
+#define CONSOLE_COLOR_RGB_CYAN		0x0000CCCC
+#define CONSOLE_COLOR_RGB_RED 		0x00CC0000
 #define CONSOLE_COLOR_RGB_MAGENTA 	0x00AA00AA
 #define CONSOLE_COLOR_RGB_BROWN 	0x00AA5500
 #define CONSOLE_COLOR_RGB_LIGHT_GREY 0x00AAAAAA
@@ -65,6 +69,11 @@ typedef struct {
 	uint8_t		foreground;
 	uint8_t		background;
 	bool		transparent_text_background;
+
+	bool		capturing_escape_code;
+	int			capture_num;
+	char		captured_escape[25];
+	int			tab_size;
 
 	uint16_t    *data;
 } vui_console;

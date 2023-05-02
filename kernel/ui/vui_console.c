@@ -63,7 +63,7 @@ bool vui_console_draw( vui_console *console ) {
 
 			switch( (*(console->data + (i * console->cols) + j) & 0xF000)>>12 ) {
 				case CONSOLE_COLOR_BLACK:
-					bg = CONSOLE_COLOR_BLACK;
+					bg = CONSOLE_COLOR_RGB_BLACK;
 					break;
 				case CONSOLE_COLOR_BLUE:
 					bg = CONSOLE_COLOR_RGB_BLUE;
@@ -116,7 +116,7 @@ bool vui_console_draw( vui_console *console ) {
 
 			switch( (*(console->data + (i * console->cols) + j) & 0x0F00)>>8 ) {
 				case CONSOLE_COLOR_BLACK:
-					fg = CONSOLE_COLOR_BLACK;
+					fg = CONSOLE_COLOR_RGB_BLACK;
 					break;
 				case CONSOLE_COLOR_BLUE:
 					fg = CONSOLE_COLOR_RGB_BLUE;
@@ -190,20 +190,126 @@ void vui_console_clear( vui_console *console ) {
  * returns number of characters put (should be 1)
 */
 int vui_console_putc( vui_console *console, char c ) {
-	vui_console_putc_color( console, c, console->background, console->foreground );
+	if( c == '\x1b' ) {
+		console->capturing_escape_code = true;
+		console->capture_num = 0;
+	} else if( console->capturing_escape_code ) {
+		if( c == 'm' ) {
+			console->captured_escape[ console->capture_num ] = 0;
+			console->capturing_escape_code = false;
+			console->capture_num = 0;
+
+			// char 3 & 4 = fg
+			// char 6 & 7 = bg
+			int captured_fg = ((console->captured_escape[3] - '0') * 10) + (console->captured_escape[4] - '0');
+			int captured_bg = ((console->captured_escape[6] - '0') * 10) + (console->captured_escape[7] - '0');
+
+			int new_fg = 0;
+			int new_bg = 0;
+
+			switch( captured_fg ) {
+				case 30:
+					new_fg = CONSOLE_COLOR_BLACK;
+					break;
+				case 31:
+					new_fg = CONSOLE_COLOR_RED;
+					break;
+				case 32:
+					new_fg = CONSOLE_COLOR_GREEN;
+					break;
+				case 33:
+					new_fg = CONSOLE_COLOR_BROWN;
+					break;
+				case 34:
+					new_fg = CONSOLE_COLOR_BLUE;
+					break;
+				case 37:
+				case 39:
+				case 0:
+				default:
+					new_fg = CONSOLE_COLOR_BLACK;
+			}
+
+			switch( captured_bg ) {
+				case 40:
+					new_bg = CONSOLE_COLOR_BLACK;
+					break;
+				case 41:
+					new_bg = CONSOLE_COLOR_RED;
+					break;
+				case 42:
+					new_bg = CONSOLE_COLOR_GREEN;
+					break;
+				case 44:
+					new_bg = CONSOLE_COLOR_BLUE;
+					break;
+				case 47:
+				case 49:
+				case 0:
+				default:
+					new_bg = CONSOLE_COLOR_BLACK;
+			}
+
+			console->foreground = new_fg;
+			console->background = new_bg;
+		} else {
+			console->captured_escape[ console->capture_num ] = c;
+			console->capture_num++;
+		}
+	} else {
+		switch( c ) {
+			case '\t':
+				int new_x = console->current_x + (console->current_x % console->tab_size);
+
+				if( new_x > console->cols ) {
+					vui_console_putc( console, '\n' );
+					console->current_x = console->cols - new_x;
+				} else {
+					console->current_x = new_x;
+				}
+
+				break;
+			case '\n':
+				console->current_x = 0;
+
+				if( console->current_y == console->rows - 1 ) {
+					for( int i = 1; i < console->rows; i++ ) {
+						memcpy( 
+							(uint8_t *)(console->data + ((i-1) * console->cols)),
+							(uint8_t *)(console->data + (i * console->cols)),
+							console->cols * 2   
+						);
+					}
+
+					memset( 
+						(uint8_t *)(console->data + ((console->cols) * (console->rows - 1))), 
+						0, 
+						console->cols * 2 
+					);
+
+				} else {
+					console->current_y++;
+				}
+
+				break;
+			default:
+				vui_console_putc_color( console, c, console->background, console->foreground );
+
+				console->current_x++;
+				
+				if( console->current_x == console->cols ) {
+					vui_console_putc( console, '\n' );
+				}
+		}
+	}
+
+	klog( "cur_x: %d, cur_y: %d, rows: %d, cols: %d\n", console->current_x, console->current_y, console->rows, console->cols );
 }
 
 int vui_console_putc_color( vui_console * console, char c, int bg, int fg ) {
 	uint16_t *chars = console->data;
 
 	*(chars + (console->current_x) + (console->current_y * console->cols) ) = ( console->background<<12 | console->foreground<<8 | c);
-
-	if( console->current_x + 1 >= console->cols ) {
-		console->current_x = 0;
-		console->current_y++;
-	} else {
-		console->current_x++;
-	}
 	
 	return 1;
 }
@@ -231,20 +337,35 @@ int vui_console_main( void ) {
 
 	rect *r;
 
-	capp_state.win = vui_window_new( 700, 50, 500, 300, "Console" );
+	capp_state.win = vui_window_new( 700, 50, 500, 300, "Fully Instanced vUI Console" );
 	vui_set_parent( capp_state.win, vui_get_main_desktop() );
 
 	r = vui_window_get_inner_rect( capp_state.win, &capp_state.pane );
 	capp_state.con = vui_console_new( r->x, r->y, r->w, r->h );
 	vui_set_parent( capp_state.con, capp_state.win );
 
-	capp_state.con->background = CONSOLE_COLOR_BLACK;
-	capp_state.con->foreground = CONSOLE_COLOR_WHITE;
+	capp_state.con->transparent_text_background = true;
+	capp_state.con->foreground = CONSOLE_COLOR_BLACK;
 
 	vui_console_clear( capp_state.con );
 
-	vui_console_puts( capp_state.con, "Hello, world!" );
+/* 	vui_console_puts( capp_state.con, "Hello, world!" );
+	vui_console_puts( capp_state.con, "\n\nThis is a line of text!\nAnd another...\n" ); */
 
+	// scroll test
+
+	char str[100];
+	// capp_state.con->rows
+	for( int i = 1; i < 21; i++ ) {
+		memset( str, 0, 100 );
+		snprintf( str, 100, "0x%02X: This is line %d (Max: %d). Test scrolling. cur_x: %d, cur_y: %d\n", i, i, capp_state.con->rows, capp_state.con->current_x, capp_state.con->current_y );
+		vui_console_puts( capp_state.con, str );
+	}
+
+	//vui_console_puts( capp_state.con, "A little extra" );
+
+ 	vui_console_puts( capp_state.con, "The first duty of every \x1b[0;31;49mStarfleet officer\x1b[0;0;0m is to the truth, whether it's scientific truth or historical truth or personal truth." );
+ 
 	vui_refresh();
 
 	log_entry_exit();
