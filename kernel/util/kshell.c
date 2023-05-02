@@ -17,7 +17,9 @@
 #include <fs.h>
 #include <dlfcn.h>
 #include <loader.h>
+#include <vui/vui.h>
 #include <vui/testapp.h>
+#include <vui/console.h>
 
 char line[256];
 char jail_env[256];
@@ -206,6 +208,8 @@ void kshell_run( void ) {
 	kshell_automate( "cat /etc/magic_key" );
 
 	test_app_main();
+
+	vui_console_main();
 
 	while( true ) {
 		printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );

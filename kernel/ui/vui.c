@@ -3,6 +3,7 @@
 #include <vui/desktop.h>
 #include <vui/label.h>
 #include <vui/window.h>
+#include <vui/console.h>
 #include <vui/font/fira.h>
 #include <vui/font/verab.h>
 #include <vui/font/verar.h>
@@ -79,6 +80,9 @@ void *vui_add_handle( int handle_type ) {
 		case VUI_TYPE_WINDOW:
 			ret = malloc( sizeof(vui_window) );
 			break;
+        case VUI_TYPE_CONSOLE:
+            ret = malloc( sizeof(vui_console) );
+            break;
 		default:
 			klog( "Unknown type: 0x%X\n", handle_type );
 			dump_stack_trace();
@@ -144,6 +148,9 @@ bool vui_handle_draw( vui_handle handle ) {
 		case VUI_TYPE_WINDOW:
 			vui_window_draw( (vui_window *)hd->resource );
 			break;
+        case VUI_TYPE_CONSOLE:
+            vui_console_draw( (vui_console *)hd->resource );
+            break;
 		default:
 			klog( "Unknown type: 0x%X\n", hd->handle_type );
 			return false;
@@ -313,6 +320,15 @@ void vui_draw_string_mono( int x, int y, int size, uint32_t fg, int font, char *
 
 	for( int i = 0; i < strlen(s); i++ ) {
 		draw_char( vga->buffer, x + (i * vga->char_width), y, fg, 0x00CCCCCC, s[i] );
+	}
+	//draw_string( s, x, y, fg, 0x00FFFFFF );
+}
+
+void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s ) {
+	vga_information * vga = vga_get_info();
+
+	for( int i = 0; i < strlen(s); i++ ) {
+		draw_char( vga->buffer, x + (i * vga->char_width), y, fg, bg, s[i] );
 	}
 	//draw_string( s, x, y, fg, 0x00FFFFFF );
 }
