@@ -17,6 +17,8 @@ unsigned int term_current_column;
 unsigned char term_current_color;
 unsigned short * term_buffer;
 
+putc_redirect_func redirect_putc;
+
 char ansi_capture[25];
 bool term_capture_ansi_escape_code = false;
 uint32_t capture_i = 0;
@@ -58,6 +60,7 @@ void term_initalize( void ) {
 	unsigned int x = 0;
 	unsigned int y = 0;
 
+	redirect_putc = NULL;
 	term_current_row = 0;
 	term_current_column = 0;
 	y_start = 0;
@@ -108,6 +111,10 @@ void term_put_char_at( char c, unsigned char color, unsigned int x, unsigned int
 	}
 }
 
+void set_terminal_redirect( putc_redirect_func func ) {
+	redirect_putc = func;
+}
+
 void term_put_char( char c ) {
 	unsigned int x;
 	unsigned int y;
@@ -117,12 +124,19 @@ void term_put_char( char c ) {
 	bool send_to_com2 = false;		// emulator's errout
 	bool send_to_screen = true;	// OS text or graphics console	
 
+	
+
 
 	if( GRAPHICS_ACTIVE == true ) {
 		if( is_debug_output == true ) {
 			send_to_com4 = true;
 			send_to_com2 = true;
 			send_to_screen = false;
+		} else {
+			if( redirect_putc != NULL ) {
+				redirect_putc(c);
+				return;
+			}
 		}
 	} else {
 		send_to_screen = false;

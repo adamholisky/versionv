@@ -10,6 +10,8 @@ extern "C" {
 #include "vga.h"
 #include "printf.h"
 
+typedef void (*putc_redirect_func)(char c);
+
 typedef struct {
     uint32_t	current_row;
     uint32_t	current_column;
@@ -20,6 +22,7 @@ typedef struct {
 void term_initalize( void );
 void term_print_color( void );
 void term_set_color( uint32_t foreground, uint32_t background );
+void set_terminal_redirect( putc_redirect_func func );
 void term_put_char( char c );
 void term_put_char_at( char c, unsigned char color, unsigned int x, unsigned int y );
 void term_clear_last_char( void );

@@ -52,7 +52,7 @@ void vui_refresh( void ) {
 	log_entry_enter();
 
 	vui_handle_draw( main_desktop->common.handle );
-	console_draw();
+	//console_draw();
 	vga_draw_screen();
 
 	log_entry_exit();
@@ -150,6 +150,15 @@ bool vui_handle_draw( vui_handle handle ) {
 			break;
         case VUI_TYPE_CONSOLE:
             vui_console_draw( (vui_console *)hd->resource );
+
+			rect r = {
+				.x = ((vui_console *)hd->resource)->x,
+				.y = ((vui_console *)hd->resource)->y,
+				.w = ((vui_console *)hd->resource)->width,
+				.h = ((vui_console *)hd->resource)->height
+			};
+
+			vga_draw_screen_box( &r );
             break;
 		default:
 			klog( "Unknown type: 0x%X\n", hd->handle_type );
@@ -320,6 +329,7 @@ void vui_draw_string_mono( int x, int y, int size, uint32_t fg, int font, char *
 
 	for( int i = 0; i < strlen(s); i++ ) {
 		draw_char( vga->buffer, x + (i * vga->char_width), y, fg, 0x00CCCCCC, s[i] );
+		draw_char( vga->fbuffer, x + (i * vga->char_width), y, fg, 0x00CCCCCC, s[i] );
 	}
 	//draw_string( s, x, y, fg, 0x00FFFFFF );
 }
@@ -329,6 +339,7 @@ void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, 
 
 	for( int i = 0; i < strlen(s); i++ ) {
 		draw_char( vga->buffer, x + (i * vga->char_width), y, fg, bg, s[i] );
+		draw_char( vga->fbuffer, x + (i * vga->char_width), y, fg, bg, s[i] );
 	}
 	//draw_string( s, x, y, fg, 0x00FFFFFF );
 }

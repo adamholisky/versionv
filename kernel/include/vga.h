@@ -126,6 +126,7 @@ void vga_move_line( unsigned int dest_y, unsigned int src_y );
 void vga_put_char( unsigned char c, unsigned int x, unsigned int y );
 void draw_char( uint8_t * buffer, unsigned int x, unsigned int y, uint32_t fg, uint32_t bg, unsigned int font_char );
 void vga_draw_screen( void );
+void vga_draw_screen_box( rect *r );
 vga_information * vga_get_info( void );
 
 static inline uint8_t vga_entry_color(enum vga_color fg, enum vga_color bg) 

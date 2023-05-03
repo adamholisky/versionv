@@ -209,8 +209,6 @@ void kshell_run( void ) {
 
 	test_app_main();
 
-	vui_console_main();
-
 	while( true ) {
 		printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );
 

@@ -19,6 +19,7 @@
 #include <vui/vui.h>
 #include <vui/window.h>
 #include <vui/desktop.h>
+#include <kapps/console.h>
 
 #define END_IMMEDIATELY
 #define TRIGGER_DIVIDE_BY_ZERO false
@@ -50,6 +51,9 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 		vga_initalize();
 		vui_initalize();
 
+		vui_console_main( 0, NULL );
+
+		/* 	
 		vui_window *win = vui_window_new( 25, 25, 7 * 80 + 6, 14 * 25 + 22, "VVTerm: /dev/tty0" );
 		vui_set_parent( win, vui_get_main_desktop() );
 
@@ -60,7 +64,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 		rect *inner_rect = vui_window_get_inner_rect( win, &r );
 
 		console_init( "default-console", inner_rect->x, inner_rect->y, inner_rect->w, inner_rect->h, 0x00CCCCCC, 0x00FF0000 );
-		console_draw();
+		console_draw(); 
+		*/
 	}
 
 	serial_enable_interrupts();

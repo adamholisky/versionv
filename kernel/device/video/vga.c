@@ -119,6 +119,15 @@ inline void vga_draw_screen( void ) {
 	memcpy( vga_info.fbuffer, vga_info.buffer, 1280*720*4 );
 }
 
+void vga_draw_screen_box( rect *r ) {
+	int size = r->w * 4;
+
+	for( int y_offset = r->y; y_offset < (r->h + r->y); y_offset++ ) {
+		int offset = (y_offset * size) + (r->x * size);
+		memcpy( vga_info.fbuffer + offset, vga_info.buffer + offset, size );
+	}
+}
+
 inline void fillrect( uint8_t * buffer, uint32_t color, unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
 	uint8_t * where = (buffer + (x * vga_info.pixel_width) + (y * vga_info.pitch ));
 	unsigned int i, j;
