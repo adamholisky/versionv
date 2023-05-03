@@ -13,10 +13,10 @@ extern "C" {
 #define VUI_TYPE_LABEL 3
 #define VUI_TYPE_CONSOLE 4
 
-#define VUI_FONT_FIRA   0
-#define VUI_FONT_VERA   1
-#define VUI_FONT_VERAB  2
-#define VUI_FONT_DVSM   3
+#define VUI_FONT_FIRA 0
+#define VUI_FONT_VERA 1
+#define VUI_FONT_VERAB 2
+#define VUI_FONT_DVSM 3
 
 #define VUI_NO_ERROR 0
 #define VUI_ERROR_UNKNOWN 0

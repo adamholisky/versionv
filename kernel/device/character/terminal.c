@@ -12,25 +12,25 @@
 #include <globals.h>
 #include <device.h>
 
-unsigned int term_current_row;
+/* unsigned int term_current_row;
 unsigned int term_current_column;
 unsigned char term_current_color;
-unsigned short * term_buffer;
+unsigned short * term_buffer; */
 
 putc_redirect_func redirect_putc;
 
-char ansi_capture[25];
+/* char ansi_capture[25];
 bool term_capture_ansi_escape_code = false;
 uint32_t capture_i = 0;
 
 unsigned int VGA_WIDTH = 80;
 unsigned int VGA_HEIGHT = 25;
-unsigned int y_start;
+unsigned int y_start; */
 
 bool is_debug_output = false;
 bool is_gui_active = false;
 
-typedef struct {
+/* typedef struct {
 		rect			box;
 
 		unsigned int 	width;
@@ -50,17 +50,19 @@ typedef struct {
 		bool 			waiting_on_input;
 		bool 			can_update_cursor;
 } console;
+ */
 
-
-device *term_device;
-console *main_console;
+//device *term_device;
+//console *main_console;
 
 void term_initalize( void ) {
 	// DO NOT PUT KLOG FUNCTIONS HERE
-	unsigned int x = 0;
+	redirect_putc = NULL;
+
+	/* unsigned int x = 0;
 	unsigned int y = 0;
 
-	redirect_putc = NULL;
+	
 	term_current_row = 0;
 	term_current_column = 0;
 	y_start = 0;
@@ -71,17 +73,17 @@ void term_initalize( void ) {
 		for( x = 0; x < VGA_WIDTH; x++ ) {
 			term_buffer[( y * VGA_WIDTH ) + x] = vga_entry( ' ', term_current_color );
 		}
-	}
+	} */
 
-	term_device = device_add_new();
+	/* term_device = device_add_new();
 	term_device->init = terminal_device_init;
 	term_device->write = terminal_device_write;
 	term_device->read = terminal_device_read;
 	strcpy( term_device->name, "Terminal" );
-	strcpy( term_device->file, "/dev/tty0" );
+	strcpy( term_device->file, "/dev/tty0" ); */
 }
 
-void terminal_device_init( void ) {
+/* void terminal_device_init( void ) {
 	// Intentionally blank
 }
 
@@ -109,7 +111,7 @@ void term_put_char_at( char c, unsigned char color, unsigned int x, unsigned int
 	if( c != '\n' ) {
 		term_buffer[( y * VGA_WIDTH ) + x] = vga_entry( c, color );
 	}
-}
+} */
 
 void set_terminal_redirect( putc_redirect_func func ) {
 	redirect_putc = func;
@@ -123,9 +125,6 @@ void term_put_char( char c ) {
 	bool send_to_com4 = false;		// saved file out
 	bool send_to_com2 = false;		// emulator's errout
 	bool send_to_screen = true;	// OS text or graphics console	
-
-	
-
 
 	if( GRAPHICS_ACTIVE == true ) {
 		if( is_debug_output == true ) {
@@ -148,7 +147,7 @@ void term_put_char( char c ) {
 		}
 	}
 
-	if( c == '\x1b' ) {
+	/* if( c == '\x1b' ) {
 		term_capture_ansi_escape_code = true;
 		capture_i = 0;
 		send_to_com4 = false;
@@ -219,7 +218,7 @@ void term_put_char( char c ) {
 			send_to_com4 = false;
 			send_to_screen = false;
 		}
-	}
+	} */
 
 	if( send_to_com4 ) {
 		serial_write_port( c, COM4 );
@@ -229,7 +228,7 @@ void term_put_char( char c ) {
 		serial_write_port( c, COM2 );
 	}
 
-	if( send_to_screen ) {
+/* 	if( send_to_screen ) {
 		if( is_gui_active ) {
 			console_put_char( c );
 			return;
@@ -270,16 +269,16 @@ void term_put_char( char c ) {
 				for( x = 0; x < VGA_WIDTH; x++ ) {
 					const size_t index = ( VGA_HEIGHT - 1 ) * VGA_WIDTH + x;
 					term_buffer[index] = vga_entry( ' ', term_current_color );
-					/* if( is_gui_active ) {
+					 if( is_gui_active ) {
 						console_put_char_at( ' ', x, VGA_HEIGHT - 1 );
-					} */
+					} 
 				}
 			}
 		}
-	}
+	} */
 }
 
-void term_clear_last_char( void ) {
+/* void term_clear_last_char( void ) {
 	int term_new_column = term_current_column - 1;
 
 	//printf( "cc: %d --> nc: %d", term_current_column, term_new_column );
@@ -290,7 +289,7 @@ void term_clear_last_char( void ) {
 	}
 
 	//update_cursor( term_current_row, term_current_column );
-}
+} */
 
 /* Outputs a string data of size the terminal
  */
@@ -302,9 +301,9 @@ void term_put_string( const char * data, size_t size ) {
 
 /* Calculates the size of *data and outputs the string *data
  */
-void term_write_string( const char * data ) {
+/* void term_write_string( const char * data ) {
 	term_put_string( data, strlen( data ) );
-}
+} */
 
 void set_debug_output( bool d ) {
 	is_debug_output = d;
@@ -314,7 +313,7 @@ void write_to_serial_port( char c ) {
 	serial_write( c );
 }
 
-/////
+/* /////
 
 
 void console_init( char * name, unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned int bg_color, unsigned int fg_color ) {
@@ -452,7 +451,7 @@ void console_move_row( unsigned int _dest, unsigned int _src ) {
 	move_rect( dest, src );
 
 	console_draw();
-}
+} */
 
 void console_scroll_forever_test( void ) {
 	for( int i = 0; i < INT_MAX; i++ ) {
