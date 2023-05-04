@@ -355,5 +355,5 @@ void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, 
 }
 
 void vui_mouse_move( int direction, int amount ) {
-	printf( "Mouse move. Direction: %d, amount %d\n", direction, amount );
+	klog( "Mouse move. Direction: %d, amount %d\n", direction, amount );
 }

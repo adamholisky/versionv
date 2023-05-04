@@ -81,7 +81,7 @@ void mouse_initalize( void ) {
 	mouse_write(0xF4);
 	mouse_read();
 
-     
+    
 	
     klog( "Done. Status: %d \n", status );
 
@@ -89,7 +89,7 @@ void mouse_initalize( void ) {
 } 
 
 void mouse_handler( void ) {
-    log_entry_enter();
+    //log_entry_enter();
 
 	volatile char move_x = 0;
 	volatile char move_y = 0;
@@ -147,5 +147,5 @@ void mouse_handler( void ) {
 	//debug_f( ". %d\n", inportb( 0x60 ) );
 	//pic_acknowledge( 0x2C );
 
-    log_entry_exit();
+   // log_entry_exit();
 }

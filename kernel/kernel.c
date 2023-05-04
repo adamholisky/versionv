@@ -47,39 +47,12 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	elf_initalize( (uint32_t)kernel_main );
 	interrupts_initalize();
 	observer_initalize();
-
-	int status = 0;
-
-	mouse_wait(1);
-	outportb( 0x64, 0x20 );
-	
-	mouse_wait(0);
-	status = inportb(0x60);
-	klog( "XXXXX status: 0x%X\n", status );
-
-	asm("cli");
-	keyboard_initalize();
-	mouse_initalize();
-
-	asm( "sti" );
-	
-	mouse_wait(1);
-	outportb( 0x64, 0x20 );
-	
-	mouse_wait(0);
-	status = inportb(0x60);
-	klog( "XXXXX status: 0x%X\n", status );
-
-
-
-	do_immediate_shutdown();
-	
+	ps2_initalize();
 
 	if( GRAPHICS_ACTIVE ) {
 		vga_initalize();
 		vui_initalize();
 		
-
 		vui_console_main( 0, NULL );
 	}
 
@@ -96,9 +69,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 
 	task_check();
 
+	asm( "sti" );
 	kshell_run();
-
-	
 
 	klog( "\n\nEnd of line." );
 

@@ -49,7 +49,7 @@ void interrupts_initalize( void ) {
     add_interrupt(19, interrupt_19, 0);
 
 	add_interrupt( 0x20, interrupt_0x20, 0 );
-	add_interrupt( 0x21, interrupt_0x21, 0 );
+	
 	add_interrupt( 0x22, interrupt_0x22, 0 );
 	add_interrupt( 0x23, interrupt_0x23, 0 );
 	add_interrupt( 0x24, interrupt_0x24, 0 );
@@ -60,7 +60,7 @@ void interrupts_initalize( void ) {
 	add_interrupt( 0x29, interrupt_0x29, 0 );
 	add_interrupt( 0x2A, interrupt_0x2A, 0 );
 	add_interrupt( 0x2B, interrupt_0x2B, 0 );
-	add_interrupt( 0x2C, interrupt_0x2C, 0 );
+	
 	add_interrupt( 0x2D, interrupt_0x2D, 0 );
 	add_interrupt( 0x2E, interrupt_0x2E, 0 );
 	add_interrupt( 0x2F, interrupt_0x2F, 0 );
@@ -71,8 +71,13 @@ void interrupts_initalize( void ) {
 
 	// mask everything
 
-	outportb( 0x21, 0xFF );
-	outportb( 0xA1, 0xFF );
+/* 	outportb( 0x21, 0xFF );
+	outportb( 0xA1, 0xFF ); */
+
+	// WTF
+
+	outportb( PIC_PRIMARY_DATA, 0x00 );
+	outportb( PIC_SECONDARY_DATA, 0x00 );
 
 	uint16_t divisor = 11931;      // Calculate our divisor, default 65535 --> 1193180/hz
     outportb( 0x43, 0x36 );             // Set our command byte 0x36
@@ -81,10 +86,10 @@ void interrupts_initalize( void ) {
 
 	// unmask the timer
 	interrupt_unmask_irq( 0x20 );
-	interrupt_unmask_irq( 0x21 );
+	
 	interrupt_unmask_irq( 0x23 );
 	interrupt_unmask_irq( 0x24 );
-	interrupt_unmask_irq( 0x2C );
+	
 
     load_idtr();
 
@@ -111,7 +116,7 @@ void interrupt_default_handler( uint32_t *stack, uint32_t interrupt_num, uint32_
 	bool error_code_present = false;
 	bool allow_return = false;
 	//dbC();
-	//debugf( "interrupt_default_handler:\n    interrupt_num: 0x%X\n    route_code: 0x%0X\n", interrupt_num, route_code );
+	//klog( "interrupt_default_handler:\n    interrupt_num: 0x%X\n    route_code: 0x%0X\n", interrupt_num, route_code );
 
 	if( route_code == 0x01 ) {
         switch( interrupt_num ) {
@@ -295,7 +300,7 @@ void interrupt_default_handler( uint32_t *stack, uint32_t interrupt_num, uint32_
 				if( timer_var < 101 ) {  // default 19
 					timer_var++;
 				} else {
-					//debugf( "!" );
+					debugf( "!" );
 					timer_var = 0;
 				}
 				break;
