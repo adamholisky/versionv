@@ -16,6 +16,7 @@
 #include "intel8254.h"
 #include <ahci.h>
 #include <fs.h>
+#include <mouse.h>
 #include <vui/vui.h>
 #include <vui/window.h>
 #include <vui/desktop.h>
@@ -47,9 +48,37 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	interrupts_initalize();
 	observer_initalize();
 
+	int status = 0;
+
+	mouse_wait(1);
+	outportb( 0x64, 0x20 );
+	
+	mouse_wait(0);
+	status = inportb(0x60);
+	klog( "XXXXX status: 0x%X\n", status );
+
+	asm("cli");
+	keyboard_initalize();
+	mouse_initalize();
+
+	asm( "sti" );
+	
+	mouse_wait(1);
+	outportb( 0x64, 0x20 );
+	
+	mouse_wait(0);
+	status = inportb(0x60);
+	klog( "XXXXX status: 0x%X\n", status );
+
+
+
+	do_immediate_shutdown();
+	
+
 	if( GRAPHICS_ACTIVE ) {
 		vga_initalize();
 		vui_initalize();
+		
 
 		vui_console_main( 0, NULL );
 	}
@@ -61,8 +90,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	ahci_initalize();
 	fs_initalize();
 	//intel8254_initalize();
-	keyboard_initalize();
-
+	
 	serial_clear_buffer( COM2 );
 	READY_FOR_INPUT = true;
 

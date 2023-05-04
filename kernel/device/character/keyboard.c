@@ -113,11 +113,16 @@ void keyboard_initalize(void)
 	observer_attach_to_subject( "keyboard", "keyboard_event_handler", 1 );
 }
 
+#define KDEBUG_KEYBOARD_INTERRUPT_HANDLER
 void keyboard_interrupt_handler(void) {
 	uint8_t status;
 	char scancode;
 	keyboard_event *k;
 	event_message e;
+
+	#ifdef KDEBUG_KEYBOARD_INTERRUPT_HANDLER
+	log_entry_enter();
+	#endif
 
 	status = inportb(0x64);
 
@@ -163,6 +168,10 @@ void keyboard_interrupt_handler(void) {
 			kfree( e.data );
 		}
 	}
+
+	#ifdef KDEBUG_KEYBOARD_INTERRUPT_HANDLER
+	log_entry_exit();
+	#endif
 }
 
 char get_character(unsigned int scancode) {

@@ -86,6 +86,7 @@ bool observer_register( char * observer_name, observer_function observer_func ) 
  * @return false Attach failed
  */
 bool observer_attach_to_subject( char * subject_name, char * observer_name, int priority ) {
+	log_entry_enter();
 	int i, j, k;
 
 	for( i = 0; i < MAX_SUBJECTS; i++ ) {
@@ -123,6 +124,7 @@ bool observer_attach_to_subject( char * subject_name, char * observer_name, int 
 
 	subjects[i]->observers[k] = observers[j];
 	
+	log_entry_exit();
 	return true;
 }
 
@@ -147,6 +149,8 @@ bool observer_detach_from_subject( char * subject_name, char * observer_name ) {
  * @return false Notifications failed
  */
 bool observer_notify( char * subject_name, event_message * message ) {
+	log_entry_enter();
+
 	int i, k;
 	observer_function f;
 
@@ -159,7 +163,7 @@ bool observer_notify( char * subject_name, event_message * message ) {
 	}
 
 	if( i == MAX_SUBJECTS ) {
-		kpanic( "MAX_SUBJECTS reached" );
+		klog( "MAX_SUBJECTS reached\n" );
 		return false;
 	}
 
@@ -179,6 +183,7 @@ bool observer_notify( char * subject_name, event_message * message ) {
 	
 	strcpy( message->subject_name, "" );
 
+	log_entry_exit();
 	return true;
 }
 

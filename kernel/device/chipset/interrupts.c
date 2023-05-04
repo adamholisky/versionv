@@ -3,6 +3,7 @@
 #include "task.h"
 #include "syscall.h"
 #include "keyboard.h"
+#include "mouse.h"
 
 idtr            sIDTR;
 x86_interrupt   IDT[256];
@@ -83,6 +84,7 @@ void interrupts_initalize( void ) {
 	interrupt_unmask_irq( 0x21 );
 	interrupt_unmask_irq( 0x23 );
 	interrupt_unmask_irq( 0x24 );
+	interrupt_unmask_irq( 0x2C );
 
     load_idtr();
 
@@ -305,6 +307,9 @@ void interrupt_default_handler( uint32_t *stack, uint32_t interrupt_num, uint32_
 				break;
 			case 0x24:
 				serial_interrupt_read_from_com1();
+				break;
+			case 0x2C:
+				mouse_handler();
 				break;
 			case 0x30:
 				debugf( "+\n" );

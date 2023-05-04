@@ -1,9 +1,13 @@
 #include <kernel.h>
+
 #include <vui/vui.h>
+
 #include <vui/desktop.h>
 #include <vui/label.h>
 #include <vui/window.h>
 #include <vui/console.h>
+#include <vui/button.h>
+
 #include <vui/font/fira.h>
 #include <vui/font/verab.h>
 #include <vui/font/verar.h>
@@ -83,6 +87,9 @@ void *vui_add_handle( int handle_type ) {
         case VUI_TYPE_CONSOLE:
             ret = malloc( sizeof(vui_console) );
             break;
+		case VUI_TYPE_BUTTON:
+			ret = malloc( sizeof(vui_button) );
+			break;
 		default:
 			klog( "Unknown type: 0x%X\n", handle_type );
 			dump_stack_trace();
@@ -160,6 +167,9 @@ bool vui_handle_draw( vui_handle handle ) {
 
 			vga_draw_screen_box( &r );
             break;
+		case VUI_TYPE_BUTTON:
+			vui_button_draw( (vui_button *)hd->resource );
+			break;
 		default:
 			klog( "Unknown type: 0x%X\n", hd->handle_type );
 			return false;
@@ -342,4 +352,8 @@ void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, 
 		draw_char( vga->fbuffer, x + (i * vga->char_width), y, fg, bg, s[i] );
 	}
 	//draw_string( s, x, y, fg, 0x00FFFFFF );
+}
+
+void vui_mouse_move( int direction, int amount ) {
+	printf( "Mouse move. Direction: %d, amount %d\n", direction, amount );
 }

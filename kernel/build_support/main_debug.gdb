@@ -48,6 +48,7 @@ end
 #break debug.cpp:30
 #break debug.cpp:39
 #break sched_yield_to_asm
-break testvuiapp.c:3367
+break interrupt_0x2C
+break interrupt_0x21
 
 target remote localhost:5894

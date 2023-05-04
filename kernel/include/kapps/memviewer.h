@@ -5,7 +5,8 @@
 extern "C" {
 #endif
 
-void test_app_main( void );
+void kapps_memviewer_main( int argc, char *argv[] );
+void mem_viewer_draw( void );
 
 #ifdef __cplusplus
 }
