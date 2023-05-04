@@ -33,12 +33,18 @@ vui_error   vui_last_error;
 
 vui_desktop	*main_desktop;
 
+int mouse_x;
+int mouse_y;
+
 
 void vui_initalize( void ) {
 	log_entry_enter();
 
 	vui_handle_top = 0;
 	vui_last_error = 0;
+
+	mouse_x = 0;
+	mouse_y = 0;
 	
 	vga_information *v = vga_get_info();
 
@@ -355,5 +361,50 @@ void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, 
 }
 
 void vui_mouse_move( int direction, int amount ) {
-	klog( "Mouse move. Direction: %d, amount %d\n", direction, amount );
+	int old_x = mouse_x;
+	int old_y = mouse_y;
+
+	switch( direction ) {
+		case cursor_right:
+			mouse_x = mouse_x + amount;
+			break;
+		case cursor_left:
+			mouse_x = mouse_x + amount;
+			break;
+		case cursor_up:
+			mouse_y = mouse_y + amount;
+			break;
+		case cursor_down:
+			mouse_y = mouse_y + amount;
+			break;
+	}
+
+	if( mouse_x >= 1280 ) {
+		mouse_x = 1280;
+	}
+
+	if( mouse_y >= 720 ) {
+		mouse_y = 720;
+	}
+
+	if( mouse_x < 0 ) {
+		mouse_x = 0;
+	}
+
+	if( mouse_y < 0 ) {
+		mouse_y = 0;
+	}
+
+	rect r = {
+		.x = mouse_x,
+		.y = mouse_y,
+		.w = 7,
+		.h = 14
+	};
+
+	
+
+	vui_draw_rectangle( r.x, r.y, r.w, r.h, 0x00000000 );
+	vga_draw_screen();
+	klog( "Mouse move. Direction: %d, amount %d --- (old: %d, %d.  new: %d, %d.)\n", direction, amount, old_x, old_y, mouse_x, mouse_y );
 }

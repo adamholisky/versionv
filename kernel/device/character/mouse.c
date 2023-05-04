@@ -91,9 +91,9 @@ void mouse_initalize( void ) {
 void mouse_handler( void ) {
     //log_entry_enter();
 
-	volatile char move_x = 0;
-	volatile char move_y = 0;
-	mouse_byte[ mouse_cycle++ ] = inportb( 0x60 );
+	int8_t move_x = 0;
+	int8_t move_y = 0;
+	mouse_byte[ mouse_cycle++ ] = sinportb( 0x60 );
 
 	if( mouse_cycle == 3 ) {
 		move_x = mouse_byte[1];
@@ -109,13 +109,13 @@ void mouse_handler( void ) {
 			return;
 		}
 
-		if( !(mouse_byte[0] & 0x20) ) {
+/*  		if( !(mouse_byte[0] & 0x20) ) {
 			move_y |= 0xFFFFFF00; 				//delta-y is a negative value
 		}
 
 		if( !(mouse_byte[0] & 0x10) ) {
 			move_x |= 0xFFFFFF00; 				//delta-x is a negative value
-		}
+		} */
 
 		if( mouse_byte[0] & 0x4 ) {
 			middle_button = true;
@@ -131,17 +131,19 @@ void mouse_handler( void ) {
 
 		//debug_f( "At 3: (%d, %d) with M: %d, R: %d, L: %d\n", move_x, move_y, middle_button, right_button, left_button );
 
+		klog( "group move_x: %d, move_y: %d\n", move_x, move_y );
+/* 
 		if( move_x > 0 ) {
 			vui_mouse_move( cursor_right, move_x );
 		} else if( move_x < 0 ) {
-			vui_mouse_move( cursor_left, move_x * -1);
+			vui_mouse_move( cursor_left, move_x);
 		}
 
 		if( move_y > 0 ) {
 			vui_mouse_move( cursor_up, move_y );
 		} else if( move_y < 0 ) {
-			vui_mouse_move( cursor_down, move_y * -1 );
-		}
+			vui_mouse_move( cursor_down, move_y );
+		} */
 	}
 
 	//debug_f( ". %d\n", inportb( 0x60 ) );
