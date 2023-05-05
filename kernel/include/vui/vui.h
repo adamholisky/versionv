@@ -71,6 +71,7 @@ int vui_get_string_width( int font, int size, char *s );
 void vui_draw_string( int x, int y, int size, uint32_t fg, int font, char *s );
 void vui_draw_string_mono( int x, int y, int size, uint32_t fg, int font, char *s );
 void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s );
+void vui_mouse_click( uint8_t button );
 void vui_mouse_move( int32_t x, int32_t y );
 
 #ifdef __cplusplus

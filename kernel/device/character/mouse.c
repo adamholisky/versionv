@@ -131,10 +131,22 @@ void mouse_handler( void ) {
 			move_y = move_y | 0xFFFFFF00;
 		}
 
-		printf( "x: %d, y: %d\n", move_x, move_y * -1 );
+		//printf( "x: %d, y: %d\n", move_x, move_y * -1 );
+
+		vui_mouse_move( move_x, move_y * -1 );
+
+		if( test_bit( mouse_bytes[0], 0 ) ) {
+			vui_mouse_click( MOUSE_BUTTON_LEFT );
+		} else if( test_bit( mouse_bytes[0], 1 ) ) {
+			vui_mouse_click( MOUSE_BUTTON_RIGHT );
+		} else if( test_bit( mouse_bytes[0], 2 ) ) {
+			vui_mouse_click( MOUSE_BUTTON_MIDDLE );
+		}
 	}
 
-	vui_mouse_move( move_x, move_y * -1 );
+	
+
+
 
 	return;
 }

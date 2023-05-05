@@ -1,4 +1,6 @@
 #include <kernel.h>
+#include <keyboard.h>
+#include <mouse.h>
 
 #include <vui/vui.h>
 
@@ -36,6 +38,19 @@ vui_desktop	*main_desktop;
 int mouse_x;
 int mouse_y;
 
+/*
+
+1000 0000 0x80
+1100 0000 0xC0
+1111 0000 0xF0
+1111 1100 0xFC
+1111 1111 0xFF
+0001 1000 0x18
+0000 1100 0x0C
+0000 0110 0x06
+*/
+
+uint8_t mouse_bitmap[] = { 0x80, 0xC0, 0xF0, 0xFC, 0xFF, 0x18, 0x0C, 0x06 };
 
 void vui_initalize( void ) {
 	log_entry_enter();
@@ -360,6 +375,22 @@ void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, 
 	//draw_string( s, x, y, fg, 0x00FFFFFF );
 }
 
+void vui_mouse_click( uint8_t button ) {
+	switch( button ) {
+		case MOUSE_BUTTON_LEFT:
+			printf( "mouse click left at %d, %d\n", mouse_x, mouse_y );
+			break;
+		case MOUSE_BUTTON_MIDDLE:
+			printf( "mouse click middle at %d, %d\n", mouse_x, mouse_y );
+			break;
+		case MOUSE_BUTTON_RIGHT:
+			printf( "mouse click right at %d, %d\n", mouse_x, mouse_y );
+			break;
+		default:
+			printf( "unknown button returned!\n" );
+	}
+}
+
 void vui_mouse_move( int32_t x, int32_t y ) {
 	int old_x = mouse_x;
 	int old_y = mouse_y;
@@ -391,8 +422,34 @@ void vui_mouse_move( int32_t x, int32_t y ) {
 	};
 
 	
+	vga_information *vgainfo = vga_get_info();
 
-	vui_draw_rectangle( r.x, r.y, r.w, r.h, 0x00000000 );
+	static unsigned long cursor_bitmap_2[] = {
+		0x8000,
+		0xC000,
+		0xE000,
+		0xF000,
+		0xF800,
+		0xFC00,
+		0xFE00,
+		0xFF00,
+		0xFE00,
+		0xFC00,
+		0xDE00,
+		0x8E00,
+		0x0E00,
+		0x0000,
+	};
+
+	for( int i = 0; i < 14; i++ ) {
+		for( int j = 15; j > -1; j-- ) {
+			if( test_bit( cursor_bitmap_2[i], j ) ) {
+				put_pixel( mouse_x + 15 - j, mouse_y + i, 0x00000000 );
+			}
+		}
+	}
+
+	//vui_draw_rectangle( r.x, r.y, r.w, r.h, 0x00000000 );
 	vga_draw_screen();
 	//klog( "Mouse move. Direction: %d, amount %d --- (old: %d, %d.  new: %d, %d.)\n", direction, amount, old_x, old_y, mouse_x, mouse_y );
 }
