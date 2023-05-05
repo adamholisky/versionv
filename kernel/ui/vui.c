@@ -441,15 +441,37 @@ void vui_mouse_move( int32_t x, int32_t y ) {
 		0x0000,
 	};
 
+	static uint32_t prev_box[16 * 14];
+	static bool has_prev = false;
+
+	if( has_prev ) {
+		for( int i = 0; i < 14; i++ ) {
+			for( int j = 0; j < 16; j++ ) {
+				*(((uint32_t *)vgainfo->fbuffer) + (((old_y + i) * 1280) + j + old_x)) = prev_box[ (i * 16) + j ];
+			}
+		}
+		printf( "d" );
+	} else {
+		has_prev = true;
+	}
+	
+	for( int i = 0; i < 14; i++ ) {
+		for( int j = 0; j < 16; j++ ) {
+			prev_box[ (i * 16) + j ] = *(((uint32_t *)vgainfo->fbuffer) + (((old_y + i) * 1280) + (j + old_x)));
+		}
+	}
+
 	for( int i = 0; i < 14; i++ ) {
 		for( int j = 15; j > -1; j-- ) {
 			if( test_bit( cursor_bitmap_2[i], j ) ) {
-				put_pixel( mouse_x + 15 - j, mouse_y + i, 0x00000000 );
+				putpixel( vgainfo->fbuffer, mouse_x + 15 - j, mouse_y + i, 0x00000000 );
 			}
 		}
 	}
 
+
+
 	//vui_draw_rectangle( r.x, r.y, r.w, r.h, 0x00000000 );
-	vga_draw_screen();
+	//vga_draw_screen();
 	//klog( "Mouse move. Direction: %d, amount %d --- (old: %d, %d.  new: %d, %d.)\n", direction, amount, old_x, old_y, mouse_x, mouse_y );
 }
