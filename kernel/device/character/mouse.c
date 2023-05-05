@@ -2,8 +2,8 @@
 #include <mouse.h>
 #include <vui/vui.h>
 
-volatile uint8_t mouse_cycle = 0;
-volatile int8_t mouse_byte[ 3 ];
+uint8_t mouse_cycle = 0;
+uint8_t mouse_bytes[ 3 ];
 bool middle_button = false;
 bool right_button = false;
 bool left_button = false;
@@ -23,7 +23,7 @@ void mouse_write( uint8_t byte ) {
 }
 
 void mouse_wait( uint8_t type ) {
-	uint8_t _time_out=100000;
+	uint32_t _time_out=100000;
 	if(type==0) {
 		while(_time_out--) {
 			if((inportb(0x64) & 1)==1) {
@@ -81,7 +81,10 @@ void mouse_initalize( void ) {
 	mouse_write(0xF4);
 	mouse_read();
 
-    
+    mouse_cycle = 0;
+	mouse_bytes[0] = 0;
+	mouse_bytes[1] = 0;
+	mouse_bytes[2] = 0;
 	
     klog( "Done. Status: %d \n", status );
 
@@ -91,11 +94,53 @@ void mouse_initalize( void ) {
 void mouse_handler( void ) {
     //log_entry_enter();
 
-	int8_t move_x = 0;
-	int8_t move_y = 0;
-	mouse_byte[ mouse_cycle++ ] = sinportb( 0x60 );
+	int move_x = 0;
+	int move_y = 0;
+	uint8_t in_byte = inportb( 0x60 );
+
+	switch( mouse_cycle ) {
+		case 0:
+			if( test_bit(in_byte,3) ) {
+				mouse_bytes[0] = in_byte;
+				mouse_cycle++;
+			} else {
+				klog( "bit 3 is NOT set!\n" );
+			}
+			break;
+		case 1:
+			mouse_bytes[1] = in_byte;
+			mouse_cycle++;
+			break;
+		case 2:
+			mouse_bytes[2] = in_byte;
+			mouse_cycle++;
+			break;
+	}
 
 	if( mouse_cycle == 3 ) {
+		mouse_cycle = 0;
+
+		//klog( "mb[0] = 0x%X     mb[1] = 0x%X    mb[2] = 0x%X\n", mouse_bytes[0], mouse_bytes[1], mouse_bytes[2] );
+
+		move_x = mouse_bytes[1];
+		move_y = mouse_bytes[2];
+
+		if( test_bit(mouse_bytes[0], 4) ) {
+			move_x = move_x * -1;
+		}
+
+		if( test_bit(mouse_bytes[0], 5) ) {
+			move_y = move_y * -1;
+		}
+
+		//klog( "x: %d, y: %d\n", move_x, move_y );
+	}
+
+	return;
+
+	
+
+/* 	if( mouse_cycle == 3 ) {
 		move_x = mouse_byte[1];
 		move_y = mouse_byte[2];
 		mouse_cycle = 0;
@@ -108,14 +153,6 @@ void mouse_handler( void ) {
 			//pic_acknowledge( 0x2C );
 			return;
 		}
-
-/*  		if( !(mouse_byte[0] & 0x20) ) {
-			move_y |= 0xFFFFFF00; 				//delta-y is a negative value
-		}
-
-		if( !(mouse_byte[0] & 0x10) ) {
-			move_x |= 0xFFFFFF00; 				//delta-x is a negative value
-		} */
 
 		if( mouse_byte[0] & 0x4 ) {
 			middle_button = true;
@@ -132,7 +169,7 @@ void mouse_handler( void ) {
 		//debug_f( "At 3: (%d, %d) with M: %d, R: %d, L: %d\n", move_x, move_y, middle_button, right_button, left_button );
 
 		klog( "group move_x: %d, move_y: %d\n", move_x, move_y );
-/* 
+
 		if( move_x > 0 ) {
 			vui_mouse_move( cursor_right, move_x );
 		} else if( move_x < 0 ) {
@@ -143,9 +180,9 @@ void mouse_handler( void ) {
 			vui_mouse_move( cursor_up, move_y );
 		} else if( move_y < 0 ) {
 			vui_mouse_move( cursor_down, move_y );
-		} */
+		} 
 	}
-
+ */
 	//debug_f( ". %d\n", inportb( 0x60 ) );
 	//pic_acknowledge( 0x2C );
 
