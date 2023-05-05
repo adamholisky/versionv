@@ -92,10 +92,8 @@ void mouse_initalize( void ) {
 } 
 
 void mouse_handler( void ) {
-    //log_entry_enter();
-
-	int move_x = 0;
-	int move_y = 0;
+	int32_t move_x = 0;
+	int32_t move_y = 0;
 	uint8_t in_byte = inportb( 0x60 );
 
 	switch( mouse_cycle ) {
@@ -122,69 +120,21 @@ void mouse_handler( void ) {
 
 		//klog( "mb[0] = 0x%X     mb[1] = 0x%X    mb[2] = 0x%X\n", mouse_bytes[0], mouse_bytes[1], mouse_bytes[2] );
 
-		move_x = mouse_bytes[1];
-		move_y = mouse_bytes[2];
+		move_x = (int32_t)mouse_bytes[1];
+		move_y = (int32_t)mouse_bytes[2];
 
 		if( test_bit(mouse_bytes[0], 4) ) {
-			move_x = move_x * -1;
+			move_x = move_x | 0xFFFFFF00;
 		}
 
 		if( test_bit(mouse_bytes[0], 5) ) {
-			move_y = move_y * -1;
+			move_y = move_y | 0xFFFFFF00;
 		}
 
-		//klog( "x: %d, y: %d\n", move_x, move_y );
+		printf( "x: %d, y: %d\n", move_x, move_y * -1 );
 	}
+
+	vui_mouse_move( move_x, move_y * -1 );
 
 	return;
-
-	
-
-/* 	if( mouse_cycle == 3 ) {
-		move_x = mouse_byte[1];
-		move_y = mouse_byte[2];
-		mouse_cycle = 0;
-		middle_button = false;
-		right_button = false;
-		left_button = false;
-
-		if( (mouse_byte[0] & 0x80) || (mouse_byte[0] & 0x40) ) {
-			//debug_f( "Dropped due to overflow\n" );
-			//pic_acknowledge( 0x2C );
-			return;
-		}
-
-		if( mouse_byte[0] & 0x4 ) {
-			middle_button = true;
-		}
-
-		if( mouse_byte[0] & 0x2 ) {
-			right_button = true;
-		}
-
-		if( mouse_byte[0] & 0x1 ) {
-			left_button = true;
-		}
-
-		//debug_f( "At 3: (%d, %d) with M: %d, R: %d, L: %d\n", move_x, move_y, middle_button, right_button, left_button );
-
-		klog( "group move_x: %d, move_y: %d\n", move_x, move_y );
-
-		if( move_x > 0 ) {
-			vui_mouse_move( cursor_right, move_x );
-		} else if( move_x < 0 ) {
-			vui_mouse_move( cursor_left, move_x);
-		}
-
-		if( move_y > 0 ) {
-			vui_mouse_move( cursor_up, move_y );
-		} else if( move_y < 0 ) {
-			vui_mouse_move( cursor_down, move_y );
-		} 
-	}
- */
-	//debug_f( ". %d\n", inportb( 0x60 ) );
-	//pic_acknowledge( 0x2C );
-
-   // log_entry_exit();
 }

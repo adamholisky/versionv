@@ -360,24 +360,12 @@ void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, 
 	//draw_string( s, x, y, fg, 0x00FFFFFF );
 }
 
-void vui_mouse_move( int direction, int amount ) {
+void vui_mouse_move( int32_t x, int32_t y ) {
 	int old_x = mouse_x;
 	int old_y = mouse_y;
 
-	switch( direction ) {
-		case cursor_right:
-			mouse_x = mouse_x + amount;
-			break;
-		case cursor_left:
-			mouse_x = mouse_x + amount;
-			break;
-		case cursor_up:
-			mouse_y = mouse_y + amount;
-			break;
-		case cursor_down:
-			mouse_y = mouse_y + amount;
-			break;
-	}
+	mouse_x = mouse_x + x;
+	mouse_y = mouse_y + y;
 
 	if( mouse_x >= 1280 ) {
 		mouse_x = 1280;
@@ -406,5 +394,5 @@ void vui_mouse_move( int direction, int amount ) {
 
 	vui_draw_rectangle( r.x, r.y, r.w, r.h, 0x00000000 );
 	vga_draw_screen();
-	klog( "Mouse move. Direction: %d, amount %d --- (old: %d, %d.  new: %d, %d.)\n", direction, amount, old_x, old_y, mouse_x, mouse_y );
+	//klog( "Mouse move. Direction: %d, amount %d --- (old: %d, %d.  new: %d, %d.)\n", direction, amount, old_x, old_y, mouse_x, mouse_y );
 }
