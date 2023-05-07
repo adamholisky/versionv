@@ -25,8 +25,8 @@
 	#endif
 	#ifdef GRAPHICS_ON
 	.long 0
-	.long 1280
-	.long 720
+	.long 1920
+	.long 1080
 	.long 32
 	#endif
 

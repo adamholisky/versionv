@@ -10,6 +10,7 @@
         "afs.h": "c",
         "syscall.h": "c",
         "testapp.h": "c",
-        "observer.h": "c"
+        "observer.h": "c",
+        "kernel.h": "c"
     }
 }

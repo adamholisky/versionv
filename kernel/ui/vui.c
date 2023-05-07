@@ -443,12 +443,12 @@ void vui_mouse_move( int32_t x, int32_t y ) {
 	mouse_x = mouse_x + x;
 	mouse_y = mouse_y + y;
 
-	if( mouse_x >= 1280 ) {
-		mouse_x = 1280;
+	if( mouse_x >= VVOS_SCREEN_WIDTH ) {
+		mouse_x = VVOS_SCREEN_WIDTH;
 	}
 
-	if( mouse_y >= 720 ) {
-		mouse_y = 720;
+	if( mouse_y >= VVOS_SCREEN_HEIGHT ) {
+		mouse_y = VVOS_SCREEN_HEIGHT;
 	}
 
 	if( mouse_x < 0 ) {

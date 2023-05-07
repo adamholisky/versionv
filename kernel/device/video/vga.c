@@ -62,20 +62,20 @@ void vga_initalize( void ) {
 
 	klog( "VGA Mapped %d pages.\n", i );
 
-	vga_info.buffer = kmalloc( sizeof(uint8_t) * 1280 * 720 * 4 );
+	vga_info.buffer = kmalloc( sizeof(uint8_t) * VVOS_SCREEN_WIDTH * VVOS_SCREEN_HEIGHT * 4 );
 
 	klog( "fb_buffer: 	    0x%08X\n", vga_info.buffer );
-	klog( "fb_buffer end:   0x%08X\n", ((uint32_t)vga_info.buffer + (1280*720*4)) );
+	klog( "fb_buffer end:   0x%08X\n", ((uint32_t)vga_info.buffer + (VVOS_SCREEN_WIDTH*VVOS_SCREEN_HEIGHT*4)) );
 
 	*vga_info.buffer = 0xBA;
 	klog( "*fb_buffer:      0x%X\n", *vga_info.buffer );
 
-	*(vga_info.buffer + (1280*720*4) ) = 0xDA;
-	klog( "*fb_buffer end:  0x%X\n", *(vga_info.buffer + (1280*720*4) ));
+	*(vga_info.buffer + (VVOS_SCREEN_WIDTH*VVOS_SCREEN_HEIGHT*4) ) = 0xDA;
+	klog( "*fb_buffer end:  0x%X\n", *(vga_info.buffer + (VVOS_SCREEN_WIDTH*VVOS_SCREEN_HEIGHT*4) ));
 
 	//If we didn't pagefault, yay! paging is really working then...
 	
-	memset( vga_info.buffer, 0, 1280*720*4 );
+	memset( vga_info.buffer, 0, VVOS_SCREEN_WIDTH*VVOS_SCREEN_HEIGHT*4 );
 
 
 	//dump_active_pt();
@@ -104,7 +104,7 @@ void vga_initalize( void ) {
 
 	bg_mask = kmalloc( sizeof(int) * 14 * 7 );
 
-	fillrect( vga_info.buffer, vga_info.bg_color, 0, 0, 1280, 720 );
+	fillrect( vga_info.buffer, vga_info.bg_color, 0, 0, VVOS_SCREEN_WIDTH, VVOS_SCREEN_HEIGHT );
 	klog( "Drawing first screen.\n" );
 	vga_draw_screen();
 
@@ -116,7 +116,7 @@ void vga_initalize( void ) {
 }
 
 inline void vga_draw_screen( void ) {
-	memcpy( vga_info.fbuffer, vga_info.buffer, 1280*720*4 );
+	memcpy( vga_info.fbuffer, vga_info.buffer, VVOS_SCREEN_WIDTH*VVOS_SCREEN_HEIGHT*4 );
 }
 
 void vga_draw_screen_box( rect *r ) {
@@ -125,7 +125,7 @@ void vga_draw_screen_box( rect *r ) {
 	int size = r->w * 4;
 
 	for( int y_offset = r->y; y_offset < (r->h + r->y); y_offset++ ) {
-		int offset = (y_offset * 1280 * 4) + (r->x * 4);
+		int offset = (y_offset * VVOS_SCREEN_WIDTH * 4) + (r->x * 4);
 		uint8_t *front_buffer = vga_info.fbuffer + offset;
 		uint8_t *back_buffer = vga_info.buffer + offset;
 

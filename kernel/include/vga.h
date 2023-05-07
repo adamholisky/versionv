@@ -5,6 +5,9 @@
 extern "C" {
 #endif
 
+#define VVOS_SCREEN_WIDTH 1920
+#define VVOS_SCREEN_HEIGHT 1080
+
 enum vga_color
 {
 	VGA_COLOR_BLACK = 0,
