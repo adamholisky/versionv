@@ -120,11 +120,17 @@ inline void vga_draw_screen( void ) {
 }
 
 void vga_draw_screen_box( rect *r ) {
+	//klog( "Redrawing area: (%d, %d) for w: %d, h: %d\n", r->x, r->y, r->w, r->h );
+
 	int size = r->w * 4;
 
 	for( int y_offset = r->y; y_offset < (r->h + r->y); y_offset++ ) {
-		int offset = (y_offset * size) + (r->x * size);
-		memcpy( vga_info.fbuffer + offset, vga_info.buffer + offset, size );
+		int offset = (y_offset * 1280 * 4) + (r->x * 4);
+		uint8_t *front_buffer = vga_info.fbuffer + offset;
+		uint8_t *back_buffer = vga_info.buffer + offset;
+
+		//klog( "front: %08X, back: %08X\n", front_buffer, back_buffer );
+		memcpy( front_buffer, back_buffer, size );
 	}
 }
 

@@ -17,6 +17,7 @@ vui_window *vui_window_new( int x, int y, int width, int height, char *title ) {
 	window->height = height;
 	window->title = malloc( strlen(title) );
 	strcpy( window->title, title );
+	window->common.custom_paint_func = NULL;
 
 	return window;
 }

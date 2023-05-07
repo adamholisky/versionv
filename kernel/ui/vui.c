@@ -9,13 +9,11 @@
 #include <vui/window.h>
 #include <vui/console.h>
 #include <vui/button.h>
+#include <vui/alert.h>
 
 #include <vui/font/fira.h>
 #include <vui/font/verab.h>
 #include <vui/font/verar.h>
-#include <vui/font/dvsm.h>
-
-uint8_t *DVSM = dvsm;
 
 #define SSFN_IMPLEMENTATION
 #include <ssfn.h>
@@ -37,20 +35,10 @@ vui_desktop	*main_desktop;
 
 int mouse_x;
 int mouse_y;
+rect prev_rect;
+bool has_prev = false;
 
-/*
-
-1000 0000 0x80
-1100 0000 0xC0
-1111 0000 0xF0
-1111 1100 0xFC
-1111 1111 0xFF
-0001 1000 0x18
-0000 1100 0x0C
-0000 0110 0x06
-*/
-
-uint8_t mouse_bitmap[] = { 0x80, 0xC0, 0xF0, 0xFC, 0xFF, 0x18, 0x0C, 0x06 };
+vui_handle active_window;
 
 void vui_initalize( void ) {
 	log_entry_enter();
@@ -60,6 +48,11 @@ void vui_initalize( void ) {
 
 	mouse_x = 0;
 	mouse_y = 0;
+	prev_rect.h = 14;
+	prev_rect.w = 16;
+	prev_rect.x = 0;
+	prev_rect.y = 0;
+	has_prev = true;
 	
 	vga_information *v = vga_get_info();
 
@@ -111,6 +104,9 @@ void *vui_add_handle( int handle_type ) {
 		case VUI_TYPE_BUTTON:
 			ret = malloc( sizeof(vui_button) );
 			break;
+		case VUI_TYPE_ALERT:
+			ret = malloc( sizeof(vui_alert) );
+			break;
 		default:
 			klog( "Unknown type: 0x%X\n", handle_type );
 			dump_stack_trace();
@@ -160,10 +156,10 @@ bool vui_handle_draw( vui_handle handle ) {
 	log_entry_enter();
 
 	vui_handle *h;
-	vui_handle_data *hd;
 
 	// TODO: Check if handle is legit
 
+	vui_handle_data *hd;
 	hd = &handles[ handle ];
 
 	switch( hd->handle_type ) {
@@ -190,6 +186,9 @@ bool vui_handle_draw( vui_handle handle ) {
             break;
 		case VUI_TYPE_BUTTON:
 			vui_button_draw( (vui_button *)hd->resource );
+			break;
+		case VUI_TYPE_ALERT:
+			vui_alert_draw( (vui_button *)hd->resource );
 			break;
 		default:
 			klog( "Unknown type: 0x%X\n", hd->handle_type );
@@ -264,7 +263,7 @@ int vui_get_string_width( int font, int size, char *s ) {
 			user_font = (ssfn_font_t *)VeraB;
 			break;
 		case VUI_FONT_DVSM:
-			user_font = (ssfn_font_t *)DVSM;
+			user_font = (ssfn_font_t *)fira;
 			break;
 		default:
 			user_font = (ssfn_font_t *)fira;
@@ -319,7 +318,7 @@ void vui_draw_string( int x, int y, int size, uint32_t fg, int font, char *s ) {
 			user_font = (ssfn_font_t *)VeraB;
 			break;
 		case VUI_FONT_DVSM:
-			user_font = (ssfn_font_t *)DVSM;
+			user_font = (ssfn_font_t *)fira;
 			break;
 		default:
 			user_font = (ssfn_font_t *)fira;
@@ -376,9 +375,10 @@ void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, 
 }
 
 void vui_mouse_click( uint8_t button ) {
-	switch( button ) {
+	/* switch( button ) {
 		case MOUSE_BUTTON_LEFT:
 			printf( "mouse click left at %d, %d\n", mouse_x, mouse_y );
+
 			break;
 		case MOUSE_BUTTON_MIDDLE:
 			printf( "mouse click middle at %d, %d\n", mouse_x, mouse_y );
@@ -388,6 +388,22 @@ void vui_mouse_click( uint8_t button ) {
 			break;
 		default:
 			printf( "unknown button returned!\n" );
+	} */
+
+	if( button == MOUSE_BUTTON_LEFT ) {
+		vui_handle obj_handle = vui_get_handle_at_point( mouse_x, mouse_y );
+
+		//printf( "Returned handle: %d\n", obj_handle );
+		klog( "Returned handle: %d\n", obj_handle );
+
+		if( handles[obj_handle].handle_type == VUI_TYPE_BUTTON ) {
+			vui_handle_data *hd;
+			hd = &handles[ obj_handle ];
+			vui_button *btn = (vui_button *)hd->resource;
+
+			printf( "Click on button id: %s\n", btn->id );
+			klog( "Click on button id: %s\n", btn->id );
+		}
 	}
 }
 
@@ -441,25 +457,10 @@ void vui_mouse_move( int32_t x, int32_t y ) {
 		0x0000,
 	};
 
-	static uint32_t prev_box[16 * 14];
-	static bool has_prev = false;
+	vga_draw_screen_box( &prev_rect );
 
-	if( has_prev ) {
-		for( int i = 0; i < 14; i++ ) {
-			for( int j = 0; j < 16; j++ ) {
-				*(((uint32_t *)vgainfo->fbuffer) + (((old_y + i) * 1280) + j + old_x)) = prev_box[ (i * 16) + j ];
-			}
-		}
-		printf( "d" );
-	} else {
-		has_prev = true;
-	}
-	
-	for( int i = 0; i < 14; i++ ) {
-		for( int j = 0; j < 16; j++ ) {
-			prev_box[ (i * 16) + j ] = *(((uint32_t *)vgainfo->fbuffer) + (((old_y + i) * 1280) + (j + old_x)));
-		}
-	}
+	prev_rect.x = mouse_x;
+	prev_rect.y = mouse_y;
 
 	for( int i = 0; i < 14; i++ ) {
 		for( int j = 15; j > -1; j-- ) {
@@ -469,9 +470,133 @@ void vui_mouse_move( int32_t x, int32_t y ) {
 		}
 	}
 
-
-
-	//vui_draw_rectangle( r.x, r.y, r.w, r.h, 0x00000000 );
-	//vga_draw_screen();
 	//klog( "Mouse move. Direction: %d, amount %d --- (old: %d, %d.  new: %d, %d.)\n", direction, amount, old_x, old_y, mouse_x, mouse_y );
 }
+
+void vui_set_active_window( vui_handle win ) {
+	active_window = win;
+}
+
+rect vui_get_handle_rect( vui_handle h ) {
+	// TODO: Check if handle is legit
+	// TODO: Make thread safe
+	rect rect_get_handle;
+
+	int x, y, w, he = 0;
+
+	vui_handle_data *hd;
+	hd = &handles[ h ];
+
+	klog( "XXXXXXXXXXXXXX handle type: %d\n", hd->handle_type );
+
+	switch( hd->handle_type ) {
+		case VUI_TYPE_WINDOW:
+			vui_window *vuiwindow = (vui_window *)hd->resource;
+			he = vuiwindow->height;
+			w = vuiwindow->width;
+			x = vuiwindow->x;
+			y = vuiwindow->y;
+			break;
+		case VUI_TYPE_DESKTOP:
+			vui_desktop *vuidesktop = (vui_desktop *)hd->resource;
+			he = vuidesktop->height;
+			w = vuidesktop->width;
+			x = vuidesktop->x;
+			y = vuidesktop->y;
+			break;
+		case VUI_TYPE_LABEL:
+			vui_label *vuilabel = (vui_label *)hd->resource;
+			he = 1;
+			w = 1;
+			x = vuilabel->x;
+			y = vuilabel->y;
+			break;
+		case VUI_TYPE_BUTTON:
+			vui_button *vuibutton = (vui_button *)hd->resource;
+			he = vuibutton->height;
+			w = vuibutton->width;
+			x = vuibutton->x;
+			y = vuibutton->y;
+			break;
+		default:
+			klog( "Unknown type: 0x%X\n", hd->handle_type );
+			return;
+	}
+
+	klog( "x y w h: %d %d %d %d\n", x, y, w, he );
+
+	rect_get_handle.h = he;
+	rect_get_handle.w = w;
+	rect_get_handle.x = x;
+	rect_get_handle.y = y;
+
+	return rect_get_handle;
+}
+
+vui_handle vui_get_handle_at_point( int x, int y ) {
+	// ONLY do the active window for now
+
+	klog( "finding %d, %d in handle: %d\n", x, y, active_window );
+
+	return vui_get_handle_at_point_inside_handle( active_window, x, y );
+}
+
+vui_handle vui_get_handle_at_point_inside_handle( vui_handle h, int x, int y ) {
+	log_entry_enter();
+
+	vui_handle found_handle = 0;
+	vui_handle possible_handle = 0;
+
+	// TODO: Check if handle is legit
+
+	// Is the point in the current handle?
+	rect r = vui_get_handle_rect( h );
+
+	klog( "finding %d, %d inside of handle %d (%d, %d, w: %d   h: %d)\n", x, y, h, r.x, r.y, r.w, r.h );
+
+	if( x >= r.x ) {
+		if( x <= r.x + r.w ) {
+			if( y >= r.y ) {
+				if( y <= r.y + r.h ) {
+					// yay!
+
+					klog( "found in rect\n" );
+
+					found_handle = h;
+
+					// now what about children...
+
+					for( int i = 1; i < vui_handle_top; i++ ) {
+						vui_object *obj = NULL;
+
+						if( handles[i].in_use == true ) {
+							obj = (vui_object *)handles[i].resource;
+
+							if( obj->parent == h ) {
+								possible_handle = vui_get_handle_at_point_inside_handle( obj->handle, x, y );
+
+								if( possible_handle != 0 ) {
+									found_handle = possible_handle;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	log_entry_exit();
+
+	return found_handle;
+}
+
+/*
+	if( hd->handle_type == VUI_TYPE_WINDOW ) {
+		if( ((vui_window *)hd->resource)->common.custom_paint_func ) {
+			((vui_window *)hd->resource)->common.custom_paint_func( hd->resource );
+		}
+		
+	}
+	
+*/

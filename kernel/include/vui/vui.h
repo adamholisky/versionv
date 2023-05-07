@@ -29,6 +29,7 @@ extern "C" {
 #define VUI_TYPE_LABEL 3
 #define VUI_TYPE_CONSOLE 4
 #define VUI_TYPE_BUTTON 5
+#define VUI_TYPE_ALERT 6
 
 #define VUI_FONT_FIRA 0
 #define VUI_FONT_VERA 1
@@ -73,6 +74,10 @@ void vui_draw_string_mono( int x, int y, int size, uint32_t fg, int font, char *
 void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s );
 void vui_mouse_click( uint8_t button );
 void vui_mouse_move( int32_t x, int32_t y );
+void vui_set_active_window( vui_handle win );
+rect vui_get_handle_rect( vui_handle h );
+vui_handle vui_get_handle_at_point( int x, int y );
+vui_handle vui_get_handle_at_point_inside_handle( vui_handle h, int x, int y );
 
 #ifdef __cplusplus
 }
