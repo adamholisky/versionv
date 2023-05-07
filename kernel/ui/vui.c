@@ -130,7 +130,11 @@ void *vui_add_handle( int handle_type ) {
 }
 
 void vui_free_handle( vui_handle handle ) {
+	log_entry_enter();
+
 	vui_handle_data *hd = &handles[ handle ];
+
+	klog( "htype: %d\n", hd->handle_type );
 
 	switch( hd->handle_type ) {
 		case VUI_TYPE_DESKTOP:
@@ -142,6 +146,13 @@ void vui_free_handle( vui_handle handle ) {
 		case VUI_TYPE_WINDOW:
 			vui_window_destroy( (vui_window *)hd->resource );
 			break;
+		case VUI_TYPE_BUTTON:
+			vui_button_destroy( (vui_button *)hd->resource );
+			break;
+		case VUI_TYPE_ALERT:
+			klog( "hi" );
+			vui_alert_destroy( (vui_alert *)hd->resource );
+			break;
 		default:
 			klog( "Unknown type: 0x%X\n", hd->handle_type );
 			return false;
@@ -149,11 +160,18 @@ void vui_free_handle( vui_handle handle ) {
 
 	handles[handle].in_use = false;
 
+	// TODO: FREE HANDLES OF CHILDREN!!!
+
 	free( handles[handle].resource );
+
+	log_entry_exit();
 }
 
+#undef KDEBUG_VUI_HANDLE_DRAW
 bool vui_handle_draw( vui_handle handle ) {
+	#ifdef KDEBUG_VUI_HANDLE_DRAW
 	log_entry_enter();
+	#endif
 
 	vui_handle *h;
 
@@ -215,7 +233,9 @@ bool vui_handle_draw( vui_handle handle ) {
 		
 	}
 
+	#ifdef KDEBUG_VUI_HANDLE_DRAW
 	log_entry_exit();
+	#endif
 
 	return true;
 }
@@ -374,8 +394,10 @@ void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, 
 	//draw_string( s, x, y, fg, 0x00FFFFFF );
 }
 
+#undef KDEBUG_VUI_MOUSE_CLICK
 void vui_mouse_click( uint8_t button ) {
-	/* switch( button ) {
+	#ifdef KDEBUG_VUI_MOUSE_CLICK
+	switch( button ) {
 		case MOUSE_BUTTON_LEFT:
 			printf( "mouse click left at %d, %d\n", mouse_x, mouse_y );
 
@@ -388,21 +410,28 @@ void vui_mouse_click( uint8_t button ) {
 			break;
 		default:
 			printf( "unknown button returned!\n" );
-	} */
+	}
+	#endif
 
 	if( button == MOUSE_BUTTON_LEFT ) {
 		vui_handle obj_handle = vui_get_handle_at_point( mouse_x, mouse_y );
 
-		//printf( "Returned handle: %d\n", obj_handle );
+		#ifdef KDEBUG_VUI_MOUSE_CLICK
+		printf( "Returned handle: %d\n", obj_handle );
 		klog( "Returned handle: %d\n", obj_handle );
+		#endif
 
 		if( handles[obj_handle].handle_type == VUI_TYPE_BUTTON ) {
 			vui_handle_data *hd;
 			hd = &handles[ obj_handle ];
 			vui_button *btn = (vui_button *)hd->resource;
 
+			btn->on_mouseup( btn->id, btn );
+
+			#ifdef KDEBUG_VUI_MOUSE_CLICK
 			printf( "Click on button id: %s\n", btn->id );
 			klog( "Click on button id: %s\n", btn->id );
+			#endif
 		}
 	}
 }
@@ -477,6 +506,7 @@ void vui_set_active_window( vui_handle win ) {
 	active_window = win;
 }
 
+#undef KDEBUG_VUI_GET_HANDLE_RECT
 rect vui_get_handle_rect( vui_handle h ) {
 	// TODO: Check if handle is legit
 	// TODO: Make thread safe
@@ -487,7 +517,9 @@ rect vui_get_handle_rect( vui_handle h ) {
 	vui_handle_data *hd;
 	hd = &handles[ h ];
 
+	#ifdef KDEBUG_VUI_GET_HANDLE_RECT
 	klog( "XXXXXXXXXXXXXX handle type: %d\n", hd->handle_type );
+	#endif
 
 	switch( hd->handle_type ) {
 		case VUI_TYPE_WINDOW:
@@ -523,7 +555,9 @@ rect vui_get_handle_rect( vui_handle h ) {
 			return;
 	}
 
+	#ifdef KDEBUG_VUI_GET_HANDLE_RECT
 	klog( "x y w h: %d %d %d %d\n", x, y, w, he );
+	#endif
 
 	rect_get_handle.h = he;
 	rect_get_handle.w = w;
@@ -533,16 +567,22 @@ rect vui_get_handle_rect( vui_handle h ) {
 	return rect_get_handle;
 }
 
+#undef KDEBUG_VUI_GET_HANDLE_AT_POINT
 vui_handle vui_get_handle_at_point( int x, int y ) {
 	// ONLY do the active window for now
 
+	#ifdef KDEBUG_VUI_GET_HANDLE_AT_POINT
 	klog( "finding %d, %d in handle: %d\n", x, y, active_window );
+	#endif
 
 	return vui_get_handle_at_point_inside_handle( active_window, x, y );
 }
 
+#undef KDEBUG_VUI_GET_HANDLE_AT_POINT_INSIDE_HANDLE
 vui_handle vui_get_handle_at_point_inside_handle( vui_handle h, int x, int y ) {
+	#ifdef KDEBUG_VUI_GET_HANDLE_AT_POINT_INSIDE_HANDLE
 	log_entry_enter();
+	#endif
 
 	vui_handle found_handle = 0;
 	vui_handle possible_handle = 0;
@@ -552,7 +592,9 @@ vui_handle vui_get_handle_at_point_inside_handle( vui_handle h, int x, int y ) {
 	// Is the point in the current handle?
 	rect r = vui_get_handle_rect( h );
 
+	#ifdef KDEBUG_VUI_GET_HANDLE_AT_POINT_INSIDE_HANDLE
 	klog( "finding %d, %d inside of handle %d (%d, %d, w: %d   h: %d)\n", x, y, h, r.x, r.y, r.w, r.h );
+	#endif
 
 	if( x >= r.x ) {
 		if( x <= r.x + r.w ) {
@@ -560,7 +602,9 @@ vui_handle vui_get_handle_at_point_inside_handle( vui_handle h, int x, int y ) {
 				if( y <= r.y + r.h ) {
 					// yay!
 
+					#ifdef KDEBUG_VUI_GET_HANDLE_AT_POINT_INSIDE_HANDLE
 					klog( "found in rect\n" );
+					#endif
 
 					found_handle = h;
 
@@ -586,7 +630,9 @@ vui_handle vui_get_handle_at_point_inside_handle( vui_handle h, int x, int y ) {
 		}
 	}
 
+	#ifdef KDEBUG_VUI_GET_HANDLE_AT_POINT_INSIDE_HANDLE
 	log_entry_exit();
+	#endif
 
 	return found_handle;
 }
