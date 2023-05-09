@@ -5,18 +5,19 @@
 #include <string.h>
 #include "afs.h"
 #include <sys/stat.h>
+#include <dirent.h>
 
 
 #define afsfile "/usr/local/osdev/versions/v/afs.img"
 
 typedef struct {
-	char * 	name;
+	char 	name[25];
 	int		type;
-	char *	loc;
-	char *	original_loc;
+	char	loc[256];
+	char	original_loc[256];
 } drive_item;
 
-drive_item items[] = {
+/* drive_item items[] = {
 	{
 		.name = "bin",
 		.type = AFS_BLOCK_TYPE_DIRECTORY,
@@ -62,10 +63,14 @@ drive_item items[] = {
 		.loc = "/etc/",
 		.original_loc = "/usr/local/osdev/versions/v/support/afsdrive/vera.sfn"
 	}
-};
+}; */
+
+#define MAX_DRIVE_ITEMS 256
 
 uint32_t drive_size_in_bytes = 1024 * 1024 * 2;
 char str_test[] = "Hello, world!";
+drive_item items[ MAX_DRIVE_ITEMS ];
+int	drive_item_count = 0;
 
 afs_drive * bs_drive;
 afs_string_table * bs_string_table;
@@ -73,6 +78,66 @@ afs_block_directory *bs_root_dir;
 afs_block_directory *bs_bin_dir;
 
 vv_file_internal file_system;
+
+void add_files_in_dir( char *dir_name, char *full_path );
+
+void add_files_in_dir( char *dir_name, char *full_path ) {
+	printf( "add_files_in_dir( \"%s\", \"%s\" );\n", dir_name, full_path );
+
+	//printf( "BBBBBB" );
+
+	DIR *d;
+	struct dirent *dir;
+	char loc_start[] = "/usr/local/osdev/versions/v/os_root";
+	char loc_full[256];
+
+	char location_fix[25];
+	memset( location_fix, 0, 25 );
+
+	strcat( location_fix, "/" );
+	strcat( location_fix, dir_name );
+	strcat( location_fix, "/" );
+
+	//printf( "AAAAAAA" );
+
+	d = opendir( full_path );
+
+	if(d) {
+		//printf( "....." );
+		while( (dir=readdir(d)) != NULL ) {
+			printf( "found %s", dir->d_name );
+			memset( loc_full, 0, 256 );
+
+			if( strcmp( dir->d_name, "." ) == 0 ) {
+				// Skip and continue
+				continue;
+			}
+
+			if( strcmp( dir->d_name, ".." ) == 0 ) {
+				// Skip and continue
+				continue;
+			}
+
+			strcat( loc_full, full_path );
+			strcat( loc_full, "/" );
+			strcat( loc_full, dir->d_name );
+
+			if( dir->d_type == DT_REG ) {
+				strcpy( items[drive_item_count].loc, location_fix );
+				strcpy( items[drive_item_count].name, dir->d_name );
+				strcpy( items[drive_item_count].original_loc, loc_full );
+				items[drive_item_count].type = AFS_BLOCK_TYPE_FILE;
+
+				drive_item_count++;
+			}
+		}
+
+		closedir(d);
+	} else {
+		printf( "d is empty.\n" );
+		return;
+	}
+}
 
 int main( void ) {
 	uint8_t * buff = malloc( drive_size_in_bytes );
@@ -86,24 +151,57 @@ int main( void ) {
 	afs_block_directory *dir_bin = bootstrap_mkdir( buff, bs_root_dir, "bin" );
 	afs_block_directory *dir_lib = bootstrap_mkdir( buff, bs_root_dir, "lib" );
 	afs_block_directory *dir_etc = bootstrap_mkdir( buff, bs_root_dir, "etc" );
+	afs_block_directory *dir_font = bootstrap_mkdir( buff, bs_root_dir, "font" );
+	afs_block_directory *dir_home = bootstrap_mkdir( buff, bs_root_dir, "home" );
 
-	for( int i = 0; i < (sizeof(items) / sizeof(drive_item)); i++ ) {
+	DIR *d;
+	struct dirent *dir;
+	char loc_start[] = "/usr/local/osdev/versions/v/os_root";
+	char loc_full[256];
+
+	d = opendir( loc_start );
+
+	if(d) {
+		while( (dir=readdir(d)) != NULL ) {
+			memset( loc_full, 0, 256 );
+
+			if( strcmp( dir->d_name, "." ) == 0 ) {
+				// Skip and continue
+				continue;
+			}
+
+			if( strcmp( dir->d_name, ".." ) == 0 ) {
+				// Skip and continue
+				continue;
+			}
+
+			DIR *in_d;
+			struct dirent *in_dirent;
+			strcat( loc_full, loc_start );
+			strcat( loc_full, "/" );
+			strcat( loc_full, dir->d_name );
+
+			printf( "found %s\n", dir->d_name );
+
+			if( dir->d_type == DT_DIR ) {
+				add_files_in_dir( dir->d_name, loc_full );
+			}
+		}
+
+		closedir(d);
+	} else {
+		printf( "d is empty.\n" );
+		return;
+	}
+
+	for( int i = 0; i < drive_item_count; i++ ) {
 		afs_block_directory *dir_to_use = NULL;
 
-		if( strstr( items[i].loc, "etc" ) ) {
-			dir_to_use = dir_etc;
-			printf( "etc" );
-		}
-
-		if( strstr( items[i].loc, "lib" ) ) {
-			dir_to_use = dir_lib;
-			printf( "lib" );
-		}
-
-		if( strstr( items[i].loc, "bin" ) ) {
-			dir_to_use = dir_bin;
-			printf( "bin" );
-		}
+		if( strstr( items[i].loc, "etc" ) ) { dir_to_use = dir_etc; }
+		if( strstr( items[i].loc, "lib" ) ) { dir_to_use = dir_lib; }
+		if( strstr( items[i].loc, "bin" ) ) { dir_to_use = dir_bin; }
+		if( strstr( items[i].loc, "home" ) ) { dir_to_use = dir_home; }
+		if( strstr( items[i].loc, "font" ) ) { dir_to_use = dir_font; }
 
 		switch( items[i].type ) {
 			case AFS_BLOCK_TYPE_DIRECTORY:
@@ -174,11 +272,20 @@ int main( void ) {
 	printf( "ls /\n" );
 	afs_ls( &file_system, "/" );
 
+	printf( "ls /bin\n" );
+	afs_ls( &file_system, "/bin" );
+
 	printf( "ls /etc\n" );
 	afs_ls( &file_system, "/etc" );
 
 	printf( "ls /lib\n" );
 	afs_ls( &file_system, "/lib" );
+
+	printf( "ls /font\n" );
+	afs_ls( &file_system, "/font" );
+
+	printf( "ls /home\n" );
+	afs_ls( &file_system, "/home" );
 	
 	return 0;
 }	

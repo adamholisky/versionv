@@ -130,6 +130,11 @@ run_ng_debug: install
 gdb:
 	gdb -q --command=/usr/local/osdev/versions/v/kernel/build_support/main_debug.gdb 
 
+drive:
+	rm $(ROOT_DIR)/afs.img
+	touch $(ROOT_DIR)/afs.img
+	$(ROOT_DIR)/support/afsdrive/afs
+
 clean:
 	@rm -rf build.log
 	@make clean_stage_2 >> $(BUILD_LOG)
