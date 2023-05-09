@@ -69,18 +69,18 @@ uint32_t afs_read( vv_file_internal *fs, void *ptr, uint32_t size, vv_file *fp )
 	uint32_t bytes_read = 0;
 
 	#ifdef KDEBUG_AFS_READ
-	printf( "fs: 0x%X\n", fs );
-	printf( "ptr: 0x%X\n", ptr );
-	printf( "size: %d\n", size );
-	printf( "fp: 0x%X\n", fp );
-	printf( "fp.pos: 0x%X\n", fp->position );
-	printf( "fp.base: 0x%X\n", fp->base );
+	klog( "fs: 0x%X\n", fs );
+	klog( "ptr: 0x%X\n", ptr );
+	klog( "size: %d\n", size );
+	klog( "fp: 0x%X\n", fp );
+	klog( "fp.pos: 0x%X\n", fp->position );
+	klog( "fp.base: 0x%X\n", fp->base );
 	#endif
 
-	bytes_read = ahci_read_at_byte_offset( fp->base + fp->position, size, (uint8_t *)ptr );
+	bytes_read = ahci_read_at_byte_offset_512_chunks( fp->base + fp->position, size, (uint8_t *)ptr );
 
 	#ifdef KDEBUG_AFS_READ
-	printf( "num bytes read: %d\n", bytes_read );
+	klog( "num bytes read: %d\n", bytes_read );
 	#endif 
 	
 	return bytes_read;

@@ -26,6 +26,8 @@ void kshell_afs_test_alpha( void );
 void kshell_test_lib_call( void );
 void kshell_test_app( void );
 
+void kshell_echo_to_serial( void );
+
 #ifdef __cplusplus
 }
 #endif

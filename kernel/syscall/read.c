@@ -48,8 +48,8 @@ uint32_t syscall_read( int _fd, void * buff, uint32_t size ) {
 	}
 
 	#ifdef KDEBUG_READ
-	printf( "syscall_read size: %d\n", size );
-	printf( "buff addr: 0x%08X\n", buff );
+	klog( "syscall_read size: %d\n", size );
+	klog( "buff addr: 0x%08X\n", buff );
 	klog( "syscall_read bytes: %d\n", num_read );
 	#endif
 	

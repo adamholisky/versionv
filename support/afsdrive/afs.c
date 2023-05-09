@@ -39,6 +39,12 @@ drive_item items[] = {
 		.original_loc = "/usr/local/osdev/versions/v/support/libtest/libmyshare.so"
 	},
 	{
+		.name = "picard_history.txt",
+		.type = AFS_BLOCK_TYPE_FILE,
+		.loc = "/lib/",
+		.original_loc = "/usr/local/osdev/versions/v/support/afsdrive/picardhistory.txt"
+	},
+	{
 		.name = "magic_key",
 		.type = AFS_BLOCK_TYPE_FILE,
 		.loc = "/etc/",

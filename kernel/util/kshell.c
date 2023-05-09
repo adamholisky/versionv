@@ -203,11 +203,15 @@ void kshell_run( void ) {
 	kshell_fake_cli( "ps_to_log" );
 	kexec( "ps", (uint32_t *)kshell_ps, NULL );
 
-	kshell_automate( "testlibcall" );
-	kshell_automate( "testapp" );
-	kshell_automate( "cat /etc/magic_key" );
+	//kshell_automate( "testlibcall" );
+	//kshell_automate( "testapp" );
+	//kshell_automate( "cat /etc/magic_key" );
 
-	test_app_main();
+	//test_app_main();
+
+	//kshell_echo_to_serial();
+
+	do_immediate_shutdown();
 
 	while( true ) {
 		printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );
@@ -449,6 +453,32 @@ void kshell_test_app( void ) {
 		enter( 2, argv_builder ); */
 
 		free( buff );
+	}
+
+	log_entry_exit();
+}
+
+void kshell_echo_to_serial( void ) {
+	log_entry_enter();
+
+	int FD = open( "/lib/picard_history.txt", 0 );
+
+	if( FD == -1 ) {
+		printf( "cannot open /lib/picard_history.txt\n" );
+	} else {
+
+		int size = get_file_size(FD);
+		uint8_t *buff = malloc( size );
+		memset( buff, 0, 2048 );
+
+		int bytes_read = read( FD, buff, size );
+
+		klog( "ph size: %d\n", size );
+		klog( "ph bytes read: %d\n", bytes_read );
+
+		klog( "begin out\n---------\n" );
+		klog( "%s", buff );
+		klog( "\n----------\nend out\n" );
 	}
 
 	log_entry_exit();

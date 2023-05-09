@@ -334,9 +334,66 @@ bool ahci_read_at_byte_offset( uint32_t offset, uint32_t size, uint8_t *buffer )
 
 	debugf( "\n" );
 
-	kdebug_peek_at_n(global_buffer, 300 );
+	//kdebug_peek_at_n(global_buffer, 300 );
 
-	kdebug_peek_at_n(buffer, 300 );
+	//kdebug_peek_at_n(buffer, 300 );
+	#endif
+
+	
+
+	return true;
+}
+
+bool ahci_read_at_byte_offset_512_chunks( uint32_t offset, uint32_t size, uint8_t *buffer ) {
+	bool read_result = false;
+	uint32_t sector = 0;
+	uint32_t count = 0;
+	uint32_t internal_offset = 0;
+
+	sector = offset / 512;
+	internal_offset = offset - (sector * 512);
+	count = (size / 512) + 2;
+
+	#ifdef KDEBUG_AHCI_READ_AT_BYTE_OFFSET
+	klog( "read: offset -- %X, size %X\n", offset, size );
+	klog( "read at offset -- sector = %X, count = %X, internal_offset = %X\n", sector, count, internal_offset );
+
+	memset( global_buffer, 0xDD, 2 * 1024 * 1024 );
+	#endif
+
+	for( int i = 0; i < count; i++ ) {
+		read_result = read_ahci( &abar->ports[1], sector + i, 0, 1, (uint16_t *)(global_buffer_addr + (i * 512)) );
+
+		if( !read_result ) {
+			klog( "Read failed. sector = %X\n", sector );
+			return false;
+		}
+	}
+
+	memcpy( buffer, (uint8_t *)global_buffer + internal_offset, size );
+
+	#ifdef KDEBUG_AHCI_READ_AT_BYTE_OFFSET
+	int z = 0;
+	for( int b = 0; b < (size / 2); b++ ) {
+		if (z == 0) {
+			//debugf( "\n%04X    ", b * 2 );
+		}
+		
+
+		//debugf( "%02X %02X  ", ( 0x00FF ) & *(buffer + b), ((0xFF00) & *(buffer + b))>>8 );
+
+		z++;
+
+		if( z == 0x8 ) {
+			z = 0;
+		}
+	}
+
+	debugf( "\n" );
+
+	//kdebug_peek_at_n(global_buffer, 300 );
+
+	//kdebug_peek_at_n(buffer, 300 );
 	#endif
 
 	
