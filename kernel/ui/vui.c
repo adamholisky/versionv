@@ -40,6 +40,10 @@ bool has_prev = false;
 
 vui_handle active_window;
 
+/**
+ * @brief 
+ * 
+ */
 void vui_initalize( void ) {
 	log_entry_enter();
 
@@ -60,12 +64,20 @@ void vui_initalize( void ) {
 
 	vui_set_main_desktop( main_desktop );
 
+	observer_function f = vui_keypress;
+	observer_register( "vui_keypress", f );
+	observer_attach_to_subject( "keyboard", "vui_keypress", 1 );
+
+
 	vui_refresh();
 
 	log_entry_exit();
 }
 
-
+/**
+ * @brief 
+ * 
+ */
 void vui_refresh( void ) {
 	log_entry_enter();
 
@@ -76,6 +88,12 @@ void vui_refresh( void ) {
 	log_entry_exit();
 }
 
+/**
+ * @brief 
+ * 
+ * @param handle_type 
+ * @return void* 
+ */
 void *vui_add_handle( int handle_type ) {
 	void *ret = NULL;
 
@@ -129,6 +147,11 @@ void *vui_add_handle( int handle_type ) {
 	return ret;
 }
 
+/**
+ * @brief 
+ * 
+ * @param handle 
+ */
 void vui_free_handle( vui_handle handle ) {
 	log_entry_enter();
 
@@ -168,6 +191,13 @@ void vui_free_handle( vui_handle handle ) {
 }
 
 #undef KDEBUG_VUI_HANDLE_DRAW
+/**
+ * @brief 
+ * 
+ * @param handle 
+ * @return true 
+ * @return false 
+ */
 bool vui_handle_draw( vui_handle handle ) {
 	#ifdef KDEBUG_VUI_HANDLE_DRAW
 	log_entry_enter();
@@ -240,6 +270,14 @@ bool vui_handle_draw( vui_handle handle ) {
 	return true;
 }
 
+/**
+ * @brief 
+ * 
+ * @param child 
+ * @param parent 
+ * @return true 
+ * @return false 
+ */
 bool vui_set_parent( void *child, void *parent ) {
 	vui_object *obj_child = (vui_object *)child;
 	vui_object *obj_parent = (vui_object *)parent;
@@ -249,6 +287,15 @@ bool vui_set_parent( void *child, void *parent ) {
 	return true;
 }
 
+/**
+ * @brief 
+ * 
+ * @param x 
+ * @param y 
+ * @param width 
+ * @param height 
+ * @param color 
+ */
 void vui_draw_rectangle( int x, int y, int width, int height, uint32_t color ) {
 	rect r = {
 		.x = x,
@@ -260,6 +307,14 @@ void vui_draw_rectangle( int x, int y, int width, int height, uint32_t color ) {
 	draw_rect( r, color );
 }
 
+/**
+ * @brief 
+ * 
+ * @param font 
+ * @param size 
+ * @param s 
+ * @return int 
+ */
 int vui_get_string_width( int font, int size, char *s ) {
 	int width = 0;
 	int height = 0;
@@ -308,6 +363,16 @@ int vui_get_string_width( int font, int size, char *s ) {
 	return width;
 }
 
+/**
+ * @brief 
+ * 
+ * @param x 
+ * @param y 
+ * @param size 
+ * @param fg 
+ * @param font 
+ * @param s 
+ */
 void vui_draw_string( int x, int y, int size, uint32_t fg, int font, char *s ) {
 	vga_information *v = vga_get_info();
 
@@ -374,6 +439,16 @@ void vui_draw_string( int x, int y, int size, uint32_t fg, int font, char *s ) {
 	}
 }
 
+/**
+ * @brief 
+ * 
+ * @param x 
+ * @param y 
+ * @param size 
+ * @param fg 
+ * @param font 
+ * @param s 
+ */
 void vui_draw_string_mono( int x, int y, int size, uint32_t fg, int font, char *s ) {
 	vga_information * vga = vga_get_info();
 
@@ -384,6 +459,17 @@ void vui_draw_string_mono( int x, int y, int size, uint32_t fg, int font, char *
 	//draw_string( s, x, y, fg, 0x00FFFFFF );
 }
 
+/**
+ * @brief 
+ * 
+ * @param x 
+ * @param y 
+ * @param size 
+ * @param bg 
+ * @param fg 
+ * @param font 
+ * @param s 
+ */
 void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s ) {
 	vga_information * vga = vga_get_info();
 
@@ -395,6 +481,11 @@ void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, 
 }
 
 #undef KDEBUG_VUI_MOUSE_CLICK
+/**
+ * @brief 
+ * 
+ * @param button 
+ */
 void vui_mouse_click( uint8_t button ) {
 	#ifdef KDEBUG_VUI_MOUSE_CLICK
 	switch( button ) {
@@ -436,6 +527,33 @@ void vui_mouse_click( uint8_t button ) {
 	}
 }
 
+/**
+ * @brief Keypress event handler
+ * 
+ * @param message keyboard_event contained in the message's data block
+ */
+void vui_keypress( event_message * message ) {
+	keyboard_event *e = (keyboard_event *)message->data;
+
+	klog( "Scancode: 0x%X\n", e->scanecode );
+
+	vui_handle_data *hd;
+	hd = &handles[ active_window ];
+	vui_window *w = (vui_window *)hd->resource;
+
+	klog( "eh: 0x%X\n", w->event_handler );
+
+	if( w->event_handler ) {
+		w->event_handler( active_window, "keypress", message->data );
+	}
+}
+
+/**
+ * @brief 
+ * 
+ * @param x 
+ * @param y 
+ */
 void vui_mouse_move( int32_t x, int32_t y ) {
 	int old_x = mouse_x;
 	int old_y = mouse_y;
@@ -502,11 +620,22 @@ void vui_mouse_move( int32_t x, int32_t y ) {
 	//klog( "Mouse move. Direction: %d, amount %d --- (old: %d, %d.  new: %d, %d.)\n", direction, amount, old_x, old_y, mouse_x, mouse_y );
 }
 
+/**
+ * @brief 
+ * 
+ * @param win 
+ */
 void vui_set_active_window( vui_handle win ) {
 	active_window = win;
 }
 
 #undef KDEBUG_VUI_GET_HANDLE_RECT
+/**
+ * @brief 
+ * 
+ * @param h 
+ * @return rect 
+ */
 rect vui_get_handle_rect( vui_handle h ) {
 	// TODO: Check if handle is legit
 	// TODO: Make thread safe
@@ -568,6 +697,13 @@ rect vui_get_handle_rect( vui_handle h ) {
 }
 
 #undef KDEBUG_VUI_GET_HANDLE_AT_POINT
+/**
+ * @brief 
+ * 
+ * @param x 
+ * @param y 
+ * @return vui_handle 
+ */
 vui_handle vui_get_handle_at_point( int x, int y ) {
 	// ONLY do the active window for now
 
@@ -579,6 +715,14 @@ vui_handle vui_get_handle_at_point( int x, int y ) {
 }
 
 #undef KDEBUG_VUI_GET_HANDLE_AT_POINT_INSIDE_HANDLE
+/**
+ * @brief 
+ * 
+ * @param h 
+ * @param x 
+ * @param y 
+ * @return vui_handle 
+ */
 vui_handle vui_get_handle_at_point_inside_handle( vui_handle h, int x, int y ) {
 	#ifdef KDEBUG_VUI_GET_HANDLE_AT_POINT_INSIDE_HANDLE
 	log_entry_enter();
@@ -635,6 +779,21 @@ vui_handle vui_get_handle_at_point_inside_handle( vui_handle h, int x, int y ) {
 	#endif
 
 	return found_handle;
+}
+
+void vui_for_each_child_handle_callback( vui_handle h, vui_callback_with_handle c, char *id, void *obj ) {
+	// Handle children
+	for( int i = 1; i < vui_handle_top; i++ ) {
+		vui_object *obj = NULL;
+
+		if( handles[i].in_use == true ) {
+			obj = (vui_object *)handles[i].resource;
+
+			if( obj->parent == h ) {
+				c( obj->handle, id, obj );
+			}
+		}
+	}
 }
 
 /*

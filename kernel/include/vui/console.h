@@ -75,6 +75,8 @@ typedef struct {
 	char		captured_escape[25];
 	int			tab_size;
 
+	char		character_buffer[255];
+
 	uint16_t    *data;
 } vui_console;
 

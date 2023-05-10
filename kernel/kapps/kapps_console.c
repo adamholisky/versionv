@@ -35,21 +35,6 @@ int vui_console_main( int argc, char *argv[] ) {
 
     klog( "done.\n" );
 
-/* 	vui_console_puts( capp_state.con, "Hello, world!" );
-	vui_console_puts( capp_state.con, "\n\nThis is a line of text!\nAnd another...\n" ); */
-
-	// scroll test
-
-	/* char str[100];
-	// capp_state.con->rows
-	for( int i = 1; i < 21; i++ ) {
-		memset( str, 0, 100 );
-		snprintf( str, 100, "0x%02X: This is line %d (Max: %d). Test scrolling. cur_x: %d, cur_y: %d\n", i, i, capp_state.con->rows, capp_state.con->current_x, capp_state.con->current_y );
-		vui_console_puts( capp_state.con, str );
-	} */
-
-	//vui_console_puts( capp_state.con, "A little extra" );
-
  	vui_console_puts( capp_state.con, "The first duty of every \x1b[0;31;49mStarfleet officer\x1b[0;0;0m is to the truth, whether it's scientific truth or historical truth or personal truth." );
 
 	vui_console_puts( capp_state.con, "\nNew line.\nAnother." );
@@ -57,7 +42,10 @@ int vui_console_main( int argc, char *argv[] ) {
     klog( "done2.\n" );
 
     set_terminal_redirect( kapps_console_putc );
+	vui_window_set_event_handler( capp_state.win, kapps_console_handle_events );
 
+	vui_set_active_window( capp_state.win->common.handle );
+	
     klog( "done3.\n" );
  
 	vui_refresh();
@@ -70,4 +58,20 @@ int vui_console_main( int argc, char *argv[] ) {
 void kapps_console_putc( char c ) {
     vui_console_putc( capp_state.con, c );
     //vui_handle_draw( capp_state.con->common.handle );
+}
+
+void kapps_console_handle_key_down( int scanecode ) {
+
+}
+
+/**
+ * @brief 
+ * 
+ * @param id 
+ * @param obj 
+ */
+void kapps_console_handle_events( vui_handle h, char *id, void *obj ) {
+	if( strcmp( "keypress", id ) == 0 ) {
+		klog( "got a keypress event\n" );
+	}
 }

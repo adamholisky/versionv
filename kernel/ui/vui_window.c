@@ -106,6 +106,13 @@ bool vui_window_draw( vui_window *window ) {
 	return true;
 }
 
+/**
+ * @brief 
+ * 
+ * @param window 
+ * @param r 
+ * @return rect* 
+ */
 rect *vui_window_get_inner_rect( vui_window *window, rect *r ) {
 	r->x = window->x + 2;
 	r->y = window->y + ui_top_height;
@@ -114,3 +121,15 @@ rect *vui_window_get_inner_rect( vui_window *window, rect *r ) {
 
 	return r;
 }
+
+/**
+ * @brief 
+ * 
+ * @param window 
+ * @param eh 
+ */
+void vui_window_set_event_handler( vui_window *window, vui_callback_with_handle eh ) {
+	window->event_handler = eh;
+}
+
+

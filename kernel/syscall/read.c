@@ -36,8 +36,9 @@ uint32_t syscall_read( int _fd, void * buff, uint32_t size ) {
 
 	switch( _fd ) {
 		case STDIN_FILENO:
-			cbuff[0] = keyboard_get_char_nonblocking();
+			cbuff[0] = keyboard_get_scancode();
 			cbuff[1] = 0;
+			num_read = 1;
 			break;
 		case STDOUT_FILENO:
 			break;

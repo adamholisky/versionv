@@ -140,7 +140,8 @@ void keyboard_interrupt_handler(void) {
 		{
 			is_shift = false;
 		}
-		else if (scancode > 0)
+		
+		if (scancode > 0)
 		{
 			e.data = kmalloc( sizeof( keyboard_event ) );
 			e.subject_name = kmalloc( 25 );
@@ -153,12 +154,12 @@ void keyboard_interrupt_handler(void) {
 
 			if (is_shift)
 			{
-				k->shift_down = true;
+				k->shift = true;
 				k->c = (char)keyboard_map_shift[(uint32_t)scancode];
 			}
 			else
 			{
-				k->shift_down = false;
+				k->shift = false;
 				k->c = (char)keyboard_map[(uint32_t)scancode];
 			}
 
@@ -211,6 +212,21 @@ char keyboard_get_char_stage2( bool blocking ) {
 			}
 		}
 	} while( !done );
+
+	return c;
+}
+
+char keyboard_get_scancode( void ) {
+	char c = 0;
+
+	if( character_buffer_current != character_buffer_end ) {
+		c = character_buffer[ character_buffer_current ];
+		character_buffer_current++;
+
+		if( character_buffer_current > 255 ) {
+			character_buffer_current = 0;
+		}
+	}
 
 	return c;
 }

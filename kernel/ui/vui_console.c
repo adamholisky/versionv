@@ -452,3 +452,13 @@ int vui_console_puts( vui_console *console, char *s ) {
 
 	return i;
 }
+
+/**
+ * @brief 
+ * 
+ * @param console 
+ * @return char 
+ */
+char vui_console_getchar( vui_console *console ) {
+	
+}

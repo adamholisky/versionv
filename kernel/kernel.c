@@ -47,6 +47,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	elf_initalize( (uint32_t)kernel_main );
 	interrupts_initalize();
 	
+	observer_initalize();
+	ps2_initalize();
 
 	if( GRAPHICS_ACTIVE ) {
 		vga_initalize();
@@ -55,8 +57,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 		vui_console_main( 0, NULL );
 	}
 
-	observer_initalize();
-	ps2_initalize();
+	
 
 	serial_enable_interrupts();
 	task_initalize();
