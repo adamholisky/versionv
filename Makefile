@@ -146,3 +146,10 @@ clean_stage_2:
 	rm -rf objdump.txt 
 	rm -rf versionv.iso
 	@>&2 echo [Clean] Done
+
+
+# React launcher notes
+# in launcher-react: npm start
+# in anywhere (from port 8000 to 5900): websockify localhost:8000 localhost:5900
+# on vvos (assuming -vnc localhost:0): make run
+# in browser: http://localhost:3000/
