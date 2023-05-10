@@ -40,6 +40,7 @@ QEMU_COMMON = 	-drive id=main_drive,if=none,format=raw,file=$(ROOT_DIR)/vv_hd.im
 				-no-reboot
 QEMU_DISPLAY_NONE =	-display none
 QEMU_DISPLAY_NORMAL = -vga std
+QEMU_DISPLAY_VNC = -vnc localhost:0
 QEMU_DEBUG_COMMON = -S -gdb tcp::5894 
 QEMU_DEBUG_LOGGING = -D $(ROOT_DIR)/qemu_debug_log.txt -d int,cpu_reset 
 
@@ -116,7 +117,7 @@ install_stage2: build/versionv.bin
 	sudo umount hd_mount_dir 
 
 run: install
-	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL)
+	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_VNC)
 
 run_debug: install
 	$(QEMU) $(QEMU_COMMON) $(QEMU_DISPLAY_NORMAL) $(QEMU_DEBUG_COMMON)

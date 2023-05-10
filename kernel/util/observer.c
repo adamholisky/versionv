@@ -140,6 +140,7 @@ bool observer_detach_from_subject( char * subject_name, char * observer_name ) {
 	
 }
 
+#undef KDEBUG_OBSERVER_NOTIFY
 /**
  * @brief Notifies all observers of the registered subject of an event
  * 
@@ -149,7 +150,9 @@ bool observer_detach_from_subject( char * subject_name, char * observer_name ) {
  * @return false Notifications failed
  */
 bool observer_notify( char * subject_name, event_message * message ) {
+	#ifdef KDEBUG_OBSERVER_NOTIFY
 	log_entry_enter();
+	#endif
 
 	int i, k;
 	observer_function f;
@@ -183,7 +186,10 @@ bool observer_notify( char * subject_name, event_message * message ) {
 	
 	strcpy( message->subject_name, "" );
 
+	#ifdef KDEBUG_OBSERVER_NOTIFY
 	log_entry_exit();
+	#endif 
+	
 	return true;
 }
 

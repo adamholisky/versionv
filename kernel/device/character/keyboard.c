@@ -113,7 +113,7 @@ void keyboard_initalize(void)
 	observer_attach_to_subject( "keyboard", "keyboard_event_handler", 1 );
 }
 
-#define KDEBUG_KEYBOARD_INTERRUPT_HANDLER
+#undef KDEBUG_KEYBOARD_INTERRUPT_HANDLER
 void keyboard_interrupt_handler(void) {
 	uint8_t status;
 	char scancode;
