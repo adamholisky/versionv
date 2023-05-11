@@ -11,6 +11,7 @@
         "syscall.h": "c",
         "testapp.h": "c",
         "observer.h": "c",
-        "kernel.h": "c"
+        "kernel.h": "c",
+        "unistd.h": "c"
     }
 }

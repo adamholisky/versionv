@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <keyboard.h>
 
+stdin_func stdin_redirect = NULL;
+
 #undef KDEBUG_READ
 uint32_t read( int fd, void * buff, uint32_t size ) {
 	syscall_args	args;
@@ -36,7 +38,12 @@ uint32_t syscall_read( int _fd, void * buff, uint32_t size ) {
 
 	switch( _fd ) {
 		case STDIN_FILENO:
-			cbuff[0] = keyboard_get_scancode();
+			if( stdin_redirect != NULL ) {
+				cbuff[0] = stdin_redirect();
+			} else {
+				cbuff[0] = keyboard_get_char_nonblocking();
+			}
+			
 			cbuff[1] = 0;
 			num_read = 1;
 			break;
@@ -55,4 +62,12 @@ uint32_t syscall_read( int _fd, void * buff, uint32_t size ) {
 	#endif
 	
 	return num_read;
+}
+
+void set_stdin_redirect( stdin_func f ) {
+	stdin_redirect = f;
+}
+
+void clear_stdin_redirect( void ) {
+	stdin_redirect = NULL;
 }

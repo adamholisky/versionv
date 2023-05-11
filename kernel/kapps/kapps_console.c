@@ -1,4 +1,6 @@
 #include <kernel.h>
+#include <syscall.h>
+#include <keyboard.h>
 #include <terminal.h>
 #include <vui/vui.h>
 #include <vui/console.h>
@@ -16,8 +18,17 @@ typedef struct {
 
 console_app_state capp_state;
 
+
+#define CONSOLE_BUFFER_SIZE 255
+int console_in_buffer_current = 0;
+int console_in_buffer_end = 0;
+char console_in_buffer[ CONSOLE_BUFFER_SIZE ];
+
+
 int vui_console_main( int argc, char *argv[] ) {
 	log_entry_enter();
+
+	memset( console_in_buffer, 0, 255 );
 
 	rect *r;
 
@@ -42,8 +53,9 @@ int vui_console_main( int argc, char *argv[] ) {
     klog( "done2.\n" );
 
     set_terminal_redirect( kapps_console_putc );
-	vui_window_set_event_handler( capp_state.win, kapps_console_handle_events );
+	set_stdin_redirect( kapps_console_getchar );
 
+	vui_window_set_event_handler( capp_state.win, kapps_console_handle_events );
 	vui_set_active_window( capp_state.win->common.handle );
 	
     klog( "done3.\n" );
@@ -71,7 +83,41 @@ void kapps_console_handle_key_down( int scanecode ) {
  * @param obj 
  */
 void kapps_console_handle_events( vui_handle h, char *id, void *obj ) {
+	klog( "got one\n" );
+
 	if( strcmp( "keypress", id ) == 0 ) {
-		klog( "got a keypress event\n" );
+		keyboard_event *k = (keyboard_event *)obj;
+
+		console_in_buffer[ console_in_buffer_end ] = k->c;
+		console_in_buffer_end++;
+
+		if( console_in_buffer_end > CONSOLE_BUFFER_SIZE ) {
+			console_in_buffer_end = 0;
+		}
 	}
+}
+
+
+char kapps_console_getchar( void ) {
+	char c = 0;
+	bool done = false;
+
+	//return 'a';
+
+	do {
+		if( console_in_buffer_current != console_in_buffer_end ) {
+			c = console_in_buffer[ console_in_buffer_current ];
+			console_in_buffer_current++;
+
+			if( console_in_buffer_current > CONSOLE_BUFFER_SIZE ) {
+				console_in_buffer_current = 0;
+			}
+
+			done = true;
+		} else {
+			sched_yield();
+		}
+	} while( !done );
+
+	return c;
 }

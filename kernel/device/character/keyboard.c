@@ -111,6 +111,8 @@ void keyboard_initalize(void)
 	observer_register_subject( "keyboard" );
 	observer_register( "keyboard_event_handler", f );
 	observer_attach_to_subject( "keyboard", "keyboard_event_handler", 1 );
+
+	set_stdin_redirect( keyboard_get_scancode );
 }
 
 #undef KDEBUG_KEYBOARD_INTERRUPT_HANDLER

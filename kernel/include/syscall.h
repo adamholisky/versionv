@@ -23,6 +23,8 @@ extern "C" {
 #define SYSCALL_RT_SUCCESS 0
 #define SYSCALL_RT_ERROR 1
 
+typedef char (*stdin_func)(void);
+
 typedef struct {
 	uint32_t	arg_1;
 	uint32_t	arg_2;
@@ -37,6 +39,8 @@ uint32_t syscall( uint32_t call_num, uint32_t num_args, syscall_args * args );
 
 uint32_t read( int fd, void * buff, uint32_t size );
 uint32_t syscall_read( int _fd, void * buff, uint32_t size );
+void set_stdin_redirect( stdin_func f );
+void clear_stdin_redirect( void );
 
 uint32_t write( int fd, void * buff, uint32_t count );
 uint32_t syscall_write( int _fd, void * buff, uint32_t count );

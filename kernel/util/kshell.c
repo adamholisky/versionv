@@ -17,9 +17,11 @@
 #include <fs.h>
 #include <dlfcn.h>
 #include <loader.h>
+#include <unistd.h>
 #include <vui/vui.h>
 #include <vui/testapp.h>
 #include <vui/console.h>
+#include <kapps/console.h>
 
 char line[256];
 char jail_env[256];
@@ -36,7 +38,8 @@ void kshell_get_line( void ) {
 	line_pos = 0;
 
 	while( process_keypress ) {
-		if( c = keyboard_get_char() ) {
+		//if( read( STDIN_FILENO, &c, 1 ) ) {
+		if( c = kapps_console_getchar() ) {
 			if( c != 13 ) {
 				printf( "%c", c );
 			}
