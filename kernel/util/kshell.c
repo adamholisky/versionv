@@ -38,8 +38,7 @@ void kshell_get_line( void ) {
 	line_pos = 0;
 
 	while( process_keypress ) {
-		//if( read( STDIN_FILENO, &c, 1 ) ) {
-		if( c = kapps_console_getchar() ) {
+		if( read( STDIN_FILENO, &c, 1 ) ) {
 			if( c != 13 ) {
 				printf( "%c", c );
 			}

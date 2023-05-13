@@ -66,6 +66,8 @@ typedef struct {
 	int         current_x;
 	int         current_y;
 
+	bool		cursor_shown;
+
 	uint8_t		foreground;
 	uint8_t		background;
 	bool		transparent_text_background;
@@ -84,10 +86,13 @@ vui_console *vui_console_new( int x, int y, int width, int height );
 void vui_console_destroy( vui_console *console );
 bool vui_console_draw( vui_console *console );
 bool vui_console_draw_x_y( vui_console *console, int x, int y );
+int vui_console_putc_at( vui_console *console, int x, int y, char c );
 int vui_console_putc( vui_console *console, char c );
 int vui_console_putc_color( vui_console * console, char c, int bg, int fg );
 void vui_console_clear( vui_console *console );
 int vui_console_puts( vui_console *console, char *s );
+void vui_console_update_cursor( vui_console *console );
+void vui_console_clear_cursor( vui_console *console );
 
 #ifdef __cplusplus
 }

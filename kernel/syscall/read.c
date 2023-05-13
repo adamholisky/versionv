@@ -4,6 +4,7 @@
 #include <fs.h>
 #include <unistd.h>
 #include <keyboard.h>
+#include <task.h>
 
 stdin_func stdin_redirect = NULL;
 
@@ -18,6 +19,21 @@ uint32_t read( int fd, void * buff, uint32_t size ) {
 	args.arg_1 = fd;
 	args.arg_2 = (uint32_t)buff;
 	args.arg_3 = size;
+
+	// Handle keyboard input for the kernel
+	if( get_current_task_id() == 0 && fd == STDIN_FILENO ) {
+		//klog( "special!\n" );
+
+		char *cbuff = (char *)buff;
+
+		if( stdin_redirect != NULL ) {
+			cbuff[0] = stdin_redirect();
+		} else {
+			cbuff[0] = keyboard_get_char_nonblocking();
+		}
+		
+		return 1;
+	}
 
 	return syscall( SYSCALL_READ, 3, &args );
 }
@@ -44,7 +60,6 @@ uint32_t syscall_read( int _fd, void * buff, uint32_t size ) {
 				cbuff[0] = keyboard_get_char_nonblocking();
 			}
 			
-			cbuff[1] = 0;
 			num_read = 1;
 			break;
 		case STDOUT_FILENO:

@@ -301,6 +301,10 @@ void vui_console_clear( vui_console *console ) {
 	}
 }
 
+int vui_console_putc_at( vui_console *console, int x, int y, char c ) {
+
+}
+
 #undef KDEBUG_VUI_CONSOLE_PUTC
 /** 
  * Puts a character into the console's current r,c position
@@ -308,6 +312,8 @@ void vui_console_clear( vui_console *console ) {
  * returns number of characters put (should be 1)
 */
 int vui_console_putc( vui_console *console, char c ) {
+	vui_console_clear_cursor( console );
+
 	if( c == '\x1b' ) {
 		console->capturing_escape_code = true;
 		console->capture_num = 0;
@@ -422,6 +428,8 @@ int vui_console_putc( vui_console *console, char c ) {
 		}
 	}
 
+	vui_console_update_cursor( console );
+
 	#ifdef KDEBUG_VUI_CONSOLE_PUTC
 	klog( "cur_x: %d, cur_y: %d, rows: %d, cols: %d\n", console->current_x, console->current_y, console->rows, console->cols );
 	#endif
@@ -461,4 +469,32 @@ int vui_console_puts( vui_console *console, char *s ) {
  */
 char vui_console_getchar( vui_console *console ) {
 	
+}
+
+void vui_console_flip_cursor( vui_console *console ) {
+	if( console->cursor_shown == true ) {
+		vui_console_clear_cursor( console );
+	} else {
+		vui_console_update_cursor( console );
+	}
+}
+
+void vui_console_clear_cursor( vui_console *console ) {
+	uint16_t *chars = console->data;
+
+	*(chars + (console->current_x) + (console->current_y * console->cols) ) = ( console->background<<12 | console->foreground<<8 | ' ');
+
+	vui_console_draw_x_y( console, console->current_x, console->current_y );
+
+	console->cursor_shown = false;
+}
+
+void vui_console_update_cursor( vui_console *console ) {
+	uint16_t *chars = console->data;
+
+	*(chars + (console->current_x) + (console->current_y * console->cols) ) = ( console->background<<12 | console->foreground<<8 | '|');
+
+	vui_console_draw_x_y( console, console->current_x, console->current_y );
+
+	console->cursor_shown = true;
 }
