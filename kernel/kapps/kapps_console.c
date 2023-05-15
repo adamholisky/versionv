@@ -36,11 +36,11 @@ int vui_console_main( int argc, char *argv[] ) {
 	vui_set_parent( capp_state.win, vui_get_main_desktop() );
 
 	r = vui_window_get_inner_rect( capp_state.win, &capp_state.pane );
-	capp_state.con = vui_console_new( r->x, r->y, r->w, r->h );
+	capp_state.con = vui_console_new( r->x + 3, r->y + 3, r->w - 3, r->h - 3 );
 	vui_set_parent( capp_state.con, capp_state.win );
 
-	capp_state.con->transparent_text_background = true;
-	capp_state.con->foreground = CONSOLE_COLOR_BLACK;
+/* 	capp_state.con->transparent_text_background = true;
+	capp_state.con->foreground = CONSOLE_COLOR_GREEN; */
 
 	vui_console_clear( capp_state.con );
 
@@ -48,7 +48,7 @@ int vui_console_main( int argc, char *argv[] ) {
 
  	vui_console_puts( capp_state.con, "The first duty of every \x1b[0;31;49mStarfleet officer\x1b[0;0;0m is to the truth, whether it's scientific truth or historical truth or personal truth." );
 
-	vui_console_puts( capp_state.con, "\nNew line.\nAnother." );
+	vui_console_puts( capp_state.con, "\nNew line.\nAnother.\n" );
 
     klog( "done2.\n" );
 

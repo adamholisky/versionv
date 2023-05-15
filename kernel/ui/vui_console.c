@@ -22,8 +22,8 @@ vui_console *vui_console_new( int x, int y, int width, int height ) {
 	console->current_x = 0;
 	console->current_y = 0;
 
-	console->foreground = CONSOLE_COLOR_BLACK;
-	console->background = CONSOLE_COLOR_WHITE;
+	console->foreground = CONSOLE_COLOR_WHITE;
+	console->background = CONSOLE_COLOR_BLACK;
 	console->transparent_text_background = false;
 
 	console->data = malloc( sizeof(uint16_t) * console->cols * console->rows );
@@ -155,11 +155,11 @@ bool vui_console_draw( vui_console *console ) {
 					fg = CONSOLE_COLOR_RGB_WHITE;
 					break;
 				default:
-					fg = CONSOLE_COLOR_RGB_BLACK;
+					fg = CONSOLE_COLOR_RGB_WHITE;
 			}
 			
 			if( console->transparent_text_background ) {
-				vui_draw_string_mono( x_loc , y_loc, 14, fg, VUI_FONT_DVSM, to_draw );
+				vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_DVSM, to_draw );
 			} else {
 				vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_DVSM, to_draw );
 			}
@@ -288,7 +288,7 @@ bool vui_console_draw_x_y( vui_console *console, int x, int y ) {
 	}
 
 	if( console->transparent_text_background ) {
-		vui_draw_string_mono( x_loc , y_loc, 14, fg, VUI_FONT_DVSM, to_draw );
+		vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_DVSM, to_draw );
 	} else {
 		vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_DVSM, to_draw );
 	}
@@ -351,7 +351,7 @@ int vui_console_putc( vui_console *console, char c ) {
 				case 39:
 				case 0:
 				default:
-					new_fg = CONSOLE_COLOR_BLACK;
+					new_fg = CONSOLE_COLOR_WHITE;
 			}
 
 			switch( captured_bg ) {
@@ -480,21 +480,21 @@ void vui_console_flip_cursor( vui_console *console ) {
 }
 
 void vui_console_clear_cursor( vui_console *console ) {
-	uint16_t *chars = console->data;
+	/* uint16_t *chars = console->data;
 
 	*(chars + (console->current_x) + (console->current_y * console->cols) ) = ( console->background<<12 | console->foreground<<8 | ' ');
 
 	vui_console_draw_x_y( console, console->current_x, console->current_y );
 
-	console->cursor_shown = false;
+	console->cursor_shown = false; */
 }
 
 void vui_console_update_cursor( vui_console *console ) {
-	uint16_t *chars = console->data;
+	/* uint16_t *chars = console->data;
 
 	*(chars + (console->current_x) + (console->current_y * console->cols) ) = ( console->background<<12 | console->foreground<<8 | '|');
 
 	vui_console_draw_x_y( console, console->current_x, console->current_y );
 
-	console->cursor_shown = true;
+	console->cursor_shown = true; */
 }
