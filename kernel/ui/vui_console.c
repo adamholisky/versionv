@@ -8,8 +8,11 @@
 vui_console *vui_console_new( int x, int y, int width, int height ) {
 	vui_console *console = vui_add_handle( VUI_TYPE_CONSOLE );
 
-	console->font_height = 14;
-	console->font_width = 7;
+/* 	console->font_height = 14;
+	console->font_width = 7; */
+
+	console->font_height = 16;
+	console->font_width = 8;
 
 	console->cols = width / console->font_width;
 	console->rows = height / console->font_height;
@@ -40,7 +43,7 @@ void vui_console_destroy( vui_console *console ) {
 
 bool vui_console_draw( vui_console *console ) {
 	for( int i = 0; i < console->rows; i++ ) {
-		int y_loc = console->y + (i * console->font_height);
+		int y_loc = console->y + (i * console->font_height) + 8;
 
 		for( int j = 0; j < console->cols; j++ ) {
 			int x_loc = console->x + (j * console->font_width);
@@ -159,9 +162,9 @@ bool vui_console_draw( vui_console *console ) {
 			}
 			
 			if( console->transparent_text_background ) {
-				vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_UNI, to_draw );
+				vui_draw_string( x_loc , y_loc, console->font_height, 0xFF000000 | bg, 0xFF000000 | fg, VUI_FONT_FIRACODE, to_draw );
 			} else {
-				vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_UNI, to_draw );
+				vui_draw_string( x_loc , y_loc, console->font_height, 0xFF000000 | bg, 0xFF000000 | fg, VUI_FONT_FIRACODE, to_draw );
 			}
 			
 		}
@@ -288,9 +291,9 @@ bool vui_console_draw_x_y( vui_console *console, int x, int y ) {
 	}
 
 	if( console->transparent_text_background ) {
-		vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_UNI, to_draw );
+		vui_draw_string( x_loc , y_loc, console->font_height, 0xFF000000 | bg, 0xFF000000 | fg, VUI_FONT_FIRACODE, to_draw );
 	} else {
-		vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_UNI, to_draw );
+		vui_draw_string( x_loc , y_loc, console->font_height, 0xFF000000 | bg, 0xFF000000 | fg, VUI_FONT_FIRACODE, to_draw );
 	}
 }
 

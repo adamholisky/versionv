@@ -43,7 +43,7 @@ void kshell_run( void ) {
 	//kshell_automate( "testapp" );
 	//kshell_automate( "cat /etc/magic_key" );
 
-	kshell_automate( "memviewer" );
+	//kshell_automate( "memviewer" );
 
 	//test_app_main();
 

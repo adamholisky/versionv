@@ -50,10 +50,6 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	observer_initalize();
 	ps2_initalize();
 
-
-
-	
-
 	serial_enable_interrupts();
 	task_initalize();
 	

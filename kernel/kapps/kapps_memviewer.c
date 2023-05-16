@@ -48,13 +48,13 @@ void kapps_memviewer_main( int argc, char *argv[] ) {
 void mem_viewer_custom_paint( void *obj ) {
 	log_entry_enter();
 
-	int text_size = 14;
+	int text_size = 16;
 
 
 
 	rect *r;
 	r = vui_window_get_inner_rect( state.win, &state.pane );
-	vui_draw_string(  r->x + 5, r->y + 45, text_size, state.bg, state.fg, VUI_FONT_UNI, "            00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F  Decoded Text" );
+	vui_draw_string(  r->x + 5, r->y + 45, text_size, state.bg, state.fg, VUI_FONT_FIRACODE, "            00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F  Decoded Text" );
 
 	uint8_t *addr = 0xc011d459;
 	int str_size = 100;
@@ -68,7 +68,7 @@ void mem_viewer_custom_paint( void *obj ) {
 		*(ptrn + 0), *(ptrn + 1), *(ptrn + 2), *(ptrn + 3), *(ptrn + 4), *(ptrn + 5), *(ptrn + 6), *(ptrn + 7), *(ptrn + 8), *(ptrn + 9), *(ptrn + 10), *(ptrn + 11), *(ptrn + 12), *(ptrn + 13), *(ptrn + 14), *(ptrn + 15),
 		peek_char( *(ptr + 0) ), peek_char( *(ptr + 1) ), peek_char( *(ptr + 2) ), peek_char( *(ptr + 3) ), peek_char( *(ptr + 4) ), peek_char( *(ptr + 5) ), peek_char( *(ptr + 6) ), peek_char( *(ptr + 7) ), peek_char( *(ptr + 8) ), peek_char( *(ptr + 9) ), peek_char( *(ptr + 10) ), peek_char( *(ptr + 11) ), peek_char( *(ptr + 12) ), peek_char( *(ptr + 13) ), peek_char( *(ptr + 14) ), peek_char( *(ptr + 15) ) );
 
-		vui_draw_string(  r->x + 5, r->y + 75 + (17 * x), text_size, state.bg, state.fg, VUI_FONT_UNI, str );
+		vui_draw_string(  r->x + 5, r->y + 75 + (17 * x), text_size, state.bg, state.fg, VUI_FONT_FIRACODE, str );
 
 		klog( "%s\n", str );
 		klog( "x: %d\n", x );

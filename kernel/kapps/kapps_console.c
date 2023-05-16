@@ -32,7 +32,7 @@ int vui_console_main( int argc, char *argv[] ) {
 
 	rect *r;
 
-	capp_state.win = vui_window_new( 10, 10, 750, (14 * 25) + 30, "Fully Instanced vUI Console" );
+	capp_state.win = vui_window_new( 10, 10, 750, (16 * 25) + 30, "Fully Instanced vUI Console" );
 	vui_set_parent( capp_state.win, vui_get_main_desktop() );
 
 	r = vui_window_get_inner_rect( capp_state.win, &capp_state.pane );

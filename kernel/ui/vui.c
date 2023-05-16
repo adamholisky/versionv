@@ -440,7 +440,7 @@ void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font
 
 	memset( font_name, 0, 25 );
 
-	ssfn_buf_t buf = {
+	ssfn_buf_t buf_display = {
 		.ptr = v->buffer,
 		.w = v->width,
 		.h = v->height,
@@ -450,6 +450,18 @@ void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font
 		.fg = fg,
 		.bg = bg
 	};
+
+	ssfn_buf_t buf_front = {
+		.ptr = v->fbuffer,
+		.w = v->width,
+		.h = v->height,
+		.p = (v->width * 4),
+		.x = x,
+		.y = y,
+		.fg = fg,
+		.bg = bg
+	};
+
 
 	int style = SSFN_STYLE_REGULAR;
 
@@ -476,10 +488,11 @@ void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font
 		return;
 	}
 
-	int x_prev = buf.x;
+	int x_prev = buf_display.x;
 
 	for( int i = 0; i < strlen(s); i++ ) {
-		err = ssfn_render( &ssfn_ctx, &buf, (s + i) );
+		err = ssfn_render( &ssfn_ctx, &buf_display, (s + i) );
+		err = ssfn_render( &ssfn_ctx, &buf_front, (s + i) );
 
 		if( err < 0 ) {
 			klog( "ssfn_render[%d] err: %d\n", i, err );
@@ -488,11 +501,12 @@ void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font
 		
 		// TODO: Should be based on monospace, not font family name
 		if( font == VUI_FONT_FIRACODE ) {
-			if( buf.x != x_prev + (size/2) ) {
-				buf.x = x_prev + (size/2);
+			if( buf_display.x != x_prev + (size/2) ) {
+				buf_display.x = x_prev + (size/2);
+				buf_front.x = x_prev + (size/2);
 			}
 
-			x_prev = buf.x;
+			x_prev = buf_display.x;
 		}
 	}
 }
