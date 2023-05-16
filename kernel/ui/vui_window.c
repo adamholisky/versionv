@@ -1,11 +1,6 @@
 #include <kernel.h>
 #include <vui/vui.h>
 #include <vui/window.h>
-#include <vui/parts/window.h>
-
-#define VUI_WINDOW_COLOR_BORDER 0x00D6D6D6
-#define VUI_WINDOW_COLOR_TITLEBAR 0x00363636
-#define VUI_WINDOW_COLOR_INNERWINDOW 0x001E1E1E
 
 int vui_window_border = 1;
 int vui_window_titlebar_height = 30;
@@ -55,13 +50,13 @@ bool vui_window_draw( vui_window *window ) {
 	draw_rect( *vui_window_get_inner_rect( window, &r ), VUI_WINDOW_COLOR_INNERWINDOW );
 
 	// title
-	int title_width = vui_get_string_width( VUI_FONT_VERA, 11, window->title );
+	int title_width = vui_get_string_width( VUI_FONT_VERAB, 11, window->title );
 	int title_x = window->x + 14;
 	int title_y = window->y + 10;
 
 	klog( "title width: %d\n", title_width );
 
-	vui_draw_string( title_x, title_y + 10, 11, 0xFFFFFFFF, VUI_FONT_VERA, window->title );
+	vui_draw_string( title_x, title_y + 10, 12, 0xFF363636, 0xFFFFFFFF, VUI_FONT_VERAB, window->title );
 
 	return true;
 }

@@ -159,9 +159,9 @@ bool vui_console_draw( vui_console *console ) {
 			}
 			
 			if( console->transparent_text_background ) {
-				vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_DVSM, to_draw );
+				vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_UNI, to_draw );
 			} else {
-				vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_DVSM, to_draw );
+				vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_UNI, to_draw );
 			}
 			
 		}
@@ -288,9 +288,9 @@ bool vui_console_draw_x_y( vui_console *console, int x, int y ) {
 	}
 
 	if( console->transparent_text_background ) {
-		vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_DVSM, to_draw );
+		vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_UNI, to_draw );
 	} else {
-		vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_DVSM, to_draw );
+		vui_draw_string_mono_with_background( x_loc , y_loc, 14, bg, fg, VUI_FONT_UNI, to_draw );
 	}
 }
 

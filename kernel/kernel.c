@@ -50,12 +50,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	observer_initalize();
 	ps2_initalize();
 
-	if( GRAPHICS_ACTIVE ) {
-		vga_initalize();
-		vui_initalize();
-		
-		vui_console_main( 0, NULL );
-	}
+
 
 	
 
@@ -66,6 +61,13 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	ahci_initalize();
 	fs_initalize();
 	//intel8254_initalize();
+
+	if( GRAPHICS_ACTIVE ) {
+		vga_initalize();
+		vui_initalize();
+		
+		vui_console_main( 0, NULL );
+	}
 	
 	serial_clear_buffer( COM2 );
 	READY_FOR_INPUT = true;

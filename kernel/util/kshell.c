@@ -22,6 +22,7 @@
 #include <vui/testapp.h>
 #include <vui/console.h>
 #include <kapps/console.h>
+#include <kapps/memviewer.h>
 
 char line[256];
 char jail_env[256];
@@ -29,6 +30,38 @@ char wd[256];
 char* dir_bin;
 char* dir_usr_bin;
 int line_pos;
+
+/**
+ * @brief Run the kshell
+ * 
+ */
+void kshell_run( void ) {
+	kshell_fake_cli( "ps_to_log" );
+	kexec( "ps", (uint32_t *)kshell_ps, NULL );
+
+	//kshell_automate( "testlibcall" );
+	//kshell_automate( "testapp" );
+	//kshell_automate( "cat /etc/magic_key" );
+
+	kshell_automate( "memviewer" );
+
+	//test_app_main();
+
+	//kshell_echo_to_serial();
+
+	//do_immediate_shutdown();
+
+	while( true ) {
+		printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );
+
+		kshell_get_line();
+
+		kshell_process_line();
+
+		sched_yield();
+	}
+}
+
 
 void kshell_get_line( void ) {
 	char c = ' ';
@@ -139,6 +172,10 @@ void kshell_process_line( void ) {
 	if( strcmp( args[0], "testapp" ) == 0  ) {
 		kshell_test_app();
 	}
+
+	if( strcmp( args[0], "memviewer" ) == 0 ) {
+		kapps_memviewer_main( 0, NULL );
+	}
 }
 
 #undef KDEBUG_CAT
@@ -197,34 +234,7 @@ void kshell_automate( char *cmd_line ) {
 	kshell_process_line();
 }
 
-/**
- * @brief Run the kshell
- * 
- */
-void kshell_run( void ) {
-	kshell_fake_cli( "ps_to_log" );
-	kexec( "ps", (uint32_t *)kshell_ps, NULL );
 
-	//kshell_automate( "testlibcall" );
-	//kshell_automate( "testapp" );
-	//kshell_automate( "cat /etc/magic_key" );
-
-	//test_app_main();
-
-	//kshell_echo_to_serial();
-
-	//do_immediate_shutdown();
-
-	while( true ) {
-		printf( "\x1b[0;31;49mVersionV\x1b[0;0;0m:\x1b[0;32;49m%s\x1b[0;0;0m> ", wd );
-
-		kshell_get_line();
-
-		kshell_process_line();
-
-		sched_yield();
-	}
-}
 
 /**
  * @brief Shutdown the emulator

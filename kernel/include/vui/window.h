@@ -11,6 +11,10 @@ extern "C"
 #include <stdbool.h>
 #include <vui/vui.h>
 
+#define VUI_WINDOW_COLOR_BORDER 0x00D6D6D6
+#define VUI_WINDOW_COLOR_TITLEBAR 0x00363636
+#define VUI_WINDOW_COLOR_INNERWINDOW 0x001E1E1E
+
 typedef struct {
 	vui_object  common;
 	

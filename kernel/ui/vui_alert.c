@@ -3,9 +3,6 @@
 #include <vui/alert.h>
 #include <vui/window.h>
 #include <vui/label.h>
-#include <vui/font/fira.h>
-#include <vui/font/verab.h>
-#include <vui/font/verar.h>
 #include <vui/button.h>
 
 vui_alert *current_alert = NULL;
@@ -23,7 +20,7 @@ vui_alert *vui_alert_new_with_callbacks( char *id, char *text, char *button1_tex
 	vui_set_parent( ret->window, vui_get_main_desktop() );
 
 	rect *r = vui_window_get_inner_rect( ret->window, &ret->pane );
-	ret->alert_text = vui_label_new( r->x + 5, r->y + 16, VUI_FONT_FIRA, 14, text );
+	ret->alert_text = vui_label_new( r->x + 5, r->y + 16, VUI_FONT_VERA, 14, text );
 	vui_set_parent( ret->alert_text, ret->window );
 
 	ret->button_two = NULL;

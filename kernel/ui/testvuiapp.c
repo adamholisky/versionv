@@ -6,9 +6,6 @@
 #include <syscall.h>
 #include <vui/window.h>
 #include <vui/label.h>
-#include <vui/font/fira.h>
-#include <vui/font/verab.h>
-#include <vui/font/verar.h>
 #include <vui/button.h>
 #include <vui/alert.h>
 

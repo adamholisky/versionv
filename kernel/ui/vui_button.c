@@ -22,5 +22,5 @@ void vui_button_destroy( vui_button *button ) {
 bool vui_button_draw( vui_button *button ) {
     vui_draw_rectangle( button->x, button->y, button->width, button->height, 0x00FFFFFF );
 
-    vui_draw_string( button->x + 5, button->y + 16, 14, 0xFF000000, VUI_FONT_FIRA, button->label );
+    vui_draw_string( button->x + 5, button->y + 16, 14, 0xFFFFFFFF, 0xFF000000, VUI_FONT_VERA, button->label );
 }

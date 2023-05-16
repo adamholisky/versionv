@@ -20,5 +20,5 @@ void vui_label_destroy( vui_label *label ) {
 }
 
 bool vui_label_draw( vui_label *label ) {
-    vui_draw_string( label->x, label->y, label->font_size, 0xFF000000, label->font, label->text );
+    vui_draw_string( label->x, label->y, label->font_size, 0xFF1E1E1E, 0xFFD9D9D9, label->font, label->text );
 }

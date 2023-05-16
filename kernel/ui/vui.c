@@ -1,4 +1,7 @@
 #include <kernel.h>
+#include <syscall.h>
+#include <afs.h>
+#include <fs.h>
 #include <keyboard.h>
 #include <mouse.h>
 
@@ -10,10 +13,6 @@
 #include <vui/console.h>
 #include <vui/button.h>
 #include <vui/alert.h>
-
-#include <vui/font/fira.h>
-#include <vui/font/verab.h>
-#include <vui/font/verar.h>
 
 #define SSFN_IMPLEMENTATION
 #include <ssfn.h>
@@ -40,6 +39,12 @@ bool has_prev = false;
 
 vui_handle active_window;
 
+ssfn_t ssfn_ctx = { 0 };
+
+uint8_t *vera_font;
+uint8_t *uni_font;
+uint8_t *firacode_font;
+
 /**
  * @brief 
  * 
@@ -60,13 +65,79 @@ void vui_initalize( void ) {
 	
 	vga_information *v = vga_get_info();
 
-	main_desktop = vui_desktop_new( 0, 0, v->width, v->height, 0x00333399 );
+	main_desktop = vui_desktop_new( 0, 0, v->width, v->height, 0x00374760 );
 
 	vui_set_main_desktop( main_desktop );
 
 	observer_function f = vui_keypress;
 	observer_register( "vui_keypress", f );
 	observer_attach_to_subject( "keyboard", "vui_keypress", 1 );
+
+	int fd = open( "/font/Vera.sfn", 0 );
+	
+	if( fd == -1 ) {
+		klog( "Cannot open /font/Vera.sfn.\n" );
+		printf( "Cannot open /font/Vera.sfn\n" );
+	} else {
+		int size = get_file_size( fd );
+
+		vera_font = malloc( size );
+		memset( vera_font, 0, size );
+
+		int bytes_read = read( fd, vera_font, size );
+	}
+
+	int fd_unifont = open( "/font/unifont.sfn.gz", 0 );
+	
+	if( fd_unifont == -1 ) {
+		klog( "Cannot open /font/unifont.srn.gz\n" );
+		printf( "Cannot open /font/unifont.sfn.gz\n" );
+	} else {
+		int size = get_file_size( fd_unifont );
+
+		uni_font = malloc( size );
+		memset( uni_font, 0, size );
+
+		int bytes_read = read( fd_unifont, uni_font, size );
+	}
+
+	int fd_firacodefont = open( "/font/FiraCode.sfn", 0 );
+	
+	if( fd_firacodefont == -1 ) {
+		klog( "Cannot open /font/FiraCode.sfn\n" );
+		printf( "Cannot open /font/FiraCode.sfn\n" );
+	} else {
+		int size = get_file_size( fd_firacodefont );
+
+		firacode_font = malloc( size );
+		memset( firacode_font, 0, size );
+
+		int bytes_read = read( fd_firacodefont, firacode_font, size );
+	}
+
+	// load fonts ahead of time?
+
+	memset( &ssfn_ctx, 0, sizeof( ssfn_t ) );
+	int err = ssfn_load( &ssfn_ctx, vera_font );
+
+	if( err < 0 ) {
+		klog( "ssfn_load err: %d\n", err );
+		return;
+	}
+
+	err = ssfn_load( &ssfn_ctx, uni_font );
+
+	if( err < 0 ) {
+		klog( "ssfn_load err: %d\n", err );
+		return;
+	}
+	
+	err = ssfn_load( &ssfn_ctx, firacode_font );
+
+	if( err < 0 ) {
+		klog( "ssfn_load err: %d\n", err );
+		return;
+	}
 
 
 	vui_refresh();
@@ -320,45 +391,35 @@ int vui_get_string_width( int font, int size, char *s ) {
 	int height = 0;
 	int left = 0;
 	int top = 0;
+	char font_name[25];
 
-	ssfn_t ctx = { 0 };
+	memset( font_name, 0, 25 );
 
-	memset( &ctx, 0, sizeof( ssfn_t ) );
-
-	ssfn_font_t *user_font = NULL;
+	int style = SSFN_STYLE_REGULAR;
 
 	switch( font ) {
-		case VUI_FONT_FIRA:
-			user_font = (ssfn_font_t *)fira;
+		case VUI_FONT_UNI:
+			style = style | SSFN_STYLE_NOAA;
+			strcpy( font_name, "Unifont" );
 			break;
-		case VUI_FONT_VERA:
-			user_font = (ssfn_font_t *)VeraR;
+		case VUI_FONT_FIRACODE:
+			strcpy( font_name, "FiraCode Regular" );
 			break;
 		case VUI_FONT_VERAB:
-			user_font = (ssfn_font_t *)VeraB;
-			break;
-		case VUI_FONT_DVSM:
-			user_font = (ssfn_font_t *)fira;
-			break;
+			style = SSFN_STYLE_BOLD;
+		case VUI_FONT_VERA:
 		default:
-			user_font = (ssfn_font_t *)fira;
-	}
-
-	int err = ssfn_load(&ctx, user_font);
-
-	if( err < 0 ) {
-		klog( "ssfn_load err: %d\n", err );
-		return;
+			strcpy( font_name, "Bitstream Vera Sans" );
 	}
 	
-	err = ssfn_select( &ctx, SSFN_FAMILY_ANY, NULL, SSFN_STYLE_REGULAR, size );
+	int err = ssfn_select( &ssfn_ctx, SSFN_FAMILY_BYNAME, font_name, style, size );
 
 	if( err < 0 ) {
 		klog( "ssfn_select err: %d\n", err );
 		return;
 	}
 
-	int bbox_result = ssfn_bbox( &ctx, s, &width, &height, &left, &top );
+	int bbox_result = ssfn_bbox( &ssfn_ctx, s, &width, &height, &left, &top );
 
 	return width;
 }
@@ -373,12 +434,11 @@ int vui_get_string_width( int font, int size, char *s ) {
  * @param font 
  * @param s 
  */
-void vui_draw_string( int x, int y, int size, uint32_t fg, int font, char *s ) {
+void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s ) {
 	vga_information *v = vga_get_info();
+	char font_name[25];
 
-	ssfn_t ctx = { 0 };
-
-	memset( &ctx, 0, sizeof( ssfn_t ) );
+	memset( font_name, 0, 25 );
 
 	ssfn_buf_t buf = {
 		.ptr = v->buffer,
@@ -387,54 +447,52 @@ void vui_draw_string( int x, int y, int size, uint32_t fg, int font, char *s ) {
 		.p = (v->width * 4),
 		.x = x,
 		.y = y,
-		.fg = fg
+		.fg = fg,
+		.bg = bg
 	};
 
-	ssfn_font_t *user_font = NULL;
+	int style = SSFN_STYLE_REGULAR;
 
 	switch( font ) {
-		case VUI_FONT_FIRA:
-			user_font = (ssfn_font_t *)fira;
+		case VUI_FONT_UNI:
+			style = style ;
+			strcpy( font_name, "Unifont" );
 			break;
-		case VUI_FONT_VERA:
-			user_font = (ssfn_font_t *)VeraR;
+		case VUI_FONT_FIRACODE:
+			style = style;
+			strcpy( font_name, "FiraCode Regular" );
 			break;
 		case VUI_FONT_VERAB:
-			user_font = (ssfn_font_t *)VeraB;
-			break;
-		case VUI_FONT_DVSM:
-			user_font = (ssfn_font_t *)fira;
-			break;
+			style = SSFN_STYLE_BOLD;
+		case VUI_FONT_VERA:
 		default:
-			user_font = (ssfn_font_t *)fira;
-	}
-
-	int err = ssfn_load(&ctx, user_font);
-
-	if( err < 0 ) {
-		klog( "ssfn_load err: %d\n", err );
-		return;
-	}
-
-	int family = SSFN_FAMILY_ANY;
-
-	if( font == VUI_FONT_DVSM ) {
-		family = SSFN_FAMILY_ANY;
+			strcpy( font_name, "Bitstream Vera Sans" );
 	}
 	
-	err = ssfn_select( &ctx, family, NULL, SSFN_STYLE_REGULAR, size );
+	int err = ssfn_select( &ssfn_ctx, SSFN_FAMILY_BYNAME, font_name, style, size );
 
 	if( err < 0 ) {
 		klog( "ssfn_select err: %d\n", err );
 		return;
 	}
 
+	int x_prev = buf.x;
+
 	for( int i = 0; i < strlen(s); i++ ) {
-		err = ssfn_render( &ctx, &buf, (s + i) );
+		err = ssfn_render( &ssfn_ctx, &buf, (s + i) );
 
 		if( err < 0 ) {
 			klog( "ssfn_render[%d] err: %d\n", i, err );
 			return;
+		}
+		
+		// TODO: Should be based on monospace, not font family name
+		if( font == VUI_FONT_FIRACODE ) {
+			if( buf.x != x_prev + (size/2) ) {
+				buf.x = x_prev + (size/2);
+			}
+
+			x_prev = buf.x;
 		}
 	}
 }
