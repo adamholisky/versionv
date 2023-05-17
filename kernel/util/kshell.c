@@ -36,6 +36,8 @@ int line_pos;
  * 
  */
 void kshell_run( void ) {
+	strcpy( wd, "/" );
+	
 	kshell_fake_cli( "ps_to_log" );
 	kexec( "ps", (uint32_t *)kshell_ps, NULL );
 
@@ -43,7 +45,7 @@ void kshell_run( void ) {
 	//kshell_automate( "testapp" );
 	//kshell_automate( "cat /etc/magic_key" );
 
-	//kshell_automate( "memviewer" );
+	kshell_automate( "memviewer" );
 
 	//test_app_main();
 
@@ -78,7 +80,7 @@ void kshell_get_line( void ) {
 		}
 
 		if( c == '\n' || c == 13 ) {
-			printf( "\n" );
+			//printf( "\n" );
 			process_keypress = false;
 		} else {
 			line[line_pos] = c;
