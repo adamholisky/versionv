@@ -43,7 +43,7 @@ void vui_console_destroy( vui_console *console ) {
 
 bool vui_console_draw( vui_console *console ) {
 	for( int i = 0; i < console->rows; i++ ) {
-		int y_loc = console->y + (i * console->font_height) + 8;
+		int y_loc = console->y + (i * console->font_height);
 
 		for( int j = 0; j < console->cols; j++ ) {
 			int x_loc = console->x + (j * console->font_width);
@@ -162,13 +162,15 @@ bool vui_console_draw( vui_console *console ) {
 			}
 			
 			if( console->transparent_text_background ) {
-				vui_draw_string( x_loc , y_loc, console->font_height, 0xFF000000 | bg, 0xFF000000 | fg, VUI_FONT_FIRACODE, to_draw );
+				vui_draw_string_immediate( x_loc , y_loc, console->font_height, 0xFF000000 | bg, 0xFF000000 | fg, VUI_FONT_FIRACODE, to_draw );
 			} else {
-				vui_draw_string( x_loc , y_loc, console->font_height, 0xFF000000 | bg, 0xFF000000 | fg, VUI_FONT_FIRACODE, to_draw );
+				vui_draw_string_immediate( x_loc , y_loc, console->font_height, 0xFF000000 | bg, 0xFF000000 | fg, VUI_FONT_FIRACODE, to_draw );
 			}
 			
 		}
 	}
+
+	//framebuffer_copy_to_frontbuffer( console->x, console->y, console->width, console->height );
 	
 }
 
@@ -291,10 +293,12 @@ bool vui_console_draw_x_y( vui_console *console, int x, int y ) {
 	}
 
 	if( console->transparent_text_background ) {
-		vui_draw_string( x_loc , y_loc, console->font_height, 0xFF000000 | bg, 0xFF000000 | fg, VUI_FONT_FIRACODE, to_draw );
+		vui_draw_string_immediate( x_loc , y_loc, console->font_height, 0xFF000000 | bg, 0xFF000000 | fg, VUI_FONT_FIRACODE, to_draw );
 	} else {
-		vui_draw_string( x_loc , y_loc, console->font_height, 0xFF000000 | bg, 0xFF000000 | fg, VUI_FONT_FIRACODE, to_draw );
+		vui_draw_string_immediate( x_loc , y_loc, console->font_height, 0xFF000000 | bg, 0xFF000000 | fg, VUI_FONT_FIRACODE, to_draw );
 	}
+
+	
 }
 
 
@@ -412,7 +416,28 @@ int vui_console_putc( vui_console *console, char c ) {
 						*(console->data + ((console->cols) * (console->rows - 1) + i)) = 0x0020;
 					}
 
-					vui_console_draw( console );
+					//0. fill in empty space becaue wtf
+					framebuffer_fill_rect_in_backbuffer( console->x, console->y - 5, console->width, 5, VUI_WINDOW_COLOR_INNERWINDOW | 0xFF000000 );
+
+					//1. move back buffer rect
+					framebuffer_move_rect_in_backbuffer( console->x, console->y + console->font_height - 1, console->width, console->height - console->font_height + 1, console->x, console->y );
+
+					//2. fill in last line 
+					framebuffer_fill_rect_in_backbuffer( console->x, console->y + (console->font_height * (console->rows)) - 6, console->width, console->font_height + 6, VUI_WINDOW_COLOR_INNERWINDOW | 0xFF000000 );
+					
+					//3. copy back buffer area to front buffer
+					rect r = {
+						.x = console->x,
+						.y = console->y - 5,
+						.w = console->width,
+						.h = console->height + 5
+					};
+
+					vga_draw_screen_box( &r );
+
+					console->current_y--;
+
+					//vui_console_draw( console );
 				} else {
 					console->current_y++;
 				}
@@ -436,6 +461,9 @@ int vui_console_putc( vui_console *console, char c ) {
 	#ifdef KDEBUG_VUI_CONSOLE_PUTC
 	klog( "cur_x: %d, cur_y: %d, rows: %d, cols: %d\n", console->current_x, console->current_y, console->rows, console->cols );
 	#endif
+
+	// THIS WORKS, BUT IS SLOW
+	// vui_console_draw( console );
 }
 
 int vui_console_putc_color( vui_console * console, char c, int bg, int fg ) {

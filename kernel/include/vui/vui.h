@@ -73,6 +73,7 @@ bool vui_set_parent( void *child, void *parent );
 void vui_draw_rectangle( int x, int y, int width, int height, uint32_t color );
 int vui_get_string_width( int font, int size, char *s );
 void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s );
+void vui_draw_string_immediate( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s );
 void vui_draw_string_mono( int x, int y, int size, uint32_t fg, int font, char *s );
 void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s );
 void vui_mouse_click( uint8_t button );

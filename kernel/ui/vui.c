@@ -440,19 +440,8 @@ void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font
 
 	memset( font_name, 0, 25 );
 
-	ssfn_buf_t buf_display = {
-		.ptr = v->buffer,
-		.w = v->width,
-		.h = v->height,
-		.p = (v->width * 4),
-		.x = x,
-		.y = y,
-		.fg = fg,
-		.bg = bg
-	};
-
 	ssfn_buf_t buf_front = {
-		.ptr = v->fbuffer,
+		.ptr = v->buffer,
 		.w = v->width,
 		.h = v->height,
 		.p = (v->width * 4),
@@ -488,10 +477,13 @@ void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font
 		return;
 	}
 
-	int x_prev = buf_display.x;
+	int x_prev = buf_front.x;
+
+	
 
 	for( int i = 0; i < strlen(s); i++ ) {
-		err = ssfn_render( &ssfn_ctx, &buf_display, (s + i) );
+		//klog( "x_prev = %d\n", x_prev );
+
 		err = ssfn_render( &ssfn_ctx, &buf_front, (s + i) );
 
 		if( err < 0 ) {
@@ -501,13 +493,123 @@ void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font
 		
 		// TODO: Should be based on monospace, not font family name
 		if( font == VUI_FONT_FIRACODE ) {
-			if( buf_display.x != x_prev + (size/2) ) {
-				buf_display.x = x_prev + (size/2);
+			if( buf_front.x != x_prev + (size/2) ) {
 				buf_front.x = x_prev + (size/2);
 			}
 
-			x_prev = buf_display.x;
+			rect r = {
+				.w = buf_front.x - x_prev,
+				.h = size,
+				.x = x_prev,
+				.y = y
+			};
+
+			klog( "r: x = %d    y = %d    w = %d    h = %d\n", r.x, r.y, r.w, r.h );
+
+			//vga_draw_screen_box( &r );
+			//framebuffer_copy_to_frontbuffer( x_prev, y, buf_front.x - x_prev, size );
+
+			x_prev = buf_front.x;
 		}
+		
+		x_prev = buf_front.x;
+	}
+}
+
+void vui_draw_string_immediate( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s ) {
+	vga_information *v = vga_get_info();
+	char font_name[25];
+
+	memset( font_name, 0, 25 );
+
+	ssfn_buf_t buf_back = {
+		.ptr = v->buffer,
+		.w = v->width,
+		.h = v->height,
+		.p = (v->width * 4),
+		.x = x,
+		.y = y,
+		.fg = fg,
+		.bg = bg
+	};
+
+	ssfn_buf_t buf_front = {
+		.ptr = v->fbuffer,
+		.w = v->width,
+		.h = v->height,
+		.p = (v->width * 4),
+		.x = x,
+		.y = y,
+		.fg = fg,
+		.bg = bg
+	};
+
+
+	int style = SSFN_STYLE_REGULAR;
+
+	switch( font ) {
+		case VUI_FONT_UNI:
+			style = style ;
+			strcpy( font_name, "Unifont" );
+			break;
+		case VUI_FONT_FIRACODE:
+			style = style | SSFN_STYLE_NOKERN;
+			buf_back.y = y + (size/2) + 1;
+			buf_front.y = y + (size/2) + 1;
+			strcpy( font_name, "FiraCode Regular" );
+			break;
+		case VUI_FONT_VERAB:
+			style = SSFN_STYLE_BOLD;
+		case VUI_FONT_VERA:
+		default:
+			strcpy( font_name, "Bitstream Vera Sans" );
+	}
+	
+	int err = ssfn_select( &ssfn_ctx, SSFN_FAMILY_BYNAME, font_name, style, size );
+
+	if( err < 0 ) {
+		klog( "ssfn_select err: %d\n", err );
+		return;
+	}
+
+	int x_prev = buf_front.x;
+
+	
+
+	for( int i = 0; i < strlen(s); i++ ) {
+		//klog( "x_prev = %d\n", x_prev );
+
+		err = ssfn_render( &ssfn_ctx, &buf_front, (s + i) );
+		err = ssfn_render( &ssfn_ctx, &buf_back, (s + i) );
+
+		if( err < 0 ) {
+			klog( "ssfn_render[%d] err: %d\n", i, err );
+			return;
+		}
+		
+		// TODO: Should be based on monospace, not font family name
+		if( font == VUI_FONT_FIRACODE ) {
+			if( buf_front.x != x_prev + (size/2) ) {
+				buf_front.x = x_prev + (size/2);
+				buf_back.x = x_prev + (size/2);
+			}
+
+			/* rect r = {
+				.w = buf_front.x - x_prev,
+				.h = size,
+				.x = x_prev,
+				.y = y
+			};
+
+			klog( "r: x = %d    y = %d    w = %d    h = %d\n", r.x, r.y, r.w, r.h );
+ */
+			//vga_draw_screen_box( &r );
+			//framebuffer_copy_to_frontbuffer( x_prev, y, buf_front.x - x_prev, size );
+
+			x_prev = buf_front.x;
+		}
+		
+		x_prev = buf_front.x;
 	}
 }
 

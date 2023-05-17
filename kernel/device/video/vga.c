@@ -119,6 +119,37 @@ inline void vga_draw_screen( void ) {
 	memcpy( vga_info.fbuffer, vga_info.buffer, VVOS_SCREEN_WIDTH*VVOS_SCREEN_HEIGHT*4 );
 }
 
+void framebuffer_copy_to_frontbuffer( int x, int y, int w, int h ) {
+	int size = w * 4;
+
+	for( int y_offset = y; y_offset < (h + y); y_offset++ ) {
+		int offset = (y_offset * VVOS_SCREEN_WIDTH * 4) + (x * 4);
+		uint8_t *front_buffer = vga_info.fbuffer + offset;
+		uint8_t *back_buffer = vga_info.buffer + offset;
+
+		//klog( "front: %08X, back: %08X\n", front_buffer, back_buffer );
+		memcpy( front_buffer, back_buffer, size );
+	}
+}
+
+void framebuffer_move_rect_in_backbuffer( int from_x, int from_y, int w, int h, int to_x, int to_y ) {
+	int size = w * 4;
+
+	for( int i = 0; i < h; i++ ) {
+		int offset_to = ((to_y + i) * VVOS_SCREEN_WIDTH * 4) + (to_x * 4);
+		int offset_from = ((from_y + i) * VVOS_SCREEN_WIDTH * 4) + (from_x * 4);
+		uint8_t *back_buffer_to = vga_info.buffer + offset_to;
+		uint8_t *back_buffer_from = vga_info.buffer + offset_from;
+
+		//klog( "front: %08X, back: %08X\n", front_buffer, back_buffer );
+		memcpy( back_buffer_to, back_buffer_from, size );
+	}
+}
+
+void framebuffer_fill_rect_in_backbuffer( int x, int y, int w, int h, uint32_t color ) {
+	fillrect( vga_info.buffer, color, x, y, w, h );
+}
+
 void vga_draw_screen_box( rect *r ) {
 	//klog( "Redrawing area: (%d, %d) for w: %d, h: %d\n", r->x, r->y, r->w, r->h );
 

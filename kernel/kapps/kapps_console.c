@@ -36,31 +36,24 @@ int vui_console_main( int argc, char *argv[] ) {
 	vui_set_parent( capp_state.win, vui_get_main_desktop() );
 
 	r = vui_window_get_inner_rect( capp_state.win, &capp_state.pane );
-	capp_state.con = vui_console_new( r->x + 3, r->y + 3, r->w - 3, r->h - 3 );
+	capp_state.con = vui_console_new( r->x + 5, r->y + 5, r->w - 5, r->h - 5 );
 	vui_set_parent( capp_state.con, capp_state.win );
 
 /* 	capp_state.con->transparent_text_background = true;
 	capp_state.con->foreground = CONSOLE_COLOR_GREEN; */
 
 	vui_console_clear( capp_state.con );
-
-    klog( "done.\n" );
-
- 	vui_console_puts( capp_state.con, "The first duty of every \x1b[0;31;49mStarfleet officer\x1b[0;0;0m is to the truth, whether it's scientific truth or historical truth or personal truth." );
-
-	vui_console_puts( capp_state.con, "\nNew line.\nAnother.\n" );
-
-    klog( "done2.\n" );
-
-    set_terminal_redirect( kapps_console_putc );
+	set_terminal_redirect( kapps_console_putc );
 	set_stdin_redirect( kapps_console_getchar );
 
 	vui_window_set_event_handler( capp_state.win, kapps_console_handle_events );
 	vui_set_active_window( capp_state.win->common.handle );
-	
-    klog( "done3.\n" );
- 
+
 	vui_refresh();
+
+ 	vui_console_puts( capp_state.con, "The first duty of every \x1b[0;31;49mStarfleet officer\x1b[0;0;0m is to the truth, whether it's scientific truth or historical truth or personal truth." );
+
+	vui_console_puts( capp_state.con, "\nNew line.\nAnother.\n" );
 
 	log_entry_exit();
 
@@ -69,7 +62,8 @@ int vui_console_main( int argc, char *argv[] ) {
 
 void kapps_console_putc( char c ) {
     vui_console_putc( capp_state.con, c );
-    //vui_handle_draw( capp_state.con->common.handle );
+
+	//klog( "!" );
 }
 
 void kapps_console_handle_key_down( int scanecode ) {
@@ -84,6 +78,7 @@ void kapps_console_handle_key_down( int scanecode ) {
  */
 void kapps_console_handle_events( vui_handle h, char *id, void *obj ) {
 	klog( "got one\n" );
+	//vui_refresh();
 
 	if( strcmp( "keypress", id ) == 0 ) {
 		keyboard_event *k = (keyboard_event *)obj;
