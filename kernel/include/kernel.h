@@ -21,6 +21,8 @@ typedef uint16_t word;
 
 #define do_immediate_shutdown() outportb( 0xF4, 0x00 )
 
+void my_function_test( void );
+
 #ifdef __cplusplus
 }
 #endif

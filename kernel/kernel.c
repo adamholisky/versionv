@@ -58,6 +58,8 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	fs_initalize();
 	//intel8254_initalize();
 
+	my_function_test();
+
 	if( GRAPHICS_ACTIVE ) {
 		vga_initalize();
 		vui_initalize();
@@ -76,4 +78,13 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	klog( "\n\nEnd of line." );
 
 	while( true ) { x = x - x + 1; }
+}
+
+__attribute__ ((always_inline)) inline void my_function_test( void ) {
+//void my_function_test( void ) {
+
+	klog( "Hello, test!\n" );
+
+	dump_stack_trace();
+	//do_immediate_shutdown();
 }

@@ -72,8 +72,6 @@ bool vui_handle_draw( vui_handle handle );
 bool vui_set_parent( void *child, void *parent );
 void vui_draw_rectangle( int x, int y, int width, int height, uint32_t color );
 int vui_get_string_width( int font, int size, char *s );
-void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s );
-void vui_draw_string_immediate( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s );
 void vui_draw_string_mono( int x, int y, int size, uint32_t fg, int font, char *s );
 void vui_draw_string_mono_with_background( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s );
 void vui_mouse_click( uint8_t button );
@@ -84,6 +82,9 @@ rect vui_get_handle_rect( vui_handle h );
 vui_handle vui_get_handle_at_point( int x, int y );
 vui_handle vui_get_handle_at_point_inside_handle( vui_handle h, int x, int y );
 void vui_for_each_child_handle_callback( vui_handle h, vui_callback_with_handle c, char *id, void *obj );
+
+void vui_draw_string_immediate( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s );
+void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s );
 
 #ifdef __cplusplus
 }

@@ -434,7 +434,8 @@ int vui_get_string_width( int font, int size, char *s ) {
  * @param font 
  * @param s 
  */
-void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s ) {
+
+__attribute__ ((always_inline)) inline void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font, char *s ) {
 	vga_information *v = vga_get_info();
 	char font_name[25];
 
@@ -504,7 +505,7 @@ void vui_draw_string( int x, int y, int size, uint32_t bg, uint32_t fg, int font
 				.y = y
 			};
 
-			klog( "r: x = %d    y = %d    w = %d    h = %d\n", r.x, r.y, r.w, r.h );
+			//klog( "r: x = %d    y = %d    w = %d    h = %d\n", r.x, r.y, r.w, r.h );
 
 			//vga_draw_screen_box( &r );
 			//framebuffer_copy_to_frontbuffer( x_prev, y, buf_front.x - x_prev, size );
