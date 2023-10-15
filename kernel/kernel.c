@@ -30,7 +30,7 @@ void kernel_main( unsigned long mb_magic, multiboot_info_t *mb_info ) {
 	char c = ' ';
 	bool process_keypress;
 
-	GRAPHICS_ACTIVE = true;
+	GRAPHICS_ACTIVE = false;
 	DF_COM4_ONLY = true;
 
 	multiboot_initalize( mb_magic, mb_info );

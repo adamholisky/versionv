@@ -38,14 +38,14 @@ int line_pos;
 void kshell_run( void ) {
 	strcpy( wd, "/" );
 	
-	kshell_fake_cli( "ps_to_log" );
-	kexec( "ps", (uint32_t *)kshell_ps, NULL );
+	//kshell_fake_cli( "ps_to_log" );
+	//kexec( "ps", (uint32_t *)kshell_ps, NULL );
 
 	//kshell_automate( "testlibcall" );
 	//kshell_automate( "testapp" );
 	//kshell_automate( "cat /etc/magic_key" );
 
-	kshell_automate( "memviewer" );
+	//kshell_automate( "memviewer" );
 
 	//test_app_main();
 
@@ -61,6 +61,8 @@ void kshell_run( void ) {
 		kshell_process_line();
 
 		sched_yield();
+
+		printf( "\n\n" );
 	}
 }
 
@@ -74,20 +76,27 @@ void kshell_get_line( void ) {
 
 	while( process_keypress ) {
 		if( read( STDIN_FILENO, &c, 1 ) ) {
-			if( c != 13 ) {
+			if( c != 13 && c != 0 ) {
 				printf( "%c", c );
+				//klog( "hit %d\n", c );
 			}
+			//klog( "hit\n" );
 		}
 
 		if( c == '\n' || c == 13 ) {
 			//printf( "\n" );
 			process_keypress = false;
+			//klog( "hit\n" );
 		} else {
-			line[line_pos] = c;
-			line_pos++;
+			if( c != 0 ) {
+				//klog( "hit\n" );
+				line[line_pos] = c;
+				line_pos++;
 
-			if( line_pos == 256 ) {
-				process_keypress = false;
+				if( line_pos == 256 ) {
+					process_keypress = false;
+					//klog( "hit\n" );
+				}
 			}
 		}
 	}

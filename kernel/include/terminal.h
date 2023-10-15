@@ -32,10 +32,11 @@ void set_debug_output( bool d );
 void write_serial(char a);
 void write_to_serial_port( char c );
 
-/* void terminal_device_init( void );
+void terminal_device_init( void );
 int terminal_device_write( uint8_t *buff, uint32_t size );
 int terminal_device_read( uint8_t *buff, uint32_t size );
 
+/*
 void console_init( char * name, unsigned int x, unsigned int y, unsigned int width, unsigned int height, unsigned int bg_color, unsigned int fg_color );
 void console_draw( void );
 void console_put_char_at( char c, unsigned int x, unsigned int y );
